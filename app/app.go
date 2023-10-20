@@ -698,10 +698,9 @@ func Int64ToBytes(i int64) []byte {
 func (app *TreasurenetApp) BeginBlocker(ctx sdk.Context, req abci.RequestBeginBlock) abci.ResponseBeginBlock {
 	var delta sdk.Dec
 	paramsnew := app.MintKeeper.GetParams(ctx)
-	stakingparamsnew := app.StakingKeeper.GetParams(ctx)
-	fmt.Println("stakingparamsnew1:", stakingparamsnew.UnbondingTime)
-	stakingparamsnew.UnbondingTime = time.Hour * 24 * 7 * 3
-	app.StakingKeeper.SetParams(ctx, stakingparamsnew)
+	// stakingparamsnew := app.StakingKeeper.GetParams(ctx)
+	// stakingparamsnew.UnbondingTime = time.Hour * 24 * 7 * 3
+	// app.StakingKeeper.SetParams(ctx, stakingparamsnew)
 	if paramsnew.EndBlock < int64(6311521) {
 		paramsnew.EndBlock = int64(6311520)
 		// paramsnew.EndBlock = int64(120) + req.Header.Height
@@ -755,11 +754,6 @@ func (app *TreasurenetApp) BeginBlocker(ctx sdk.Context, req abci.RequestBeginBl
 					if err != nil {
 						panic(err)
 					}
-					// newdelta3 := math.Floor(newdelta2)
-					// newdelta4 := strconv.FormatFloat(newdelta3, 'f', -1, 64)
-					// newdelta5 := sdk.MustNewDecFromStr(newdelta4)
-					// newdelta6 := sdk.NewDecWithPrec(1, 2).Mul(newdelta5).Add(sdk.NewDecWithPrec(90, 2))
-					// newdelta7 := sdk.MinDec(newdelta6, sdk.NewDecWithPrec(99, 2))
 					newdeltatats := sdk.MinDec(sdk.NewDecWithPrec(1, 2).Mul(sdk.MustNewDecFromStr(strconv.FormatFloat(math.Floor(newdelta2), 'f', -1, 64))).Add(sdk.NewDecWithPrec(90, 2)), sdk.NewDecWithPrec(99, 2))
 					NewPerReward, _ := sdk.NewDecFromStr(paramsnew.PerReward)
 					paramsnew.PerReward = newdeltatats.Mul(NewPerReward).String()
