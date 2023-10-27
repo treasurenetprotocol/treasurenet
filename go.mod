@@ -160,11 +160,11 @@ require (
 replace (
 	github.com/99designs/keyring => github.com/cosmos/keyring v1.1.7-0.20210622111912-ef00f8ac3d76
 	github.com/coinbase/rosetta-sdk-go v0.7.0 => github.com/coinbase/rosetta-sdk-go v0.6.10
-	github.com/cosmos/cosmos-sdk v0.45.8 => github.com/treasurenetprotocol/treasurenet-cosmos-pack v1.0.2-tn-ibc
+	github.com/cosmos/cosmos-sdk v0.45.8 => github.com/treasurenetprotocol/treasurenet-cosmos-pack v1.0.3-tn-ibc
 	github.com/cosmos/iavl v0.19.1 => github.com/cosmos/iavl v0.17.3
-	github.com/cosmos/ibc-go/v3 v3.2.0 => github.com/treasurenetprotocol/treasurenet-ibc-go-pack v1.0.0-231023-tn
+	github.com/cosmos/ibc-go/v3 v3.2.0 => github.com/treasurenetprotocol/treasurenet-ibc-go-pack/v3 v3.3.0-tn-ibc
 	github.com/gogo/protobuf => github.com/regen-network/protobuf v1.3.3-alpha.regen.1
-	github.com/osmosis-labs/bech32-ibc v0.3.0-rc1 => ./bech32-ibc_pack
+	github.com/osmosis-labs/bech32-ibc v0.3.0-rc1 => github.com/treasurenetprotocol/treasurenet-bech32-pack v1.0.0-231027-tn
 	github.com/tendermint/tendermint v0.34.21 => ./tendermint_pack
 	google.golang.org/grpc => google.golang.org/grpc v1.33.2
 )
