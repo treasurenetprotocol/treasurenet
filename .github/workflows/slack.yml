@@ -1,0 +1,19 @@
+name: Notify Slack on PR merge
+
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  slackNotification:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main'
+    steps:
+      - name: Notify Slack
+        uses: rtCamp/action-slack-notify@v2.0.0
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_CHANNEL: ${{ secrets.SLACK_CHANNEL }} 
+          SLACK_ICON: https://github.githubassets.com/images/modules/logos_page/Octocat.png
+          SLACK_MESSAGE: ${{ github.event.pull_request.title }} PR merged by ${{ github.event.pull_request.merged_by.login }}
+          SLACK_COLOR: '#00FF00'
