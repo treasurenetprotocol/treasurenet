@@ -23,7 +23,7 @@ ALLOCATION="100000000000000000000000000aunit,10000000000stake,10000000000footoke
 
 KEY1="validator"
 KEY2="orchestrator"
-CHAINID="treasurenet_5005-1"
+CHAINID="treasurenet_9000-1"
 MONIKER="localtestnet"
 KEYRING="test"
 #KEYALGO="eth_secp256k1"

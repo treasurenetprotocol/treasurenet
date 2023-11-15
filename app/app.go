@@ -122,6 +122,11 @@ import (
 	"github.com/treasurenetprotocol/treasurenet/x/gravity/keeper"
 	gravitytypes "github.com/treasurenetprotocol/treasurenet/x/gravity/types"
 
+	"github.com/treasurenetprotocol/treasurenet/x/erc20"
+	erc20client "github.com/treasurenetprotocol/treasurenet/x/erc20/client"
+	erc20keeper "github.com/treasurenetprotocol/treasurenet/x/erc20/keeper"
+	erc20types "github.com/treasurenetprotocol/treasurenet/x/erc20/types"
+
 	// Force-load the tracer engines to trigger registration due to Go-Ethereum v1.10.15 changes
 	_ "github.com/ethereum/go-ethereum/eth/tracers/js"
 	_ "github.com/ethereum/go-ethereum/eth/tracers/native"
@@ -147,6 +152,9 @@ var (
 		gov.NewAppModuleBasic(
 			paramsclient.ProposalHandler, distrclient.ProposalHandler, upgradeclient.ProposalHandler, upgradeclient.CancelProposalHandler,
 			ibcclientclient.UpdateClientProposalHandler, ibcclientclient.UpgradeProposalHandler,
+			// Evmos proposal types
+			erc20client.RegisterCoinProposalHandler, erc20client.RegisterERC20ProposalHandler, erc20client.ToggleTokenConversionProposalHandler,
+			// incentivesclient.RegisterIncentiveProposalHandler, incentivesclient.CancelIncentiveProposalHandler,
 		),
 		params.AppModuleBasic{},
 		crisis.AppModuleBasic{},
@@ -233,6 +241,14 @@ type TreasurenetApp struct {
 	// Treasurenet keepers
 	EvmKeeper       *evmkeeper.Keeper
 	FeeMarketKeeper feemarketkeeper.Keeper
+	// InflationKeeper  inflationkeeper.Keeper
+	// ClaimsKeeper     *claimskeeper.Keeper
+	Erc20Keeper erc20keeper.Keeper
+	// IncentivesKeeper incentiveskeeper.Keeper
+	// EpochsKeeper     epochskeeper.Keeper
+	// VestingKeeper    vestingkeeper.Keeper
+	// RecoveryKeeper   *recoverykeeper.Keeper
+	// FeesplitKeeper   feesplitkeeper.Keeper
 
 	// the module manager
 	mm *module.Manager
@@ -434,7 +450,8 @@ func NewTreasurenetApp(
 		AddRoute(upgradetypes.RouterKey, upgrade.NewSoftwareUpgradeProposalHandler(app.UpgradeKeeper)).
 		AddRoute(ibchost.RouterKey, ibcclient.NewClientProposalHandler(app.IBCKeeper.ClientKeeper)).
 		AddRoute(gravitytypes.RouterKey, keeper.NewGravityProposalHandler(app.GravityKeeper)).
-		AddRoute(bech32ibctypes.RouterKey, bech32ibc.NewBech32IBCProposalHandler(app.Bech32IbcKeeper))
+		AddRoute(bech32ibctypes.RouterKey, bech32ibc.NewBech32IBCProposalHandler(app.Bech32IbcKeeper)).
+		AddRoute(erc20types.RouterKey, erc20.NewErc20ProposalHandler(&app.Erc20Keeper))
 
 	govKeeper := govkeeper.NewKeeper(
 		appCodec, keys[govtypes.StoreKey], app.GetSubspace(govtypes.ModuleName), app.AccountKeeper, app.BankKeeper,
