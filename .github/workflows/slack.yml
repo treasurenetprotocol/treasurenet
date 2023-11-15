@@ -1,4 +1,4 @@
-name: Notify Slack on PR merged to the main branch
+name: Pull Request Merged
 
 on:
   push:
@@ -18,5 +18,5 @@ jobs:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
           SLACK_CHANNEL: ${{ secrets.SLACK_CHANNEL }} 
           SLACK_ICON: https://github.githubassets.com/images/modules/logos_page/Octocat.png
-          SLACK_MESSAGE: ${{ github.event.pull_request.title }} merged to main branch
+          SLACK_MESSAGE: ${{ github.repository }} 
           SLACK_COLOR: '#00FF00'
