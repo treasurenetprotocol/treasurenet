@@ -70,7 +70,7 @@ func Setup(isCheckTx bool, patchGenesis func(*TreasurenetApp, simapp.GenesisStat
 		// Initialize the chain
 		app.InitChain(
 			abci.RequestInitChain{
-				ChainId:         "treasurenet_8000-1",
+				ChainId:         "treasurenet_5005-1",
 				Validators:      []abci.ValidatorUpdate{},
 				ConsensusParams: DefaultConsensusParams,
 				AppStateBytes:   stateBytes,

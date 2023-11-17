@@ -34,27 +34,27 @@ import (
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/core/vm"
-	"github.com/evmos/ethermint/crypto/ethsecp256k1"
-	"github.com/evmos/ethermint/encoding"
-	"github.com/evmos/ethermint/server/config"
-	"github.com/evmos/ethermint/tests"
-	ethermint "github.com/evmos/ethermint/types"
-	"github.com/evmos/ethermint/x/evm/statedb"
-	evm "github.com/evmos/ethermint/x/evm/types"
-	evmtypes "github.com/evmos/ethermint/x/evm/types"
-	feemarkettypes "github.com/evmos/ethermint/x/feemarket/types"
 	tmjson "github.com/tendermint/tendermint/libs/json"
+	"github.com/treasurenetprotocol/treasurenet/crypto/ethsecp256k1"
+	"github.com/treasurenetprotocol/treasurenet/encoding"
+	"github.com/treasurenetprotocol/treasurenet/server/config"
+	"github.com/treasurenetprotocol/treasurenet/tests"
+	treasurenet "github.com/treasurenetprotocol/treasurenet/types"
+	"github.com/treasurenetprotocol/treasurenet/x/evm/statedb"
+	evm "github.com/treasurenetprotocol/treasurenet/x/evm/types"
+	evmtypes "github.com/treasurenetprotocol/treasurenet/x/evm/types"
+	feemarkettypes "github.com/treasurenetprotocol/treasurenet/x/feemarket/types"
 
-	"github.com/evmos/evmos/v8/app"
-	"github.com/evmos/evmos/v8/contracts"
-	"github.com/evmos/evmos/v8/x/erc20/types"
+	"github.com/treasurenetprotocol/treasurenet/app"
+	"github.com/treasurenetprotocol/treasurenet/contracts"
+	"github.com/treasurenetprotocol/treasurenet/x/erc20/types"
 )
 
 type KeeperTestSuite struct {
 	suite.Suite
 
 	ctx              sdk.Context
-	app              *app.Evmos
+	app              *app.TreasurenetApp
 	queryClientEvm   evm.QueryClient
 	queryClient      types.QueryClient
 	address          common.Address
@@ -97,7 +97,7 @@ func (suite *KeeperTestSuite) DoSetupTest(t require.TestingT) {
 	feemarketGenesis.Params.NoBaseFee = false
 
 	// init app
-	suite.app = app.Setup(checkTx, feemarketGenesis)
+	suite.app = app.SetupNew(checkTx, feemarketGenesis)
 
 	if suite.mintFeeCollector {
 		// mint some coin to fee collector
@@ -163,7 +163,7 @@ func (suite *KeeperTestSuite) DoSetupTest(t require.TestingT) {
 	types.RegisterQueryServer(queryHelper, suite.app.Erc20Keeper)
 	suite.queryClient = types.NewQueryClient(queryHelper)
 
-	acc := &ethermint.EthAccount{
+	acc := &treasurenet.EthAccount{
 		BaseAccount: authtypes.NewBaseAccount(sdk.AccAddress(suite.address.Bytes()), nil, 0, 0),
 		CodeHash:    common.BytesToHash(crypto.Keccak256(nil)).String(),
 	}

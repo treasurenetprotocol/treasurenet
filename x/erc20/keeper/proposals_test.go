@@ -9,12 +9,12 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 
-	"github.com/evmos/ethermint/tests"
-	evmtypes "github.com/evmos/ethermint/x/evm/types"
+	"github.com/treasurenetprotocol/treasurenet/tests"
+	evmtypes "github.com/treasurenetprotocol/treasurenet/x/evm/types"
 
-	"github.com/evmos/evmos/v8/x/erc20/keeper"
-	"github.com/evmos/evmos/v8/x/erc20/types"
-	inflationtypes "github.com/evmos/evmos/v8/x/inflation/types"
+	"github.com/treasurenetprotocol/treasurenet/x/erc20/keeper"
+	"github.com/treasurenetprotocol/treasurenet/x/erc20/types"
+	inflationtypes "github.com/treasurenetprotocol/treasurenet/x/inflation/types"
 )
 
 const (

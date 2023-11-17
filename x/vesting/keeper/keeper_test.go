@@ -28,17 +28,17 @@ import (
 	"github.com/tendermint/tendermint/version"
 
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
-	"github.com/evmos/ethermint/crypto/ethsecp256k1"
-	"github.com/evmos/ethermint/encoding"
-	"github.com/evmos/ethermint/server/config"
-	"github.com/evmos/ethermint/tests"
-	ethermint "github.com/evmos/ethermint/types"
-	evm "github.com/evmos/ethermint/x/evm/types"
+	"github.com/treasurenetprotocol/treasurenet/crypto/ethsecp256k1"
+	"github.com/treasurenetprotocol/treasurenet/encoding"
+	"github.com/treasurenetprotocol/treasurenet/server/config"
+	"github.com/treasurenetprotocol/treasurenet/tests"
+	treasurenet "github.com/treasurenetprotocol/treasurenet/types"
+	evm "github.com/treasurenetprotocol/treasurenet/x/evm/types"
 
-	"github.com/evmos/evmos/v8/app"
-	"github.com/evmos/evmos/v8/contracts"
-	epochstypes "github.com/evmos/evmos/v8/x/epochs/types"
-	"github.com/evmos/evmos/v8/x/vesting/types"
+	"github.com/treasurenetprotocol/treasurenet/app"
+	"github.com/treasurenetprotocol/treasurenet/contracts"
+	epochstypes "github.com/treasurenetprotocol/treasurenet/x/epochs/types"
+	"github.com/treasurenetprotocol/treasurenet/x/vesting/types"
 )
 
 var (
@@ -71,7 +71,7 @@ type KeeperTestSuite struct {
 	suite.Suite
 
 	ctx              sdk.Context
-	app              *app.Evmos
+	app              *app.TreasurenetApp
 	queryClientEvm   evm.QueryClient
 	queryClient      types.QueryClient
 	address          common.Address
@@ -162,7 +162,7 @@ func (suite *KeeperTestSuite) DoSetupTest(t require.TestingT) {
 		suite.app.EpochsKeeper.SetEpochInfo(suite.ctx, epoch)
 	}
 
-	acc := &ethermint.EthAccount{
+	acc := &treasurenet.EthAccount{
 		BaseAccount: authtypes.NewBaseAccount(sdk.AccAddress(suite.address.Bytes()), nil, 0, 0),
 		CodeHash:    common.BytesToHash(crypto.Keccak256(nil)).String(),
 	}

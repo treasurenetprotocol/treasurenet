@@ -9,7 +9,7 @@ import (
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	ibctransfertypes "github.com/cosmos/ibc-go/v3/modules/apps/transfer/types"
-	ethermint "github.com/evmos/ethermint/types"
+	treasurenet "github.com/treasurenetprotocol/treasurenet/types"
 )
 
 // constants
@@ -107,7 +107,7 @@ func ValidateErc20Denom(denom string) error {
 		return fmt.Errorf("invalid denom. %s denomination should be prefixed with the format 'erc20/", denom)
 	}
 
-	return ethermint.ValidateAddress(denomSplit[1])
+	return treasurenet.ValidateAddress(denomSplit[1])
 }
 
 // NewRegisterERC20Proposal returns new instance of RegisterERC20Proposal
@@ -129,7 +129,7 @@ func (*RegisterERC20Proposal) ProposalType() string {
 
 // ValidateBasic performs a stateless check of the proposal fields
 func (rtbp *RegisterERC20Proposal) ValidateBasic() error {
-	if err := ethermint.ValidateAddress(rtbp.Erc20Address); err != nil {
+	if err := treasurenet.ValidateAddress(rtbp.Erc20Address); err != nil {
 		return sdkerrors.Wrap(err, "ERC20 address")
 	}
 	return govtypes.ValidateAbstract(rtbp)
@@ -156,7 +156,7 @@ func (*ToggleTokenConversionProposal) ProposalType() string {
 func (ttcp *ToggleTokenConversionProposal) ValidateBasic() error {
 	// check if the token is a hex address, if not, check if it is a valid SDK
 	// denom
-	if err := ethermint.ValidateAddress(ttcp.Token); err != nil {
+	if err := treasurenet.ValidateAddress(ttcp.Token); err != nil {
 		if err := sdk.ValidateDenom(ttcp.Token); err != nil {
 			return err
 		}

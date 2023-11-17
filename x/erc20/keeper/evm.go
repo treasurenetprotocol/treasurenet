@@ -12,11 +12,12 @@ import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/evmos/ethermint/server/config"
-	evmtypes "github.com/evmos/ethermint/x/evm/types"
+	"github.com/treasurenetprotocol/treasurenet/server/config"
 
-	"github.com/evmos/evmos/v8/contracts"
-	"github.com/evmos/evmos/v8/x/erc20/types"
+	evmtypes "github.com/treasurenetprotocol/treasurenet/x/evm/types"
+
+	"github.com/treasurenetprotocol/treasurenet/contracts"
+	"github.com/treasurenetprotocol/treasurenet/x/erc20/types"
 )
 
 // DeployERC20Contract creates and deploys an ERC20 contract on the EVM with the

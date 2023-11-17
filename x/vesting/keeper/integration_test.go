@@ -7,11 +7,11 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	"github.com/evmos/ethermint/encoding"
-	"github.com/evmos/ethermint/tests"
-	"github.com/evmos/evmos/v8/app"
-	"github.com/evmos/evmos/v8/app/ante"
-	"github.com/evmos/evmos/v8/testutil"
+	"github.com/treasurenetprotocol/treasurenet/app"
+	"github.com/treasurenetprotocol/treasurenet/app/ante"
+	"github.com/treasurenetprotocol/treasurenet/encoding"
+	"github.com/treasurenetprotocol/treasurenet/tests"
+	"github.com/treasurenetprotocol/treasurenet/testutil"
 
 	"github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
@@ -20,9 +20,9 @@ import (
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	sdkvesting "github.com/cosmos/cosmos-sdk/x/auth/vesting/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-	evmtypes "github.com/evmos/ethermint/x/evm/types"
+	evmtypes "github.com/treasurenetprotocol/treasurenet/x/evm/types"
 
-	"github.com/evmos/evmos/v8/x/vesting/types"
+	"github.com/treasurenetprotocol/treasurenet/x/vesting/types"
 )
 
 // Clawback vesting with Cliff and Lock. In this case the cliff is reached

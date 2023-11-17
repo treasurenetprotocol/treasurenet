@@ -18,9 +18,9 @@ import (
 	"github.com/spf13/cobra"
 	abci "github.com/tendermint/tendermint/abci/types"
 
-	"github.com/evmos/evmos/v8/x/erc20/client/cli"
-	"github.com/evmos/evmos/v8/x/erc20/keeper"
-	"github.com/evmos/evmos/v8/x/erc20/types"
+	"github.com/treasurenetprotocol/treasurenet/x/erc20/client/cli"
+	"github.com/treasurenetprotocol/treasurenet/x/erc20/keeper"
+	"github.com/treasurenetprotocol/treasurenet/x/erc20/types"
 )
 
 // type check to ensure the interface is properly implemented
@@ -146,6 +146,10 @@ func (am AppModule) BeginBlock(_ sdk.Context, _ abci.RequestBeginBlock) {
 }
 
 func (am AppModule) EndBlock(_ sdk.Context, _ abci.RequestEndBlock) []abci.ValidatorUpdate {
+	return []abci.ValidatorUpdate{}
+}
+
+func (am AppModule) NewEndBlock(ctx sdk.Context, req abci.RequestEndBlock, _ sdk.ABCIMessageLogs) []abci.ValidatorUpdate {
 	return []abci.ValidatorUpdate{}
 }
 

@@ -10,13 +10,13 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	"github.com/evmos/ethermint/crypto/ethsecp256k1"
-	"github.com/evmos/ethermint/encoding"
-	ethermint "github.com/evmos/ethermint/types"
+	"github.com/treasurenetprotocol/treasurenet/crypto/ethsecp256k1"
+	"github.com/treasurenetprotocol/treasurenet/encoding"
+	treasurenet "github.com/treasurenetprotocol/treasurenet/types"
 
-	"github.com/evmos/evmos/v8/app"
-	"github.com/evmos/evmos/v8/testutil"
-	"github.com/evmos/evmos/v8/x/erc20/types"
+	"github.com/treasurenetprotocol/treasurenet/app"
+	"github.com/treasurenetprotocol/treasurenet/testutil"
+	"github.com/treasurenetprotocol/treasurenet/x/erc20/types"
 
 	authsigning "github.com/cosmos/cosmos-sdk/x/auth/signing"
 	abci "github.com/tendermint/tendermint/abci/types"
@@ -101,7 +101,7 @@ var _ = Describe("ERC20: Converting", Ordered, func() {
 			coin = sdk.NewCoin(pair.Denom, amt)
 
 			denom := s.app.ClaimsKeeper.GetParams(s.ctx).ClaimsDenom
-			err := testutil.FundAccount(s.app.BankKeeper, s.ctx, accAddr, sdk.NewCoins(sdk.NewCoin(denom, sdk.TokensFromConsensusPower(100, ethermint.PowerReduction))))
+			err := testutil.FundAccount(s.app.BankKeeper, s.ctx, accAddr, sdk.NewCoins(sdk.NewCoin(denom, sdk.TokensFromConsensusPower(100, treasurenet.PowerReduction))))
 			s.Require().NoError(err)
 			err = testutil.FundAccount(s.app.BankKeeper, s.ctx, accAddr, sdk.NewCoins(coin))
 			s.Require().NoError(err)

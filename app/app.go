@@ -40,8 +40,9 @@ import (
 	authkeeper "github.com/cosmos/cosmos-sdk/x/auth/keeper"
 	authtx "github.com/cosmos/cosmos-sdk/x/auth/tx"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
-	"github.com/cosmos/cosmos-sdk/x/auth/vesting"
-	vestingtypes "github.com/cosmos/cosmos-sdk/x/auth/vesting/types"
+
+	// "github.com/cosmos/cosmos-sdk/x/auth/vesting"
+	// vestingtypes "github.com/cosmos/cosmos-sdk/x/auth/vesting/types"
 	"github.com/cosmos/cosmos-sdk/x/authz"
 	authzkeeper "github.com/cosmos/cosmos-sdk/x/authz/keeper"
 	authzmodule "github.com/cosmos/cosmos-sdk/x/authz/module"
@@ -103,6 +104,7 @@ import (
 	_ "github.com/treasurenetprotocol/treasurenet/client/docs/statik"
 
 	"github.com/treasurenetprotocol/treasurenet/app/ante"
+	"github.com/treasurenetprotocol/treasurenet/encoding"
 	srvflags "github.com/treasurenetprotocol/treasurenet/server/flags"
 	treasurenet "github.com/treasurenetprotocol/treasurenet/types"
 	"github.com/treasurenetprotocol/treasurenet/x/evm"
@@ -126,6 +128,9 @@ import (
 	erc20client "github.com/treasurenetprotocol/treasurenet/x/erc20/client"
 	erc20keeper "github.com/treasurenetprotocol/treasurenet/x/erc20/keeper"
 	erc20types "github.com/treasurenetprotocol/treasurenet/x/erc20/types"
+	"github.com/treasurenetprotocol/treasurenet/x/vesting"
+	vestingkeeper "github.com/treasurenetprotocol/treasurenet/x/vesting/keeper"
+	vestingtypes "github.com/treasurenetprotocol/treasurenet/x/vesting/types"
 
 	// Force-load the tracer engines to trigger registration due to Go-Ethereum v1.10.15 changes
 	_ "github.com/ethereum/go-ethereum/eth/tracers/js"
@@ -171,6 +176,7 @@ var (
 		// Treasurenet modules
 		evm.AppModuleBasic{},
 		feemarket.AppModuleBasic{},
+		erc20.AppModuleBasic{},
 	)
 
 	// module account permissions
@@ -184,6 +190,7 @@ var (
 		ibctransfertypes.ModuleName:    {authtypes.Minter, authtypes.Burner},
 		evmtypes.ModuleName:            {authtypes.Minter, authtypes.Burner}, // used for secure addition and subtraction of balance using module account
 		gravitytypes.ModuleName:        {authtypes.Minter, authtypes.Burner},
+		erc20types.ModuleName:          {authtypes.Minter, authtypes.Burner},
 	}
 
 	// module accounts that are allowed to receive tokens
@@ -216,7 +223,7 @@ type TreasurenetApp struct {
 
 	// keepers
 	AccountKeeper authkeeper.AccountKeeper
-	// BankKeeper       bankkeeper.Keeper
+	// BankKeeper    bankkeeper.Keeper
 	BankKeeper       bankkeeper.BaseKeeper
 	CapabilityKeeper *capabilitykeeper.Keeper
 	StakingKeeper    stakingkeeper.Keeper
@@ -246,7 +253,7 @@ type TreasurenetApp struct {
 	Erc20Keeper erc20keeper.Keeper
 	// IncentivesKeeper incentiveskeeper.Keeper
 	// EpochsKeeper     epochskeeper.Keeper
-	// VestingKeeper    vestingkeeper.Keeper
+	VestingKeeper vestingkeeper.Keeper
 	// RecoveryKeeper   *recoverykeeper.Keeper
 	// FeesplitKeeper   feesplitkeeper.Keeper
 
@@ -309,7 +316,10 @@ func NewTreasurenetApp(
 		gravitytypes.StoreKey,
 		bech32ibctypes.StoreKey,
 		// treasurenet keys
-		evmtypes.StoreKey, feemarkettypes.StoreKey,
+		evmtypes.StoreKey, feemarkettypes.StoreKey, vestingtypes.StoreKey,
+		// inflationtypes.StoreKey, erc20types.StoreKey, incentivestypes.StoreKey,
+		// epochstypes.StoreKey, claimstypes.StoreKey, vestingtypes.StoreKey,
+		// feesplittypes.StoreKey,
 	)
 
 	// Add the EVM transient store key
@@ -464,6 +474,24 @@ func NewTreasurenetApp(
 		),
 	)
 
+	app.VestingKeeper = vestingkeeper.NewKeeper(
+		keys[vestingtypes.StoreKey], appCodec,
+		app.AccountKeeper, app.BankKeeper, app.StakingKeeper,
+	)
+
+	app.Erc20Keeper = erc20keeper.NewKeeper(
+		keys[erc20types.StoreKey], appCodec, app.GetSubspace(erc20types.ModuleName),
+		app.AccountKeeper, app.BankKeeper, app.EvmKeeper,
+	)
+
+	app.EvmKeeper = app.EvmKeeper.SetHooks(
+		evmkeeper.NewMultiEvmHooks(
+			app.Erc20Keeper.Hooks(),
+			// app.IncentivesKeeper.Hooks(),
+			// app.FeesplitKeeper.Hooks(),
+			// app.ClaimsKeeper.Hooks(),
+		),
+	)
 	// Create Transfer Keepers
 	app.TransferKeeper = ibctransferkeeper.NewKeeper(
 		appCodec, keys[ibctransfertypes.StoreKey], app.GetSubspace(ibctransfertypes.ModuleName),
@@ -530,6 +558,8 @@ func NewTreasurenetApp(
 			app.Bech32IbcKeeper,
 		),
 		feemarket.NewAppModule(app.FeeMarketKeeper),
+		erc20.NewAppModule(app.Erc20Keeper, app.AccountKeeper),
+		vesting.NewAppModule(app.VestingKeeper, app.AccountKeeper, app.BankKeeper, app.StakingKeeper),
 	)
 
 	// During begin block slashing happens after distr.BeginBlocker so that
@@ -562,6 +592,7 @@ func NewTreasurenetApp(
 		feegrant.ModuleName,
 		paramstypes.ModuleName,
 		vestingtypes.ModuleName,
+		erc20types.ModuleName,
 	)
 
 	// NOTE: fee market module must go last in order to retrieve the block gas used.
@@ -589,6 +620,7 @@ func NewTreasurenetApp(
 		paramstypes.ModuleName,
 		upgradetypes.ModuleName,
 		vestingtypes.ModuleName,
+		erc20types.ModuleName,
 	)
 
 	// NOTE: The genutils module must occur after staking so that pools are
@@ -622,6 +654,7 @@ func NewTreasurenetApp(
 		paramstypes.ModuleName,
 		upgradetypes.ModuleName,
 		vestingtypes.ModuleName,
+		erc20types.ModuleName,
 		// NOTE: crisis module must go at the end to check for invariants on each module
 		crisistypes.ModuleName,
 	)
@@ -997,6 +1030,34 @@ func (app *TreasurenetApp) RegisterTendermintService(clientCtx client.Context) {
 	tmservice.RegisterTendermintService(app.BaseApp.GRPCQueryRouter(), clientCtx, app.interfaceRegistry)
 }
 
+// IBC Go TestingApp functions
+
+// GetBaseApp implements the TestingApp interface.
+func (app *TreasurenetApp) GetBaseApp() *baseapp.BaseApp {
+	return app.BaseApp
+}
+
+// GetStakingKeeper implements the TestingApp interface.
+func (app *TreasurenetApp) GetStakingKeeper() stakingkeeper.Keeper {
+	return app.StakingKeeper
+}
+
+// GetIBCKeeper implements the TestingApp interface.
+func (app *TreasurenetApp) GetIBCKeeper() *ibckeeper.Keeper {
+	return app.IBCKeeper
+}
+
+// GetScopedIBCKeeper implements the TestingApp interface.
+func (app *TreasurenetApp) GetScopedIBCKeeper() capabilitykeeper.ScopedKeeper {
+	return app.ScopedIBCKeeper
+}
+
+// GetTxConfig implements the TestingApp interface.
+func (app *TreasurenetApp) GetTxConfig() client.TxConfig {
+	cfg := encoding.MakeConfig(ModuleBasics)
+	return cfg.TxConfig
+}
+
 // RegisterSwaggerAPI registers swagger route with API Server
 func RegisterSwaggerAPI(_ client.Context, rtr *mux.Router) {
 	statikFS, err := fs.New()
@@ -1039,5 +1100,6 @@ func initParamsKeeper(
 	// treasurenet subspaces
 	paramsKeeper.Subspace(evmtypes.ModuleName)
 	paramsKeeper.Subspace(feemarkettypes.ModuleName)
+	paramsKeeper.Subspace(erc20types.ModuleName)
 	return paramsKeeper
 }

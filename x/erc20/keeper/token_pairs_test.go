@@ -4,10 +4,10 @@ import (
 	"fmt"
 
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/evmos/ethermint/tests"
-	evmtypes "github.com/evmos/ethermint/x/evm/types"
+	"github.com/treasurenetprotocol/treasurenet/tests"
+	evmtypes "github.com/treasurenetprotocol/treasurenet/x/evm/types"
 
-	"github.com/evmos/evmos/v8/x/erc20/types"
+	"github.com/treasurenetprotocol/treasurenet/x/erc20/types"
 )
 
 func (suite *KeeperTestSuite) TestGetTokenPairs() {

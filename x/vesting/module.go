@@ -18,9 +18,9 @@ import (
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
 	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
 
-	"github.com/evmos/evmos/v8/x/vesting/client/cli"
-	"github.com/evmos/evmos/v8/x/vesting/keeper"
-	"github.com/evmos/evmos/v8/x/vesting/types"
+	"github.com/treasurenetprotocol/treasurenet/x/vesting/client/cli"
+	"github.com/treasurenetprotocol/treasurenet/x/vesting/keeper"
+	"github.com/treasurenetprotocol/treasurenet/x/vesting/types"
 )
 
 var (
@@ -146,6 +146,9 @@ func (am AppModule) BeginBlock(_ sdk.Context, _ abci.RequestBeginBlock) {}
 
 // EndBlock performs a no-op.
 func (am AppModule) EndBlock(_ sdk.Context, _ abci.RequestEndBlock) []abci.ValidatorUpdate {
+	return []abci.ValidatorUpdate{}
+}
+func (am AppModule) NewEndBlock(ctx sdk.Context, req abci.RequestEndBlock, _ sdk.ABCIMessageLogs) []abci.ValidatorUpdate {
 	return []abci.ValidatorUpdate{}
 }
 

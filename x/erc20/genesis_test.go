@@ -13,18 +13,19 @@ import (
 	tmversion "github.com/tendermint/tendermint/proto/tendermint/version"
 	"github.com/tendermint/tendermint/version"
 
-	"github.com/evmos/ethermint/tests"
-	feemarkettypes "github.com/evmos/ethermint/x/feemarket/types"
+	"github.com/treasurenetprotocol/treasurenet/tests"
+	feemarkettypes "github.com/treasurenetprotocol/treasurenet/x/feemarket/types"
 
-	"github.com/evmos/evmos/v8/app"
-	"github.com/evmos/evmos/v8/x/erc20"
-	"github.com/evmos/evmos/v8/x/erc20/types"
+	"github.com/treasurenetprotocol/treasurenet/app"
+	"github.com/treasurenetprotocol/treasurenet/x/erc20"
+	"github.com/treasurenetprotocol/treasurenet/x/erc20/types"
 )
 
 type GenesisTestSuite struct {
 	suite.Suite
-	ctx     sdk.Context
-	app     *app.Evmos
+	ctx sdk.Context
+	// app     *app.Evmos
+	app     *app.TreasurenetApp
 	genesis types.GenesisState
 }
 
@@ -36,10 +37,10 @@ func (suite *GenesisTestSuite) SetupTest() {
 	// consensus key
 	consAddress := sdk.ConsAddress(tests.GenerateAddress().Bytes())
 
-	suite.app = app.Setup(false, feemarkettypes.DefaultGenesisState())
+	suite.app = app.SetupNew(false, feemarkettypes.DefaultGenesisState())
 	suite.ctx = suite.app.BaseApp.NewContext(false, tmproto.Header{
 		Height:          1,
-		ChainID:         "evmos_9000-1",
+		ChainID:         "treasurenet_5005-1",
 		Time:            time.Now().UTC(),
 		ProposerAddress: consAddress.Bytes(),
 

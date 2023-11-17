@@ -9,9 +9,9 @@ import (
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	sdkvesting "github.com/cosmos/cosmos-sdk/x/auth/vesting/types"
 
-	"github.com/evmos/ethermint/tests"
-	"github.com/evmos/evmos/v8/testutil"
-	"github.com/evmos/evmos/v8/x/vesting/types"
+	"github.com/treasurenetprotocol/treasurenet/tests"
+	"github.com/treasurenetprotocol/treasurenet/testutil"
+	"github.com/treasurenetprotocol/treasurenet/x/vesting/types"
 )
 
 var (
