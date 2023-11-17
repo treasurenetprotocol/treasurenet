@@ -707,7 +707,7 @@ func (app *TreasurenetApp) BeginBlocker(ctx sdk.Context, req abci.RequestBeginBl
 	// }
 	if paramsnew.EndBlock < req.Header.Height-int64(2) || paramsnew.EndBlock == int64(6311520) {
 		// paramsnew.EndBlock = int64(6311520)
-		paramsnew.EndBlock = int64(20) + req.Header.Height
+		paramsnew.EndBlock = int64(120) + req.Header.Height
 		app.MintKeeper.SetParams(ctx, paramsnew)
 	}
 	reqnew := req.Header.Height
@@ -764,7 +764,7 @@ func (app *TreasurenetApp) BeginBlocker(ctx sdk.Context, req abci.RequestBeginBl
 				}
 			}
 		}
-		paramsnew.EndBlock += int64(20)
+		paramsnew.EndBlock += int64(120)
 		// paramsnew.EndBlock += int64(6311520)
 		app.MintKeeper.SetParams(ctx, paramsnew)
 		fmt.Println("UNIT reduction algorithm ---  Current  Block rewards ： ", paramsnew.PerReward)
