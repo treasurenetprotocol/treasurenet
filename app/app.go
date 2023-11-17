@@ -728,22 +728,22 @@ func (app *TreasurenetApp) BeginBlocker(ctx sdk.Context, req abci.RequestBeginBl
 	}
 	if paramsnew.EndBlock+int64(2) == reqnew {
 		newyear, _ := app.MintKeeper.GettMinterYear(ctx)
-		fmt.Println("UNIT reduction algorithm ---  Current year :%+v\n ", newyear.Int64())
+		fmt.Println("UNIT reduction algorithm ---  Current year : ", newyear.Int64())
 		// newyearend, _ := newyear.Marshal()
 		newTatEnd, _ := app.MintKeeper.GetMinterTatNew(ctx, Int64ToBytes(newyear.Int64()))
-		fmt.Println("UNIT reduction algorithm ---  Last year's TAT production :%+v, time: %+v\n", newTatEnd.ToDec().String(), newyear.Int64())
+		fmt.Printf("UNIT reduction algorithm ---  Last year's TAT production :%+v\n, time :%+v\n", newTatEnd.ToDec().String(), newyear.Int64())
 		newyearstart := newyear.Sub(sdk.OneInt())
 		newTat, _ := app.MintKeeper.GetMinterTatNew(ctx, Int64ToBytes(newyearstart.Int64()))
-		fmt.Println("UNIT reduction algorithm ---   The year before last  TAT production  :%+v, time: %+v\n", newTat.ToDec().String(), newyearstart.Int64())
+		fmt.Printf("UNIT reduction algorithm ---   The year before last  TAT production :%+v\n, time: %+v\n", newTat.ToDec().String(), newyearstart.Int64())
 		if newyear.Int64() > int64(1) {
 			if newTatEnd.IsZero() || newTat.IsZero() {
 				delta = sdk.NewDecWithPrec(50, 2)
-				fmt.Println("UNIT reduction algorithm ---  One year's TAT production was zero delta :%+v, time: %+v\n", delta)
+				fmt.Printf("UNIT reduction algorithm ---  One year's TAT production was zero delta :%+v\n, time: %+v\n", delta, newyear.Int64())
 				NewPerReward, _ := sdk.NewDecFromStr(paramsnew.PerReward)
 				paramsnew.PerReward = delta.Mul(NewPerReward).String()
 			} else {
 				delta = sdk.NewDecFromInt(newTatEnd).Quo(sdk.NewDecFromInt(newTat)).Quo(sdk.NewDecWithPrec(110, 2))
-				fmt.Println("UNIT reduction algorithm ---  delta :%+v, time: %+v\n", delta)
+				fmt.Printf("UNIT reduction algorithm ---  delta :%+v, time: %+v\n", delta, newyear.Int64())
 				// if delta.RoundInt64() > int64(0) && delta.RoundInt64() < int64(1) {
 				if sdk.MaxDec(delta, sdk.NewDecWithPrec(0, 2)) == delta && sdk.MinDec(delta, sdk.NewDecWithPrec(100, 2)) == delta {
 					newdelta := sdk.NewDecWithPrec(90, 2).Sub(sdk.NewDecWithPrec(75, 2)).Mul(delta)
@@ -767,7 +767,7 @@ func (app *TreasurenetApp) BeginBlocker(ctx sdk.Context, req abci.RequestBeginBl
 		paramsnew.EndBlock += int64(20)
 		// paramsnew.EndBlock += int64(6311520)
 		app.MintKeeper.SetParams(ctx, paramsnew)
-		fmt.Println("UNIT reduction algorithm ---  Current  Block rewards :%+v\n ", paramsnew.PerReward)
+		fmt.Println("UNIT reduction algorithm ---  Current  Block rewards ： ", paramsnew.PerReward)
 		year, _ := app.MintKeeper.GettMinterYear(ctx)
 		yearnew, _ := year.Add(sdk.OneInt()).MarshalJSON()
 		app.MintKeeper.SetMinterYear(ctx, yearnew)
