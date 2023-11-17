@@ -1,6 +1,7 @@
 name: Pull Request Merged
 
 on:
+  # Trigger the workflow on push
   push:
     branches:
       - main
@@ -9,9 +10,7 @@ jobs:
   slackNotification:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
+      # Notify Slack when a pull request is merged
       - name: Notify Slack
         uses: rtCamp/action-slack-notify@v2
         env:
