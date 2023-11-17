@@ -10,7 +10,6 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"reflect"
 	"strconv"
 	"time"
 
@@ -825,14 +824,14 @@ func (app *TreasurenetApp) EndBlocker(ctx sdk.Context, req abci.RequestEndBlock)
 	if StartBlock+int64(1) == newreq && HeightBlock != int64(60) {
 		if Even.Code == 200 && len(Even.Data) > 0 {
 			res1 := Even.Data[0]
-			fmt.Println(reflect.TypeOf(Even.Data[0]))
-			fmt.Println("res1:", res1[0])
+			// fmt.Println(reflect.TypeOf(Even.Data[0]))
+			// fmt.Println("res1:", res1[0])
 			res2, _ := json.Marshal(res1[0])
-			fmt.Println("res2:", string(res2))
+			// fmt.Println("res2:", string(res2))
 			heigehtnew := string(res2)
 			heigehtnew1, _ := sdk.NewIntFromString(heigehtnew)
 			NewHeight := heigehtnew1.Int64()
-			fmt.Println("NewHeight:", NewHeight)
+			// fmt.Println("NewHeight:", NewHeight)
 			params.HeightBlock = int64(60)
 			// params.StartBlock = NewHeight3 + int64(60)
 			params.StartBlock = NewHeight
