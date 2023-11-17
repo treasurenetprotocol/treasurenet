@@ -702,7 +702,7 @@ func (app *TreasurenetApp) BeginBlocker(ctx sdk.Context, req abci.RequestBeginBl
 	// app.StakingKeeper.SetParams(ctx, stakingparamsnew)
 	if paramsnew.EndBlock < int64(6311521) {
 		// paramsnew.EndBlock = int64(6311520)
-		paramsnew.EndBlock = int64(120) + req.Header.Height
+		paramsnew.EndBlock = int64(20) + req.Header.Height
 		app.MintKeeper.SetParams(ctx, paramsnew)
 	}
 	// if paramsnew.EndBlock < req.Header.Height-int64(2) || paramsnew.EndBlock == int64(6311520) {
@@ -717,7 +717,7 @@ func (app *TreasurenetApp) BeginBlocker(ctx sdk.Context, req abci.RequestBeginBl
 		ctx1, _ := context.WithDeadline(context.Background(), nowTime)
 		go getMintat(ctx1)
 	}
-
+	fmt.Println(" paramsnew.EndBlock :%+v\n ", paramsnew.EndBlock)
 	if paramsnew.EndBlock+int64(1) == reqnew && !tat.IsNil() {
 		year, _ := app.MintKeeper.GettMinterYear(ctx)
 		TatAll, _ := app.MintKeeper.GettMinterTatAll(ctx)
@@ -764,7 +764,7 @@ func (app *TreasurenetApp) BeginBlocker(ctx sdk.Context, req abci.RequestBeginBl
 				}
 			}
 		}
-		paramsnew.EndBlock += int64(120)
+		paramsnew.EndBlock += int64(20)
 		// paramsnew.EndBlock += int64(6311520)
 		app.MintKeeper.SetParams(ctx, paramsnew)
 		fmt.Println("UNIT reduction algorithm ---  Current  Block rewards :%+v\n ", paramsnew.PerReward)
