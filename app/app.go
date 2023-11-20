@@ -124,10 +124,20 @@ import (
 	"github.com/treasurenetprotocol/treasurenet/x/gravity/keeper"
 	gravitytypes "github.com/treasurenetprotocol/treasurenet/x/gravity/types"
 
+	"github.com/treasurenetprotocol/treasurenet/x/epochs"
+	epochskeeper "github.com/treasurenetprotocol/treasurenet/x/epochs/keeper"
+	epochstypes "github.com/treasurenetprotocol/treasurenet/x/epochs/types"
 	"github.com/treasurenetprotocol/treasurenet/x/erc20"
 	erc20client "github.com/treasurenetprotocol/treasurenet/x/erc20/client"
 	erc20keeper "github.com/treasurenetprotocol/treasurenet/x/erc20/keeper"
 	erc20types "github.com/treasurenetprotocol/treasurenet/x/erc20/types"
+	"github.com/treasurenetprotocol/treasurenet/x/incentives"
+	incentivesclient "github.com/treasurenetprotocol/treasurenet/x/incentives/client"
+	incentiveskeeper "github.com/treasurenetprotocol/treasurenet/x/incentives/keeper"
+	incentivestypes "github.com/treasurenetprotocol/treasurenet/x/incentives/types"
+	"github.com/treasurenetprotocol/treasurenet/x/inflation"
+	inflationkeeper "github.com/treasurenetprotocol/treasurenet/x/inflation/keeper"
+	inflationtypes "github.com/treasurenetprotocol/treasurenet/x/inflation/types"
 	"github.com/treasurenetprotocol/treasurenet/x/vesting"
 	vestingkeeper "github.com/treasurenetprotocol/treasurenet/x/vesting/keeper"
 	vestingtypes "github.com/treasurenetprotocol/treasurenet/x/vesting/types"
@@ -159,7 +169,7 @@ var (
 			ibcclientclient.UpdateClientProposalHandler, ibcclientclient.UpgradeProposalHandler,
 			// Evmos proposal types
 			erc20client.RegisterCoinProposalHandler, erc20client.RegisterERC20ProposalHandler, erc20client.ToggleTokenConversionProposalHandler,
-			// incentivesclient.RegisterIncentiveProposalHandler, incentivesclient.CancelIncentiveProposalHandler,
+			incentivesclient.RegisterIncentiveProposalHandler, incentivesclient.CancelIncentiveProposalHandler,
 		),
 		params.AppModuleBasic{},
 		crisis.AppModuleBasic{},
@@ -176,7 +186,10 @@ var (
 		// Treasurenet modules
 		evm.AppModuleBasic{},
 		feemarket.AppModuleBasic{},
+		inflation.AppModuleBasic{},
 		erc20.AppModuleBasic{},
+		incentives.AppModuleBasic{},
+		epochs.AppModuleBasic{},
 	)
 
 	// module account permissions
@@ -190,12 +203,15 @@ var (
 		ibctransfertypes.ModuleName:    {authtypes.Minter, authtypes.Burner},
 		evmtypes.ModuleName:            {authtypes.Minter, authtypes.Burner}, // used for secure addition and subtraction of balance using module account
 		gravitytypes.ModuleName:        {authtypes.Minter, authtypes.Burner},
+		inflationtypes.ModuleName:      {authtypes.Minter},
 		erc20types.ModuleName:          {authtypes.Minter, authtypes.Burner},
+		incentivestypes.ModuleName:     {authtypes.Minter, authtypes.Burner},
 	}
 
 	// module accounts that are allowed to receive tokens
 	allowedReceivingModAcc = map[string]bool{
-		distrtypes.ModuleName: true,
+		distrtypes.ModuleName:      true,
+		incentivestypes.ModuleName: true,
 	}
 )
 
@@ -248,12 +264,12 @@ type TreasurenetApp struct {
 	// Treasurenet keepers
 	EvmKeeper       *evmkeeper.Keeper
 	FeeMarketKeeper feemarketkeeper.Keeper
-	// InflationKeeper  inflationkeeper.Keeper
+	InflationKeeper inflationkeeper.Keeper
 	// ClaimsKeeper     *claimskeeper.Keeper
-	Erc20Keeper erc20keeper.Keeper
-	// IncentivesKeeper incentiveskeeper.Keeper
-	// EpochsKeeper     epochskeeper.Keeper
-	VestingKeeper vestingkeeper.Keeper
+	Erc20Keeper      erc20keeper.Keeper
+	IncentivesKeeper incentiveskeeper.Keeper
+	EpochsKeeper     epochskeeper.Keeper
+	VestingKeeper    vestingkeeper.Keeper
 	// RecoveryKeeper   *recoverykeeper.Keeper
 	// FeesplitKeeper   feesplitkeeper.Keeper
 
@@ -317,6 +333,9 @@ func NewTreasurenetApp(
 		bech32ibctypes.StoreKey,
 		// treasurenet keys
 		evmtypes.StoreKey, feemarkettypes.StoreKey, vestingtypes.StoreKey,
+
+		erc20types.StoreKey, epochstypes.StoreKey, incentivestypes.StoreKey,
+		inflationtypes.StoreKey,
 		// inflationtypes.StoreKey, erc20types.StoreKey, incentivestypes.StoreKey,
 		// epochstypes.StoreKey, claimstypes.StoreKey, vestingtypes.StoreKey,
 		// feesplittypes.StoreKey,
@@ -461,7 +480,8 @@ func NewTreasurenetApp(
 		AddRoute(ibchost.RouterKey, ibcclient.NewClientProposalHandler(app.IBCKeeper.ClientKeeper)).
 		AddRoute(gravitytypes.RouterKey, keeper.NewGravityProposalHandler(app.GravityKeeper)).
 		AddRoute(bech32ibctypes.RouterKey, bech32ibc.NewBech32IBCProposalHandler(app.Bech32IbcKeeper)).
-		AddRoute(erc20types.RouterKey, erc20.NewErc20ProposalHandler(&app.Erc20Keeper))
+		AddRoute(erc20types.RouterKey, erc20.NewErc20ProposalHandler(&app.Erc20Keeper)).
+		AddRoute(incentivestypes.RouterKey, incentives.NewIncentivesProposalHandler(&app.IncentivesKeeper))
 
 	govKeeper := govkeeper.NewKeeper(
 		appCodec, keys[govtypes.StoreKey], app.GetSubspace(govtypes.ModuleName), app.AccountKeeper, app.BankKeeper,
@@ -474,6 +494,12 @@ func NewTreasurenetApp(
 		),
 	)
 
+	app.InflationKeeper = inflationkeeper.NewKeeper(
+		keys[inflationtypes.StoreKey], appCodec, app.GetSubspace(inflationtypes.ModuleName),
+		app.AccountKeeper, app.BankKeeper, app.DistrKeeper, &stakingKeeper,
+		authtypes.FeeCollectorName,
+	)
+
 	app.VestingKeeper = vestingkeeper.NewKeeper(
 		keys[vestingtypes.StoreKey], appCodec,
 		app.AccountKeeper, app.BankKeeper, app.StakingKeeper,
@@ -484,10 +510,24 @@ func NewTreasurenetApp(
 		app.AccountKeeper, app.BankKeeper, app.EvmKeeper,
 	)
 
+	app.IncentivesKeeper = incentiveskeeper.NewKeeper(
+		keys[incentivestypes.StoreKey], appCodec, app.GetSubspace(incentivestypes.ModuleName),
+		app.AccountKeeper, app.BankKeeper, app.InflationKeeper, app.StakingKeeper, app.EvmKeeper,
+	)
+
+	epochsKeeper := epochskeeper.NewKeeper(appCodec, keys[epochstypes.StoreKey])
+	app.EpochsKeeper = *epochsKeeper.SetHooks(
+		epochskeeper.NewMultiEpochHooks(
+			// insert epoch hooks receivers here
+			app.IncentivesKeeper.Hooks(),
+			app.InflationKeeper.Hooks(),
+		),
+	)
+
 	app.EvmKeeper = app.EvmKeeper.SetHooks(
 		evmkeeper.NewMultiEvmHooks(
 			app.Erc20Keeper.Hooks(),
-			// app.IncentivesKeeper.Hooks(),
+			app.IncentivesKeeper.Hooks(),
 			// app.FeesplitKeeper.Hooks(),
 			// app.ClaimsKeeper.Hooks(),
 		),
@@ -529,7 +569,8 @@ func NewTreasurenetApp(
 		),
 		// auth.NewAppModule(appCodec, app.AccountKeeper, authsims.RandomGenesisAccounts),
 		auth.NewAppModule(appCodec, app.AccountKeeper, nil),
-		vesting.NewAppModule(app.AccountKeeper, app.BankKeeper),
+		// vesting.NewAppModule(app.AccountKeeper, app.BankKeeper),
+		vesting.NewAppModule(app.VestingKeeper, app.AccountKeeper, app.BankKeeper, app.StakingKeeper),
 		bank.NewAppModule(appCodec, app.BankKeeper, app.AccountKeeper),
 		capability.NewAppModule(appCodec, *app.CapabilityKeeper),
 		crisis.NewAppModule(&app.CrisisKeeper, skipGenesisInvariants),
@@ -558,7 +599,9 @@ func NewTreasurenetApp(
 			app.Bech32IbcKeeper,
 		),
 		feemarket.NewAppModule(app.FeeMarketKeeper),
+		inflation.NewAppModule(app.InflationKeeper, app.AccountKeeper, app.StakingKeeper),
 		erc20.NewAppModule(app.Erc20Keeper, app.AccountKeeper),
+		incentives.NewAppModule(app.IncentivesKeeper, app.AccountKeeper),
 		vesting.NewAppModule(app.VestingKeeper, app.AccountKeeper, app.BankKeeper, app.StakingKeeper),
 	)
 
@@ -592,7 +635,9 @@ func NewTreasurenetApp(
 		feegrant.ModuleName,
 		paramstypes.ModuleName,
 		vestingtypes.ModuleName,
+		inflationtypes.ModuleName,
 		erc20types.ModuleName,
+		incentivestypes.ModuleName,
 	)
 
 	// NOTE: fee market module must go last in order to retrieve the block gas used.
@@ -620,7 +665,9 @@ func NewTreasurenetApp(
 		paramstypes.ModuleName,
 		upgradetypes.ModuleName,
 		vestingtypes.ModuleName,
+		inflationtypes.ModuleName,
 		erc20types.ModuleName,
+		incentivestypes.ModuleName,
 	)
 
 	// NOTE: The genutils module must occur after staking so that pools are
@@ -654,7 +701,10 @@ func NewTreasurenetApp(
 		paramstypes.ModuleName,
 		upgradetypes.ModuleName,
 		vestingtypes.ModuleName,
+		inflationtypes.ModuleName,
 		erc20types.ModuleName,
+		incentivestypes.ModuleName,
+		epochstypes.ModuleName,
 		// NOTE: crisis module must go at the end to check for invariants on each module
 		crisistypes.ModuleName,
 	)
@@ -1100,6 +1150,8 @@ func initParamsKeeper(
 	// treasurenet subspaces
 	paramsKeeper.Subspace(evmtypes.ModuleName)
 	paramsKeeper.Subspace(feemarkettypes.ModuleName)
+	paramsKeeper.Subspace(inflationtypes.ModuleName)
 	paramsKeeper.Subspace(erc20types.ModuleName)
+	paramsKeeper.Subspace(incentivestypes.ModuleName)
 	return paramsKeeper
 }
