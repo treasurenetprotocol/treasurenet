@@ -1,0 +1,22 @@
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  check-unwanted-characters:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v2
+
+    - name: Check for Unwanted Characters
+      run: |
+        if grep -rHnP --exclude-dir='.git' --exclude='*.png' --exclude='*.jpg' "[\x{4e00}-\x{9fff}]" . ; then
+          echo "Unwanted characters found!"
+          exit 1
+        else
+          echo "All good."
+        fi

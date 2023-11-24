@@ -50,7 +50,7 @@ func (k Keeper) DenomToERC20Lookup(ctx sdk.Context, denom string) (bool, *types.
 	tc1, err := types.GravityDenomToERC20(denom)
 
 	if err != nil {
-		// Look up ERC20 contract in index and error if it's not in there.如果不是gravition代币需要找erc20的映射关系
+		// Look up ERC20 contract in index and error if it's not in there
 		tc2, exists := k.GetCosmosOriginatedERC20(ctx, denom)
 		if !exists {
 			return false, nil,
