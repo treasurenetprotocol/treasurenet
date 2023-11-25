@@ -149,7 +149,7 @@ $BIN collect-gentxs
 #./treasurenetd query staking validator ethvaloper1s8znfe26xwq8lm5dhzxh4rjr7n90wrl2hn4dwj -o json --chain-id treasurenet_4143179869527-1 --home /data/mytreasurenet/node8//treasurenetd
 #./treasurenetd tx slashing unjail --from node8 --chain-id treasurenet_4143179869527-1 --home /data/mytreasurenet/node8/treasurenetd --keyring-backend test --gas-prices 20aunit
 #treasurenetd start --pruning=nothing --trace --log_level info --minimum-gas-prices=0.0001aunit --json-rpc.api eth,txpool,personal,net,debug,web3,miner --p2p.persistent_peers=a2f4cd782091b4429efc0748109d326053c99a59@54.241.61.93:26656,56490415fafa170557e410069faf05e3077500fd@54.193.100.97:26656,a82f9a917b35c77c572f6b9139635cec3c5f0317@18.144.45.142:26656
-# --json-rpc.address 0.0.0.0:8555  为了和以太坊启动的端口不冲突
+# --json-rpc.address 0.0.0.0:8555  
 #$BIN start --pruning=nothing --log_level $LOGLEVEL --json-rpc.api eth,txpool,personal,net,debug,web3,miner --trace --json-rpc.address 0.0.0.0:8555 
 #gravity start  --log_level $LOGLEVEL  --trace --home /validator1
 # nohup ./treasurenetd10 start --home /data/.treasurenetd --evm.tracer=json  --keyring-backend file --json-rpc.api eth,txpool,net,web3,miner --pruning=nothing --trace --json-rpc.address 0.0.0.0:8555 --rpc.laddr tcp://0.0.0.0:26657 --x-crisis-skip-assert-invariants --chain-id treasurenet_5002-1 < /root/psw.txt >> /data/node0.log 2>&1 &
