@@ -6,7 +6,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/server"
 	svrcmd "github.com/cosmos/cosmos-sdk/server/cmd"
 
-	// sdk "github.com/cosmos/cosmos-sdk/types"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/treasurenetprotocol/treasurenet/app"
 	cmdcfg "github.com/treasurenetprotocol/treasurenet/cmd/config"
@@ -15,7 +15,7 @@ import (
 )
 
 func main() {
-	// setupConfig()
+	setupConfig()
 	cmdcfg.RegisterDenoms()
 
 	rootCmd, _ := NewRootCmd()
@@ -31,10 +31,10 @@ func main() {
 	}
 }
 
-// func setupConfig() {
-// 	// set the address prefixes
-// 	config := sdk.GetConfig()
-// 	cmdcfg.SetBech32Prefixes(config)
-// 	cmdcfg.SetBip44CoinType(config)
-// 	config.Seal()
-// }
+func setupConfig() {
+	// set the address prefixes
+	config := sdk.GetConfig()
+	cmdcfg.SetBech32Prefixes(config)
+	cmdcfg.SetBip44CoinType(config)
+	config.Seal()
+}
