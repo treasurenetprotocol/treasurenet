@@ -14,8 +14,8 @@ Treasurenet proposes a solution for the critical lack of sustaining and tangible
 -
 
 ## Documents
-<a href="https://github.com/treasurenetprotocol/treasurenet/wiki">
-    https://github.com/treasurenetprotocol/treasurenet/wiki
+<a href="https://wiki.treasurenet.io/">
+    wiki.treasurenet.io
 </a>
 
 
@@ -33,4 +33,4 @@ Treasurenet proposes a solution for the critical lack of sustaining and tangible
 
 -----
 
-_TreasureNet 2022_
+_TreasureNet 2023_
