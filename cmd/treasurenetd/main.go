@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/cosmos/cosmos-sdk/server"
@@ -34,6 +35,7 @@ func main() {
 func setupConfig() {
 	// set the address prefixes
 	config := sdk.GetConfig()
+	fmt.Printf("config is:%+v\n", config)
 	cmdcfg.SetBech32Prefixes(config)
 	cmdcfg.SetBip44CoinType(config)
 	config.Seal()
