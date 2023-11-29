@@ -35,4 +35,4 @@ Treasurenet proposes a solution for the critical lack of sustaining and tangible
 
 -----
 
-_TreasureNet 2022_
+TreasureNet 2022
