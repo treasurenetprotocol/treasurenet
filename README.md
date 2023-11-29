@@ -1,3 +1,5 @@
+[![CI](https://github.com/treasurenetprotocol/treasurenet/actions/workflows/ci.yml/badge.svg)](https://github.com/treasurenetprotocol/treasurenet/actions/workflows/ci.yml)
+
 <p align="center">
   <a href="https://treasurenet.io">
     <img alt="treasurenetLogo" src="https://raw.githubusercontent.com/treasurenetprotocol/docs/feature/1.0.3/static/img/logo_tn_github.png" width="250" />
@@ -13,9 +15,9 @@ Treasurenet proposes a solution for the critical lack of sustaining and tangible
 
 -
 
-## Documents
-<a href="https://github.com/treasurenetprotocol/treasurenet/wiki">
-    https://github.com/treasurenetprotocol/treasurenet/wiki
+## Knowledgebase
+<a href="https://wiki.treasurenet.io/">
+    https://wiki.treasurenet.io/
 </a>
 
 

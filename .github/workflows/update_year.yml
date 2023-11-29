@@ -1,0 +1,25 @@
+name: Update Year in README
+
+on:
+  schedule:
+    - cron: '0 0 1 1 *' # This sets it to run on January 1st of every year
+  # manually trigger workflow, for testing purposes
+  workflow_dispatch:
+
+jobs:
+  update-readme:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Update Year in README
+      run: |
+        sed -i 's/© [0-9][0-9][0-9][0-9]/© $(date +"%Y")/g' README.md
+
+    - name: Commit and Push
+      run: |
+        git config --global user.name 'Your Name'
+        git config --global user.email 'your-email@example.com'
+        git commit -am "Update Year"
+        git push
