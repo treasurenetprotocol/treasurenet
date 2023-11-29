@@ -15,11 +15,12 @@ jobs:
 
     - name: Update Year in README
       run: |
-        sed -i 's/© [0-9][0-9][0-9][0-9]/© $(date +"%Y")/g' README.md
+        sed -i 's/TreasureNet [0-9][0-9][0-9][0-9]/TreasureNet $(date +"%Y")/g' README.md
+
 
     - name: Commit and Push
       run: |
-        git config --global user.name 'Your Name'
-        git config --global user.email 'your-email@example.com'
+        git config --global user.name 'Treasurenet Bot'
+        git config --global user.email 'devops@treasurenet.org'
         git commit -am "Update Year"
         git push
