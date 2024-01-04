@@ -160,7 +160,7 @@ require (
 replace (
 	github.com/99designs/keyring => github.com/cosmos/keyring v1.1.7-0.20210622111912-ef00f8ac3d76
 	github.com/coinbase/rosetta-sdk-go v0.7.0 => github.com/coinbase/rosetta-sdk-go v0.6.10
-	github.com/cosmos/cosmos-sdk v0.45.8 => github.com/treasurenetprotocol/treasurenet-cosmos-pack v1.0.9-tn-erc20
+	github.com/cosmos/cosmos-sdk v0.45.8 => github.com/treasurenetprotocol/treasurenet-cosmos-pack v1.1.1-tn-crosschain
 	github.com/cosmos/iavl v0.19.1 => github.com/cosmos/iavl v0.17.3
 	github.com/cosmos/ibc-go/v3 v3.2.0 => github.com/treasurenetprotocol/treasurenet-ibc-go-pack/v3 v3.3.0-tn-ibc
 	github.com/gogo/protobuf => github.com/regen-network/protobuf v1.3.3-alpha.regen.1
