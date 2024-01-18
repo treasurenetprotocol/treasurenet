@@ -1487,8 +1487,8 @@ github.com/tommy-muehle/go-mnd/v2 v2.5.0/go.mod h1:WsUAkMJMYww6l/ufffCD3m+P7LEvr
 github.com/treasurenetprotocol/treasurenet v1.0.2-231023-ibc/go.mod h1:81Ss+Zk1bYK0oy0v4Qch+P2xFVPC5MyYXmDjMxAcpjA=
 github.com/treasurenetprotocol/treasurenet-bech32-pack v1.0.0-231027-tn h1:4LAallfP8h8z/EI4HDklHHq2iOTCq3vR5r5DVxnff+s=
 github.com/treasurenetprotocol/treasurenet-bech32-pack v1.0.0-231027-tn/go.mod h1:X5/FZHMPL+B3ufuVyY2/koxVjd4hIwyTLjYP1DZwppQ=
-github.com/treasurenetprotocol/treasurenet-cosmos-pack v1.0.9-tn-erc20 h1:KIDBSOJjDPrUWaKCrVu65pv51aVK7H6cho7xhggwnTc=
-github.com/treasurenetprotocol/treasurenet-cosmos-pack v1.0.9-tn-erc20/go.mod h1:Ro+XFSYAMGEJIsLCwW8hK095roo6vsZLXFEPoOcQyjE=
+github.com/treasurenetprotocol/treasurenet-cosmos-pack v1.1.1-tn-crosschain h1:hj5/PmZNz4/qeR1Oz/88rNUIiKfjefgFIWclHYHBjQg=
+github.com/treasurenetprotocol/treasurenet-cosmos-pack v1.1.1-tn-crosschain/go.mod h1:Ro+XFSYAMGEJIsLCwW8hK095roo6vsZLXFEPoOcQyjE=
 github.com/treasurenetprotocol/treasurenet-ibc-go-pack/v3 v3.3.0-tn-ibc h1:U7j+8yPQEIbMBZF9jMQB5GwArZll4XuWKIt/SfiBLhA=
 github.com/treasurenetprotocol/treasurenet-ibc-go-pack/v3 v3.3.0-tn-ibc/go.mod h1:DrDYXJjWNwgv72cK1Il+BegtyGIDXcx+cnJwWGzve6o=
 github.com/ttacon/chalk v0.0.0-20160626202418-22c06c80ed31/go.mod h1:onvgF043R+lC5RZ8IT9rBXDaEDnpnw/Cl+HFiw+v/7Q=
