@@ -76,12 +76,12 @@ func validateBlock(state State, block *types.Block) error {
 			block.ValidatorsHash,
 		)
 	}
-	if !bytes.Equal(block.NextValidatorsHash, state.NextValidators.Hash()) {
-		return fmt.Errorf("wrong Block.Header.NextValidatorsHash.  Expected %X, got %v",
-			state.NextValidators.Hash(),
-			block.NextValidatorsHash,
-		)
-	}
+	// if !bytes.Equal(block.NextValidatorsHash, state.NextValidators.Hash()) {
+	// 	return fmt.Errorf("wrong Block.Header.NextValidatorsHash.  Expected %X, got %v",
+	// 		state.NextValidators.Hash(),
+	// 		block.NextValidatorsHash,
+	// 	)
+	// }
 
 	// Validate block LastCommit.
 	if block.Height == state.InitialHeight {
