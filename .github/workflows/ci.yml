@@ -4,7 +4,6 @@ on:
   pull_request:
     branches:
       - main
-
 jobs:
   check-unwanted-characters:
     runs-on: ubuntu-latest
