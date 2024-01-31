@@ -7,6 +7,7 @@ on:
 #   push:
 #     branches: [ main ]
 # Environment variables available to all jobs and steps in this workflow.
+
 env:
   DEPLOY_DIR: /data/docs/build/
 jobs:
