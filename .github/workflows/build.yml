@@ -1,16 +1,46 @@
 name: build
-
+#on:
+#  pull_request:
+#    branches:
+#      - main
 on:
   push:
     branches: [ main ]
-
+# Environment variables available to all jobs and steps in this workflow.
+env:
+  DEPLOY_DIR: /data/docs/build/
 jobs:
   build:
+    name: build
     runs-on: ubuntu-latest
-
     steps:
-      - uses: actions/checkout@v4
-
-      - name: build
+      - name: checkout
+        uses: actions/checkout@v4
+      - name: go mod tidy and make install
         run: go mod tidy && make install
-        
+      - name: cat dir
+        run: ls build/
+      #用于将文件或文件夹上传到存储库中。它可以用于将构建过程中的输出或其他文件共享到存储库中，以便于在后续工作流或手动下载中使用
+      - name: Upload treasurenetd
+        uses: actions/upload-artifact@v2
+        with:
+          name: treasurenetd
+          path: build/treasurenetd
+      #用于将应用程序或文件从一个服务器复制到另一个服务器，或者在多个服务器之间进行配置和部署。
+      - name: Deploy to Server
+        uses: cross-the-world/ssh-scp-ssh-pipelines@latest
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          user: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_KEY }}
+          connect_timeout: 180s
+          first_ssh: |
+            pwd
+#            backup or prepare
+#            mkdir -p /home/github/test/test1 &&
+#            mkdir -p /home/github/test/test2 &&
+          scp: |
+            ./build/* => ${{ env.DEPLOY_DIR }}
+          last_ssh: |
+            pwd
+#            执行启动脚本
