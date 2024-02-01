@@ -1,13 +1,17 @@
 name: build
+# 中文文档：https://docs.github.com/zh/actions
+# uses:来源 action 查询市场https://github.com/marketplace?category=&type=&verification=&query=
+# on 触发任务的事件：https://docs.github.com/zh/actions/using-workflows/events-that-trigger-workflows
+# pr 成功触发构建
+#on:
+#  pull_request:
+#    branches:
+#      - main
+# 推送 main 分支触发构建
 on:
-  pull_request:
-    branches:
-      - main
-# on:
-#   push:
-#     branches: [ main ]
+  push:
+    branches: [ main ]
 # Environment variables available to all jobs and steps in this workflow.
-
 env:
   DEPLOY_DIR: /data/docs/build/
 jobs:
