@@ -1,9 +1,4 @@
 name: deploy
-# on:
-#  pull_request:
-#    branches:
-#      - main
-# 推送 main 分支触发构建
 on:
   push:
     branches: [ main ]
