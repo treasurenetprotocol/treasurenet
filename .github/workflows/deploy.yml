@@ -8,8 +8,8 @@ on:
   push:
     branches: [ main ]
 env:
-  SOURCE_DIR: /home/runner/work/treasurenet/treasurenet/build/treasurenetd
-  TARGET_DIR: /home/tnuser
+  SOURCE_DIR: build/treasurenetd
+  TARGET_DIR: /home/tnuser/
   GO_VERSION: 1.18
 jobs:
   build:
