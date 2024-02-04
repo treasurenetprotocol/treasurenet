@@ -8,7 +8,7 @@ on:
   push:
     branches: [ main ]
 env:
-  SOURCE_DIR: README.md
+  SOURCE_DIR: /build/treasurenetd
   TARGET_DIR: /home/tnuser/
   GO_VERSION: 1.18
 jobs:
@@ -25,7 +25,7 @@ jobs:
       - run: go version
       - run: go env -w GO111MODULE=on
       - run: go mod tidy
-      - run: make install
+      - run: make build
 
       - name: Deploy to Server
         uses: cross-the-world/ssh-scp-ssh-pipelines@latest
