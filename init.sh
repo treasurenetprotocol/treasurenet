@@ -5,6 +5,7 @@ CHAINID="treasurenet_5005-1"
 MONIKER="localtestnet"
 KEYRING="test"
 KEYALGO="eth_secp256k1"
+# cosmos default secp256k1
 LOGLEVEL="info"
 # to trace evm
 TRACE="--trace"
