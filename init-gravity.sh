@@ -3,9 +3,8 @@ set -eux
 # your gaiad binary name
 BIN=treasurenetd
 
-#CHAIN_ID="gravity-test"
 
-CHAIN_ID="treasurenet_9000-1"
+CHAIN_ID="treasurenet_5005-1"
 
 #NODES=1
 
