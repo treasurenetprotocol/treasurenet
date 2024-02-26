@@ -3,9 +3,8 @@ set -eux
 # your gaiad binary name
 BIN=treasurenetd
 
-#CHAIN_ID="gravity-test"
 
-CHAIN_ID="treasurenet_9000-1"
+CHAIN_ID="treasurenet_5005-1"
 
 #NODES=1
 
@@ -23,11 +22,10 @@ ALLOCATION="100000000000000000000000000aunit,10000000000stake,10000000000footoke
 
 KEY1="validator"
 KEY2="orchestrator"
-CHAINID="treasurenet_9000-1"
+CHAINID="treasurenet_5005-1"
 MONIKER="localtestnet"
 KEYRING="test"
-#KEYALGO="eth_secp256k1"
-KEYALGO="secp256k1"
+KEYALGO="eth_secp256k1"
 LOGLEVEL="info"
 # to trace evm
 TRACE="--trace"
