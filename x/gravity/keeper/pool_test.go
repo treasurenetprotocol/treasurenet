@@ -23,6 +23,7 @@ func TestAddToOutgoingPool(t *testing.T) {
 		myReceiver          = "0xd041c41EA1bf0F006ADBb6d2c9ef9D425dE5eaD7"
 		myTokenContractAddr = "0x429881672B9AE42b8EbA0E26cD9C73711b891Ca5"
 	)
+	fmt.Println("0x429881672B9AE42b8EbA0E26cD9C73711b891Ca5")
 	receiver, err := types.NewEthAddress(myReceiver)
 	require.NoError(t, err)
 	tokenContract, err := types.NewEthAddress(myTokenContractAddr)
