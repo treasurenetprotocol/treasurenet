@@ -392,6 +392,51 @@ func (k Keeper) GetValsetConfirms(ctx sdk.Context, nonce uint64) (confirms []typ
 	return confirms
 }
 
+// IterateValsetConfirms returns all valset confirms in reverse order by nonce, aka most recent valset nonce first
+func (k Keeper) IterateValsetConfirms(ctx sdk.Context, cb func(key []byte, confirms []types.MsgValsetConfirm, nonce uint64) (stop bool)) {
+	prefixStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.ValsetConfirmKey)
+	iter := prefixStore.ReverseIterator(nil, nil)
+	defer iter.Close()
+
+	var confirmsByNonce []types.MsgValsetConfirm
+	var nonce uint64 = 0
+
+	// Iterate through all stored valset confirms grouping them into confirmsByNonce.
+	// When a new nonce is found: process the collected confirmsByNonce, clear the collection + update the current nonce
+	var key []byte
+	for ; iter.Valid(); iter.Next() {
+		key = iter.Key()
+		// The iterator guarantees us some nonempty value stored at the Value(), it better be a MsgValsetConfirm
+		var confirm types.MsgValsetConfirm
+		k.cdc.MustUnmarshal(iter.Value(), &confirm)
+
+		if len(confirmsByNonce) == 0 { // First confirm found
+			// Initialize current nonce, start the collection
+			nonce = confirm.Nonce
+			confirmsByNonce = append(confirmsByNonce, confirm)
+		} else {
+			if confirm.Nonce != nonce { // At nonce boundary
+				// We are guaranteed to have some collection of confirms at this point
+				// cb returns true to stop early
+				if cb(key, confirmsByNonce, nonce) {
+					return
+				}
+				// Now we are done with the old confirms, update the nonce and clear the collection
+				nonce = confirm.Nonce
+				confirmsByNonce = []types.MsgValsetConfirm{}
+			}
+			// Add the current confirm to the collection
+			confirmsByNonce = append(confirmsByNonce, confirm)
+		}
+	}
+
+	// Process the final nonce, or arrive here if no confirms are in the store
+	if len(confirmsByNonce) != 0 {
+		// This is the final callback execution, we stop regardless of their request to do so
+		cb(key, confirmsByNonce, nonce)
+	}
+}
+
 // DeleteValsetConfirms deletes the valset confirmations for the valset at a given nonce from state
 func (k Keeper) DeleteValsetConfirms(ctx sdk.Context, nonce uint64) {
 	store := ctx.KVStore(k.storeKey)
