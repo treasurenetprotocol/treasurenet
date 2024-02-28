@@ -4,10 +4,10 @@
 }:
 let
   version = "v0.17.1";
-  pname = "ethermintd";
+  pname = "treasurenetd";
   tags = [ "ledger" "netgo" ];
   ldflags = lib.concatStringsSep "\n" ([
-    "-X github.com/cosmos/cosmos-sdk/version.Name=ethermint"
+    "-X github.com/cosmos/cosmos-sdk/version.Name=treasurenet"
     "-X github.com/cosmos/cosmos-sdk/version.AppName=${pname}"
     "-X github.com/cosmos/cosmos-sdk/version.Version=${version}"
     "-X github.com/cosmos/cosmos-sdk/version.BuildTags=${lib.concatStringsSep "," tags}"
@@ -23,13 +23,13 @@ buildGoApplication rec {
   modules = ./gomod2nix.toml;
   doCheck = false;
   pwd = src; # needed to support replace
-  subPackages = [ "cmd/ethermintd" ];
+  subPackages = [ "cmd/treasurenetd" ];
   CGO_ENABLED = "1";
 
   meta = with lib; {
-    description = "Ethermint is a scalable and interoperable Ethereum library, built on Proof-of-Stake with fast-finality using the Cosmos SDK which runs on top of Tendermint Core consensus engine.";
-    homepage = "https://github.com/evmos/ethermint";
+    description = "treasurenet is a scalable and interoperable Ethereum library, built on Proof-of-Stake with fast-finality using the Cosmos SDK which runs on top of Tendermint Core consensus engine.";
+    homepage = "https://github.com/treasurenetprotocol/treasurenet";
     license = licenses.asl20;
-    mainProgram = "ethermintd";
+    mainProgram = "treasurenetd";
   };
 }
