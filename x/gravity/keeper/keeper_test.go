@@ -162,12 +162,12 @@ func TestDelegateKeys(t *testing.T) {
 			"0x610277F0208D342C576b991daFdCb36E36515e76", "0x835973768750b3ED2D5c3EF5AdcD5eDb44d12aD4",
 			"0xb2A7F3E84F8FdcA1da46c810AEa110dd96BAE6bF"}
 
-		valAddrs = []string{"gravityvaloper1jpz0ahls2chajf78nkqczdwwuqcu97w6j77vg6",
-			"gravityvaloper15n79nty2fj37ant3p2gj4wju4ls6eu6tzpy7gq", "gravityvaloper16dnkc6ac6ruuyr6l372fc3p77jgjpet6eezum0",
-			"gravityvaloper1vrptwhl3ht2txmzy28j9msqkcvmn8gjzyqpjtn"}
+		valAddrs = []string{"treasurenetvaloper1jpz0ahls2chajf78nkqczdwwuqcu97w6j77vg6",
+			"treasurenetvaloper15n79nty2fj37ant3p2gj4wju4ls6eu6tzpy7gq", "treasurenetvaloper16dnkc6ac6ruuyr6l372fc3p77jgjpet6eezum0",
+			"treasurenetvaloper1vrptwhl3ht2txmzy28j9msqkcvmn8gjzyqpjtn"}
 
-		orchAddrs = []string{"gravity1g0etv93428tvxqftnmj25jn06mz6dtda5zxt8k", "gravity1rhfs24tlw4na04v35tzmjncy785kkw9jwwlvnw",
-			"gravity10upq3tmt04zf55f6hw67m0uyrda3mp72wsvhxx", "gravity1nt2uwjh5peg9vz2wfh2m3jjwqnu9kpjlncnrum"}
+		orchAddrs = []string{"treasurenet1g0etv93428tvxqftnmj25jn06mz6dtda5zxt8k", "treasurenet1rhfs24tlw4na04v35tzmjncy785kkw9jwwlvnw",
+			"treasurenet10upq3tmt04zf55f6hw67m0uyrda3mp72wsvhxx", "treasurenet1nt2uwjh5peg9vz2wfh2m3jjwqnu9kpjlncnrum"}
 	)
 
 	for i := range ethAddrs {
