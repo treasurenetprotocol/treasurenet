@@ -7,6 +7,7 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestValidateMsgSetOrchestratorAddress(t *testing.T) {
@@ -65,4 +66,14 @@ func TestValidateMsgSetOrchestratorAddress(t *testing.T) {
 		})
 	}
 
+}
+
+// Gets the ClaimHash() output from every claims member and casts it to a string, panicing on any errors
+func getClaimHashStrings(t *testing.T, claims ...EthereumClaim) (hashes []string) {
+	for _, claim := range claims {
+		hash, e := claim.ClaimHash()
+		require.NoError(t, e)
+		hashes = append(hashes, string(hash))
+	}
+	return
 }

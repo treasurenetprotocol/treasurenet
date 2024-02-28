@@ -7,9 +7,9 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	"github.com/treasurenetprotocol/treasurenet/x/gravity/keeper"
 	"github.com/treasurenetprotocol/treasurenet/x/gravity/types"
-	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 )
 
 // Have the validators put in a erc20<>denom relation with ERC20DeployedEvent
@@ -48,7 +48,7 @@ func initializeTestingVars(t *testing.T) *testingVars {
 	tv.t = t
 
 	tv.erc20 = "0x0bc529c00C6401aEF6D220BE8C6Ea1667F6Ad93e"
-	tv.denom = "ugraviton"
+	tv.denom = "aunit"
 
 	tv.input, tv.ctx = keeper.SetupFiveValChain(t)
 	tv.h = NewHandler(tv.input.GravityKeeper)
@@ -81,9 +81,9 @@ func addDenomToERC20Relation(tv *testingVars) {
 			EthBlockHeight: 0,
 			CosmosDenom:    tv.denom,
 			TokenContract:  tv.erc20,
-			Name:           "Graviton",
-			Symbol:         "GRAV",
-			Decimals:       6,
+			Name:           "Stake Token",
+			Symbol:         "STEAK",
+			Decimals:       18,
 			Orchestrator:   v.String(),
 		}
 		_, err := tv.h(tv.ctx, &ethClaim)
@@ -114,8 +114,8 @@ func addDenomToERC20Relation(tv *testingVars) {
 
 func lockCoinsInModule(tv *testingVars) {
 	var (
-		userCosmosAddr, err           = sdk.AccAddressFromBech32("gravity1990z7dqsvh8gthw9pa5sn4wuy2xrsd80lcx6lv")
-		denom                         = "ugraviton"
+		userCosmosAddr, err           = sdk.AccAddressFromBech32("treasurenet1990z7dqsvh8gthw9pa5sn4wuy2xrsd80lcx6lv")
+		denom                         = "aunit"
 		startingCoinAmount  sdk.Int   = sdk.NewIntFromUint64(150)
 		sendAmount          sdk.Int   = sdk.NewIntFromUint64(50)
 		feeAmount           sdk.Int   = sdk.NewIntFromUint64(5)
@@ -157,7 +157,7 @@ func lockCoinsInModule(tv *testingVars) {
 
 func acceptDepositEvent(tv *testingVars) {
 	var (
-		myCosmosAddr, err = sdk.AccAddressFromBech32("gravity16ahjkfqxpp6lvfy9fpfnfjg39xr96qet0l08hu")
+		myCosmosAddr, err = sdk.AccAddressFromBech32("treasurenet16ahjkfqxpp6lvfy9fpfnfjg39xr96qet0l08hu")
 		myNonce           = uint64(3)
 		anyETHAddr        = "0xf9613b532673Cc223aBa451dFA8539B87e1F666D"
 	)
