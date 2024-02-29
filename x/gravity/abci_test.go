@@ -10,13 +10,13 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/treasurenetprotocol/treasurenet/x/gravity/keeper"
-	"github.com/treasurenetprotocol/treasurenet/x/gravity/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	slashingtypes "github.com/cosmos/cosmos-sdk/x/slashing/types"
 	"github.com/cosmos/cosmos-sdk/x/staking"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
+	"github.com/treasurenetprotocol/treasurenet/x/gravity/keeper"
+	"github.com/treasurenetprotocol/treasurenet/x/gravity/types"
 )
 
 func TestValsetCreationIfNotAvailable(t *testing.T) {
@@ -487,13 +487,14 @@ func TestBatchTimeout(t *testing.T) {
 	params := pk.GetParams(ctx)
 	var (
 		now                 = time.Now().UTC()
-		mySender, _         = sdk.AccAddressFromBech32("gravity1ahx7f8wyertuus9r20284ej0asrs085ceqtfnm")
+		mySender, e1        = sdk.AccAddressFromBech32("gravity1ahx7f8wyertuus9r20284ej0asrs085ceqtfnm")
 		myReceiver          = "0xd041c41EA1bf0F006ADBb6d2c9ef9D425dE5eaD7"
 		myTokenContractAddr = "0x429881672B9AE42b8EbA0E26cD9C73711b891Ca5" // Pickle
-		token, err          = types.NewInternalERC20Token(sdk.NewInt(99999), myTokenContractAddr)
+		token, e2           = types.NewInternalERC20Token(sdk.NewInt(99999), myTokenContractAddr)
 		allVouchers         = sdk.NewCoins(token.GravityCoin())
 	)
-	require.NoError(t, err)
+	require.NoError(t, e1)
+	require.NoError(t, e2)
 	receiver, err := types.NewEthAddress(myReceiver)
 	require.NoError(t, err)
 	tokenContract, err := types.NewEthAddress(myTokenContractAddr)
