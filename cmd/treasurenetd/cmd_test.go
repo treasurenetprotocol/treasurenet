@@ -11,16 +11,16 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/genutil/client/cli"
 
 	"github.com/treasurenetprotocol/treasurenet/app"
-	ethermintd "github.com/treasurenetprotocol/treasurenet/cmd/treasurenetd"
+	treasurenetd "github.com/treasurenetprotocol/treasurenet/cmd/treasurenetd"
 )
 
 func TestInitCmd(t *testing.T) {
-	rootCmd, _ := ethermintd.NewRootCmd()
+	rootCmd, _ := treasurenetd.NewRootCmd()
 	rootCmd.SetArgs([]string{
-		"init",          // Test the init cmd
-		"etherminttest", // Moniker
+		"init",            // Test the init cmd
+		"treasurenettest", // Moniker
 		fmt.Sprintf("--%s=%s", cli.FlagOverwrite, "true"), // Overwrite genesis.json, in case it already exists
-		fmt.Sprintf("--%s=%s", flags.FlagChainID, "ethermint_5005-1"),
+		fmt.Sprintf("--%s=%s", flags.FlagChainID, "treasurenet_5005-1"),
 	})
 
 	err := svrcmd.Execute(rootCmd, app.DefaultNodeHome)

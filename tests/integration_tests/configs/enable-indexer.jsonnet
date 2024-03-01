@@ -1,7 +1,7 @@
 local config = import 'default.jsonnet';
 
 config {
-  'ethermint_5005-1'+: {
+  'treasurenet_5005-1'+: {
     config+: {
       tx_index+: {
         indexer: 'null',
