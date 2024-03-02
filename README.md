@@ -6,13 +6,13 @@
 
 # Treasurenet  
 
-Treasurenet proposes a solution for the critical lack of sustaining and tangible value in the crypto world. Our goal is the combine real world economic drivers and distributed ledger scalability. As a layer 1 protocol, TN will become a model for sustaining value in the fiat world and the digital world.
+Treasurenet offers a remedy for the significant shortfall of enduring and substantial value within the cryptocurrency realm. Our objective is to merge real-world economic forces with the scalability of distributed ledger technology. As a layer 1 protocol, Treasurenet aims to set a precedent for maintaining value across both the fiat and digital domains.
 
 <img alt="Static Badge" src="https://img.shields.io/badge/license-LGPL_3.0-blue">  <img alt="Static Badge" src="https://img.shields.io/badge/Golang-v1.22-orange">  <img alt="Static Badge" src="https://img.shields.io/badge/tag-v1.5.0-green">
 
 ## Installation
 
-For prerequisites and detailed build instructions please read the [Installation](https://docs.treasurenet.io/docs/validators/quickStart/installation) instructions. Once the dependencies are installed, run:
+For prerequisites and detailed build instructions please read the [Installation](https://wiki.treasurenet.io/docs/For-Validators/quickStart/) instructions. Once the dependencies are installed, run:
 
 ```shell
 make install
@@ -21,7 +21,7 @@ make install
 Or check out the latest [release](https://github.com/treasurenetprotocol/treasurenet/releases).
 ## Usage
 
-Our documentation is hosted in a separate repository and can be found at [docs.treasurenet.io](https://docs.treasurenet.io) . Head over there and check it out.
+Our documentation is hosted in a separate repository and can be found at [here](https://wiki.treasurenet.io).
 
 ## Contributing
 
