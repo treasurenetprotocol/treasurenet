@@ -23,6 +23,17 @@ Or check out the latest [release](https://github.com/treasurenetprotocol/treasu
 
 Our documentation is hosted in a separate repository and can be found at [here](https://wiki.treasurenet.io).
 
+## API Guide
+
+TBA
+
+# License
+Treasurenet Protocol is licensed under GNU Lesser General Public License v3.0. See LICENSE file for the terms and conditions.
+
+Treasurenet Protocl includes third-party open-source code. In general, a source subtree with a LICENSE or COPYRIGHT file is from a third party, and our modifications thereto are licensed under the same third-party open source license.
+
+Also please see our Fiduciary License Agreement if you are contributing to the project. By your submission of your contribution to us, you and we mutually agree to the terms and conditions of the agreement.
+
 ## Contributing
 
 Looking for a good place to start contributing? Check out some good [first issues](https://github.com/treasurenetprotocol/treasurenet/issues/new/choose).
