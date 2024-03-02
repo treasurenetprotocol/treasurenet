@@ -4,9 +4,9 @@
   </a>  
 </p>  
 
-# Treasurenet  
+# Treasurenet Protocol 
 
-Treasurenet offers a remedy for the significant shortfall of enduring and substantial value within the cryptocurrency realm. Our objective is to merge real-world economic forces with the scalability of distributed ledger technology. As a layer 1 protocol, Treasurenet aims to set a precedent for maintaining value across both the fiat and digital domains.
+Treasurenet Protocol offers a remedy for the significant shortfall of enduring and substantial value within the cryptocurrency realm. Our objective is to merge real-world economic forces with the scalability of distributed ledger technology. As a layer 1 protocol, Treasurenet Protocol aims to set a precedent for maintaining value across both the fiat and digital domains.
 
 <img alt="Static Badge" src="https://img.shields.io/badge/license-LGPL_3.0-blue">  <img alt="Static Badge" src="https://img.shields.io/badge/Golang-v1.22-orange">  <img alt="Static Badge" src="https://img.shields.io/badge/tag-v1.5.0-green">
 
@@ -25,12 +25,12 @@ Our documentation is hosted in a separate repository and can be found at [here](
 
 ## Contributing
 
-Looking for a good place to start contributing? Check out some good [first issues](https://github.com/treasurenetprotocol/treasurenet/issues).
+Looking for a good place to start contributing? Check out some good [first issues](https://github.com/treasurenetprotocol/treasurenet/issues/new/choose).
 
 
 ## Contact Information
 
-Please follow our social media and discussion groups to ask your questions or suggestions
+Please connect with us on our social media platforms and join our discussion groups to share your questions or suggestions.
 
 - [Discord](https://discord.com/invite/treasurenet)
 - [Telegram](https://t.me/treasurenet)
@@ -38,4 +38,4 @@ Please follow our social media and discussion groups to ask your questions or su
 
 
 -----  
-_Treasurenet Foundation 2024_
+_Treasurenet Protocol 2024_
