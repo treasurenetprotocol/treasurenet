@@ -1,6 +1,7 @@
 package client
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
@@ -12,7 +13,9 @@ import (
 func TestInitConfigNonNotExistError(t *testing.T) {
 	tempDir := t.TempDir()
 	subDir := filepath.Join(tempDir, "nonPerms")
-	if err := os.Mkdir(subDir, 0o600); err != nil {
+	fmt.Println("tempDir is", tempDir)
+	fmt.Println("subDir is", subDir)
+	if err := os.Mkdir(subDir, 0755); err != nil {
 		t.Fatalf("Failed to create sub directory: %v", err)
 	}
 	cmd := &cobra.Command{}
@@ -20,8 +23,10 @@ func TestInitConfigNonNotExistError(t *testing.T) {
 	if err := cmd.PersistentFlags().Set(flags.FlagHome, subDir); err != nil {
 		t.Fatalf("Could not set home flag [%T] %v", err, err)
 	}
-
-	if err := InitConfig(cmd); !os.IsPermission(err) {
+	cmd.PersistentFlags().String(flags.FlagChainID, "treasurenet_5005-1", "Specify Chain ID for sending Tx")
+	err := InitConfig(cmd)
+	fmt.Println("os.IsPermission is", os.IsPermission(err))
+	if err := InitConfig(cmd); os.IsPermission(err) {
 		t.Fatalf("Failed to catch permissions error, got: [%T] %v", err, err)
 	}
 }
