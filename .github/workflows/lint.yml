@@ -27,7 +27,7 @@ jobs:
           check-latest: true
 
       - uses: technote-space/get-diff-action@v6.1.2
-        id: git_diff
+        id: git_diff_long
         with:
           PATTERNS: |
             Makefile
@@ -35,7 +35,7 @@ jobs:
             .golangci.yml
 
       - name: run linting (long)
-        if: env.GIT_DIFF
+        if: steps.git_diff_long.outputs.diff
         id: lint_long
         run: |
           nix develop -c make lint
@@ -44,16 +44,16 @@ jobs:
 
       - uses: technote-space/get-diff-action@v6.1.2
         if: steps.lint_long.outcome == 'skipped'
+        id: git_diff_short
         with:
           PATTERNS: |
             **/*.go
             *.go
 
       - name: run linting (short)
-        if: steps.lint_long.outcome == 'skipped' && env.GIT_DIFF
+        if: steps.lint_long.outcome == 'skipped' && steps.git_diff_short.outputs.diff
         run: |
           nix develop -c make lint
         env:
-          GIT_DIFF: ${{ env.GIT_DIFF }}
           LINT_DIFF: 1
           NIX: 1
