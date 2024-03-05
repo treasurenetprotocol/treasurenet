@@ -15,13 +15,16 @@ Treasurenet proposes a solution for the critical lack of sustaining and tangible
 For prerequisites and detailed build instructions please read the [Installation](https://docs.treasurenet.io/docs/validators/quickStart/installation) instructions. Once the dependencies are installed, run:
 
 ```shell
-make install
+make build
 ```
 
 Or check out the latest [release](https://github.com/treasurenetprotocol/treasurenet/releases).
+
 ## Usage
 
 Our documentation is hosted in a separate repository and can be found at [docs.treasurenet.io](https://docs.treasurenet.io) . Head over there and check it out.
+
+[Treasurenet Chain - Legacy REST and gRPC Gateway docs](http://124.70.23.119:8282/#/)
 
 ## Contributing
 
