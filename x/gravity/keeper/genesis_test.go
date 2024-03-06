@@ -6,9 +6,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/treasurenetprotocol/treasurenet/x/gravity/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
+	"github.com/treasurenetprotocol/treasurenet/x/gravity/types"
 )
 
 // Tests that batches and transactions are preserved during chain restart
@@ -22,27 +22,25 @@ func TestBatchAndTxImportExport(t *testing.T) {
 	batchSize := 100
 	accAddresses := []string{ // Warning: this must match the length of ctrAddresses
 
-		"gravity1dg55rtevlfxh46w88yjpdd08sqhh5cc3z8yqu6",
-		"gravity164knshrzuuurf05qxf3q5ewpfnwzl4gj3t84vv",
-		"gravity193fw83ynn76328pty4yl7473vg9x86aly623wk",
-		"gravity1ahx7f8wyertuus9r20284ej0asrs085ceqtfnm",
-		"gravity1ees2tqhhhm9ahlhceh2zdguww9lqn2ckcxpllh",
+		"treasurenet102e577f29shw9ngdp462ml3nj44mdrg4hy2y07",
+		"treasurenet1v2xyllxrwd60mfwa6aj6r8fa4xz4235zgd4z75",
+		"treasurenet10aays6dtcx7tlwvqrngc06a2rp7jy0cvqfw5vq",
+		"treasurenet1sa74q750nrs3729zmd489ae7a3527997au6mtv",
+		"treasurenet158ckg6g8l8zy4jckj4hc4tjzx8skeeye4de0k2",
 	}
 	ethAddresses := []string{
-		"0xd041c41EA1bf0F006ADBb6d2c9ef9D425dE5eaD7",
-		"0xd041c41EA1bf0F006ADBb6d2c9ef9D425dE5eaD8",
-		"0xd041c41EA1bf0F006ADBb6d2c9ef9D425dE5eaD9",
-		"0xd041c41EA1bf0F006ADBb6d2c9ef9D425dE5eaD0",
-		"0xd041c41EA1bf0F006ADBb6d2c9ef9D425dE5eaD1",
-		"0xd041c41EA1bf0F006ADBb6d2c9ef9D425dE5eaD2",
-		"0xd041c41EA1bf0F006ADBb6d2c9ef9D425dE5eaD3",
+		"0xbcbA9257D4419bcEd1C6E6F06f8f8Beba471B016",
+		"0x0F528A4Be8720D2BF71f5A4EbC138e06eCBa289f",
+		"0x19Ae0a2f2F47F818017e0EcB3163C04D18b97B65",
+		"0x1FBae33071b1CA691B6919fdD138770824Fe676D",
+		"0xa09C955532f00b470cF64672232f81A0AbE2A69e",
 	}
 	ctrAddresses := []string{ // Warning: this must match the length of accAddresses
-		"0x429881672B9AE42b8EbA0E26cD9C73711b891Ca5",
-		"0x429881672b9AE42b8eBA0e26cd9c73711b891ca6",
-		"0x429881672b9aE42b8eba0e26cD9c73711B891Ca7",
-		"0x429881672B9AE42b8EbA0E26cD9C73711b891Ca8",
-		"0x429881672B9AE42b8EbA0E26cD9C73711b891Ca9",
+		"0x7Ab34f792A2C2eE2cD0D0d74aDFe33956Bb68d15",
+		"0x628C4FFcC37374Fda5DDd765a19d3Da985554682",
+		"0x7F7A4869Abc1bCbFb9801cD187ebaA187D223F0C",
+		"0x877d507a8f98E11f28A2DB6a72f73Eec68AF14be",
+		"0xa1F1646907f9c44Acb16956f8AaE4231E16ce499",
 	}
 
 	// SETUP ACCOUNTS

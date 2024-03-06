@@ -158,7 +158,7 @@ func TestGetSetLastEventNonceByValidator(t *testing.T) {
 	k := input.GravityKeeper
 	ctx := input.Context
 
-	valAddrString := "gravity1ahx7f8wyertuus9r20284ej0asrs085ceqtfnm"
+	valAddrString := "treasurenet102e577f29shw9ngdp462ml3nj44mdrg4hy2y07"
 	valAccAddress, _ := sdktypes.AccAddressFromBech32(valAddrString)
 	valAccount := k.accountKeeper.NewAccountWithAddress(ctx, valAccAddress)
 	require.NotNil(t, valAccount)

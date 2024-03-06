@@ -223,7 +223,7 @@ var (
 	TestingGravityParams = types.Params{
 		GravityId:                    "testgravityid",
 		ContractSourceHash:           "62328f7bc12efb28f86111d08c29b39285680a906ea0e524e0209d6f6657b713",
-		BridgeEthereumAddress:        "0x8858eeb3dfffa017d4bce9801d340d36cf895ccf",
+		BridgeEthereumAddress:        "0xa1F1646907f9c44Acb16956f8AaE4231E16ce499",
 		BridgeChainId:                11,
 		SignedValsetsWindow:          10,
 		SignedBatchesWindow:          10,

@@ -59,15 +59,15 @@ func initializeTestingVars(t *testing.T) *testingVars {
 func addDenomToERC20Relation(tv *testingVars) {
 	tv.input.BankKeeper.SetDenomMetaData(tv.ctx, banktypes.Metadata{
 		Description: "The native staking token of the Cosmos Gravity Bridge",
-		Name:        "Graviton",
-		Symbol:      "GRAV",
+		Name:        "Stake Token",
+		Symbol:      "STEAK",
 		DenomUnits: []*banktypes.DenomUnit{
-			{Denom: "ugraviton", Exponent: uint32(0), Aliases: []string{"micrograviton"}},
-			{Denom: "mgraviton", Exponent: uint32(3), Aliases: []string{"milligraviton"}},
-			{Denom: "graviton", Exponent: uint32(6), Aliases: []string{}},
+			{Denom: "aunit", Exponent: uint32(0), Aliases: []string{"microunit"}},
+			// {Denom: "mgraviton", Exponent: uint32(3), Aliases: []string{"milligraviton"}},
+			{Denom: "unit", Exponent: uint32(18), Aliases: []string{}},
 		},
-		Base:    "ugraviton",
-		Display: "graviton",
+		Base:    "aunit",
+		Display: "unit",
 	})
 
 	var (
@@ -114,7 +114,7 @@ func addDenomToERC20Relation(tv *testingVars) {
 
 func lockCoinsInModule(tv *testingVars) {
 	var (
-		userCosmosAddr, err           = sdk.AccAddressFromBech32("treasurenet1990z7dqsvh8gthw9pa5sn4wuy2xrsd80lcx6lv")
+		userCosmosAddr, err           = sdk.AccAddressFromBech32("treasurenet10aays6dtcx7tlwvqrngc06a2rp7jy0cvqfw5vq")
 		denom                         = "aunit"
 		startingCoinAmount  sdk.Int   = sdk.NewIntFromUint64(150)
 		sendAmount          sdk.Int   = sdk.NewIntFromUint64(50)
@@ -157,9 +157,9 @@ func lockCoinsInModule(tv *testingVars) {
 
 func acceptDepositEvent(tv *testingVars) {
 	var (
-		myCosmosAddr, err = sdk.AccAddressFromBech32("treasurenet16ahjkfqxpp6lvfy9fpfnfjg39xr96qet0l08hu")
+		myCosmosAddr, err = sdk.AccAddressFromBech32("treasurenet1sa74q750nrs3729zmd489ae7a3527997au6mtv")
 		myNonce           = uint64(3)
-		anyETHAddr        = "0xf9613b532673Cc223aBa451dFA8539B87e1F666D"
+		anyETHAddr        = "0x877d507a8f98E11f28A2DB6a72f73Eec68AF14be"
 	)
 	require.NoError(tv.t, err)
 

@@ -487,7 +487,7 @@ func TestBatchTimeout(t *testing.T) {
 	params := pk.GetParams(ctx)
 	var (
 		now                 = time.Now().UTC()
-		mySender, e1        = sdk.AccAddressFromBech32("treasurenet1ahx7f8wyertuus9r20284ej0asrs085ceqtfnm")
+		mySender, e1        = sdk.AccAddressFromBech32("treasurenet158ckg6g8l8zy4jckj4hc4tjzx8skeeye4de0k2")
 		myReceiver          = "0xd041c41EA1bf0F006ADBb6d2c9ef9D425dE5eaD7"
 		myTokenContractAddr = "0x429881672B9AE42b8EbA0E26cD9C73711b891Ca5" // Pickle
 		token, e2           = types.NewInternalERC20Token(sdk.NewInt(99999), myTokenContractAddr)
