@@ -3,12 +3,12 @@ package keeper
 import (
 	"testing"
 
-	"github.com/treasurenetprotocol/treasurenet/x/gravity/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	disttypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/treasurenetprotocol/treasurenet/x/gravity/types"
 )
 
 // nolint: exhaustruct
@@ -18,7 +18,7 @@ func TestAirdropProposal(t *testing.T) {
 
 	ctx := input.Context
 
-	testAddr := []string{"gravity1ahx7f8wyertuus9r20284ej0asrs085ceqtfnm", "gravity1n38caqg63jf9hefycw3yp95fpkpk669nvekqy2", "gravity1qz4zm5s0vwfuu46lg3q0vmnwsukd8e9yfmcgjj"}
+	testAddr := []string{"treasurenet10aays6dtcx7tlwvqrngc06a2rp7jy0cvqfw5vq", "treasurenet1sa74q750nrs3729zmd489ae7a3527997au6mtv", "treasurenet158ckg6g8l8zy4jckj4hc4tjzx8skeeye4de0k2"}
 
 	parsedRecipients := make([]sdk.AccAddress, len(testAddr))
 	for i, v := range testAddr {

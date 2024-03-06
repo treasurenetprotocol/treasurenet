@@ -19,7 +19,7 @@ func TestAddToOutgoingPool(t *testing.T) {
 
 	ctx := input.Context
 	var (
-		mySender, _         = sdk.AccAddressFromBech32("gravity1ahx7f8wyertuus9r20284ej0asrs085ceqtfnm")
+		mySender, _         = sdk.AccAddressFromBech32("treasurenet158ckg6g8l8zy4jckj4hc4tjzx8skeeye4de0k2")
 		myReceiver          = "0xd041c41EA1bf0F006ADBb6d2c9ef9D425dE5eaD7"
 		myTokenContractAddr = "0x429881672B9AE42b8EbA0E26cD9C73711b891Ca5"
 	)
@@ -110,7 +110,7 @@ func TestAddToOutgoingPoolEdgeCases(t *testing.T) {
 
 	ctx := input.Context
 	var (
-		mySender, _         = sdk.AccAddressFromBech32("gravity1ahx7f8wyertuus9r20284ej0asrs085ceqtfnm")
+		mySender, _         = sdk.AccAddressFromBech32("treasurenet158ckg6g8l8zy4jckj4hc4tjzx8skeeye4de0k2")
 		myReceiver          = "0xd041c41EA1bf0F006ADBb6d2c9ef9D425dE5eaD7"
 		myTokenContractAddr = "0x429881672B9AE42b8EbA0E26cD9C73711b891Ca5"
 	)
@@ -192,7 +192,7 @@ func TestTotalBatchFeeInPool(t *testing.T) {
 
 	// token1
 	var (
-		mySender, _         = sdk.AccAddressFromBech32("gravity1ahx7f8wyertuus9r20284ej0asrs085ceqtfnm")
+		mySender, _         = sdk.AccAddressFromBech32("treasurenet158ckg6g8l8zy4jckj4hc4tjzx8skeeye4de0k2")
 		myReceiver          = "0xd041c41EA1bf0F006ADBb6d2c9ef9D425dE5eaD7"
 		myTokenContractAddr = "0x429881672B9AE42b8EbA0E26cD9C73711b891Ca5"
 	)
@@ -276,7 +276,7 @@ func TestGetBatchFeeByTokenType(t *testing.T) {
 
 	// token1
 	var (
-		mySender1, _                        = sdk.AccAddressFromBech32("gravity1ahx7f8wyertuus9r20284ej0asrs085ceqtfnm")
+		mySender1, _                        = sdk.AccAddressFromBech32("treasurenet158ckg6g8l8zy4jckj4hc4tjzx8skeeye4de0k2")
 		mySender2            sdk.AccAddress = []byte("gravity1ahx7f8wyertus")
 		mySender3            sdk.AccAddress = []byte("gravity1ahx7f8wyertut")
 		myReceiver                          = "0xd041c41EA1bf0F006ADBb6d2c9ef9D425dE5eaD7"
@@ -391,7 +391,7 @@ func TestRemoveFromOutgoingPoolAndRefund(t *testing.T) {
 
 	ctx := input.Context
 	var (
-		mySender, _         = sdk.AccAddressFromBech32("gravity1ahx7f8wyertuus9r20284ej0asrs085ceqtfnm")
+		mySender, _         = sdk.AccAddressFromBech32("treasurenet158ckg6g8l8zy4jckj4hc4tjzx8skeeye4de0k2")
 		myReceiver          = "0xd041c41EA1bf0F006ADBb6d2c9ef9D425dE5eaD7"
 		myTokenContractAddr = "0x429881672B9AE42b8EbA0E26cD9C73711b891Ca5"
 		myTokenDenom        = "gravity" + myTokenContractAddr
@@ -457,7 +457,7 @@ func TestRemoveFromOutgoingPoolAndRefundCosmosOriginated(t *testing.T) {
 	ctx := input.Context
 
 	var (
-		mySender, _         = sdk.AccAddressFromBech32("gravity1ahx7f8wyertuus9r20284ej0asrs085ceqtfnm")
+		mySender, _         = sdk.AccAddressFromBech32("treasurenet158ckg6g8l8zy4jckj4hc4tjzx8skeeye4de0k2")
 		myReceiver          = "0xd041c41EA1bf0F006ADBb6d2c9ef9D425dE5eaD7"
 		myTokenContractAddr = "0x429881672B9AE42b8EbA0E26cD9C73711b891Ca5"
 		myTokenDenom        = "grav"
@@ -554,7 +554,7 @@ func TestRefundInconsistentTx(t *testing.T) {
 
 	ctx := input.Context
 	var (
-		mySender, _            = sdk.AccAddressFromBech32("gravity1ahx7f8wyertuus9r20284ej0asrs085ceqtfnm")
+		mySender, _            = sdk.AccAddressFromBech32("treasurenet158ckg6g8l8zy4jckj4hc4tjzx8skeeye4de0k2")
 		myReceiver, _          = types.NewEthAddress("0xd041c41EA1bf0F006ADBb6d2c9ef9D425dE5eaD7")
 		myTokenContractAddr, _ = types.NewEthAddress("0x429881672B9AE42b8EbA0E26cD9C73711b891Ca5")
 	)
@@ -592,7 +592,7 @@ func TestRefundNonexistentTx(t *testing.T) {
 
 	ctx := input.Context
 	var (
-		mySender, _ = sdk.AccAddressFromBech32("gravity1ahx7f8wyertuus9r20284ej0asrs085ceqtfnm")
+		mySender, _ = sdk.AccAddressFromBech32("treasurenet158ckg6g8l8zy4jckj4hc4tjzx8skeeye4de0k2")
 	)
 
 	//////// Refund a tx which never existed ////////
@@ -609,7 +609,7 @@ func TestRefundTwice(t *testing.T) {
 
 	ctx := input.Context
 	var (
-		mySender, _         = sdk.AccAddressFromBech32("gravity1ahx7f8wyertuus9r20284ej0asrs085ceqtfnm")
+		mySender, _         = sdk.AccAddressFromBech32("treasurenet158ckg6g8l8zy4jckj4hc4tjzx8skeeye4de0k2")
 		myReceiver          = "0xd041c41EA1bf0F006ADBb6d2c9ef9D425dE5eaD7"
 		myTokenContractAddr = "0x429881672B9AE42b8EbA0E26cD9C73711b891Ca5"
 	)
@@ -665,8 +665,8 @@ func TestGetUnbatchedTransactions(t *testing.T) {
 
 	// token1
 	var (
-		mySender1, _                        = sdk.AccAddressFromBech32("gravity1ahx7f8wyertuus9r20284ej0asrs085ceqtfnm")
-		mySender2            sdk.AccAddress = []byte("gravity1ahx7f8wyertus")
+		mySender1, _                        = sdk.AccAddressFromBech32("treasurenet158ckg6g8l8zy4jckj4hc4tjzx8skeeye4de0k2")
+		mySender2            sdk.AccAddress = []byte("treasurenet158ckg6g8l8zy4")
 		myReceiver                          = "0xd041c41EA1bf0F006ADBb6d2c9ef9D425dE5eaD7"
 		myTokenContractAddr1                = "0x429881672B9AE42b8EbA0E26cD9C73711b891Ca5"
 		myTokenContractAddr2                = "0x429881672b9AE42b8eBA0e26cd9c73711b891ca6"
@@ -813,8 +813,8 @@ func TestIterateUnbatchedTransactions(t *testing.T) {
 
 	// token1
 	var (
-		mySender1, _                        = sdk.AccAddressFromBech32("gravity1ahx7f8wyertuus9r20284ej0asrs085ceqtfnm")
-		mySender2            sdk.AccAddress = []byte("gravity1ahx7f8wyertus")
+		mySender1, _                        = sdk.AccAddressFromBech32("treasurenet158ckg6g8l8zy4jckj4hc4tjzx8skeeye4de0k2")
+		mySender2            sdk.AccAddress = []byte("treasurenet158ckg6g8l8zy4")
 		myReceiver                          = "0xd041c41EA1bf0F006ADBb6d2c9ef9D425dE5eaD7"
 		myTokenContractAddr1                = "0x429881672B9AE42b8EbA0E26cD9C73711b891Ca5"
 		myTokenContractAddr2                = "0x429881672b9AE42b8eBA0e26cd9c73711b891ca6"
@@ -935,7 +935,7 @@ func TestAddToOutgoingPoolExportGenesis(t *testing.T) {
 	ctx := input.Context
 	k := input.GravityKeeper
 	var (
-		mySender, _         = sdk.AccAddressFromBech32("gravity1ahx7f8wyertuus9r20284ej0asrs085ceqtfnm")
+		mySender, _         = sdk.AccAddressFromBech32("treasurenet158ckg6g8l8zy4jckj4hc4tjzx8skeeye4de0k2")
 		myReceiver          = "0xd041c41EA1bf0F006ADBb6d2c9ef9D425dE5eaD7"
 		myTokenContractAddr = "0x429881672B9AE42b8EbA0E26cD9C73711b891Ca5"
 	)

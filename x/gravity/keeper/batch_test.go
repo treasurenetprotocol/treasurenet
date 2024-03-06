@@ -21,7 +21,7 @@ func TestBatches(t *testing.T) {
 	ctx := input.Context
 	var (
 		now                     = time.Now().UTC()
-		mySender, e1            = sdk.AccAddressFromBech32("gravity1ahx7f8wyertuus9r20284ej0asrs085ceqtfnm")
+		mySender, e1            = sdk.AccAddressFromBech32("treasurenet102e577f29shw9ngdp462ml3nj44mdrg4hy2y07")
 		myReceiver, e2          = types.NewEthAddress("0xd041c41EA1bf0F006ADBb6d2c9ef9D425dE5eaD7")
 		myTokenContractAddr, e3 = types.NewEthAddress("0x429881672B9AE42b8EbA0E26cD9C73711b891Ca5") // Pickle
 		token, e4               = types.NewInternalERC20Token(sdk.NewInt(99999), myTokenContractAddr.GetAddress().Hex())
@@ -318,7 +318,7 @@ func TestBatchesFullCoins(t *testing.T) {
 	ctx := input.Context
 	var (
 		now                 = time.Now().UTC()
-		mySender, e1        = sdk.AccAddressFromBech32("gravity1ahx7f8wyertuus9r20284ej0asrs085ceqtfnm")
+		mySender, e1        = sdk.AccAddressFromBech32("treasurenet102e577f29shw9ngdp462ml3nj44mdrg4hy2y07")
 		myReceiver          = "0xd041c41EA1bf0F006ADBb6d2c9ef9D425dE5eaD7"
 		receiverAddr, e2    = types.NewEthAddress(myReceiver)
 		myTokenContractAddr = "0x429881672B9AE42b8EbA0E26cD9C73711b891Ca5"   // Pickle
@@ -534,7 +534,7 @@ func TestManyBatches(t *testing.T) {
 	ctx := input.Context
 	var (
 		now                = time.Now().UTC()
-		mySender, _        = sdk.AccAddressFromBech32("gravity1ahx7f8wyertuus9r20284ej0asrs085ceqtfnm")
+		mySender, _        = sdk.AccAddressFromBech32("treasurenet102e577f29shw9ngdp462ml3nj44mdrg4hy2y07")
 		myReceiver         = "0xd041c41EA1bf0F006ADBb6d2c9ef9D425dE5eaD7"
 		tokenContractAddr1 = "0x429881672B9AE42b8EbA0E26cD9C73711b891Ca5"
 		tokenContractAddr2 = "0xF815240800ddf3E0be80e0d848B13ecaa504BF37"
@@ -635,8 +635,8 @@ func TestPoolTxRefund(t *testing.T) {
 	ctx := input.Context
 	var (
 		now                 = time.Now().UTC()
-		mySender, e1        = sdk.AccAddressFromBech32("gravity1ahx7f8wyertuus9r20284ej0asrs085ceqtfnm")
-		notMySender, e2     = sdk.AccAddressFromBech32("gravity1ahx7f8wyertuus9r20284ej0asrs085case3km")
+		mySender, e1        = sdk.AccAddressFromBech32("treasurenet102e577f29shw9ngdp462ml3nj44mdrg4hy2y07")
+		notMySender, e2     = sdk.AccAddressFromBech32("treasurenet1n0paayv2g40q7hl8g9g4l2v0r763xpsz0nzqs0")
 		myReceiver          = "0xd041c41EA1bf0F006ADBb6d2c9ef9D425dE5eaD7"
 		myTokenContractAddr = "0x429881672B9AE42b8EbA0E26cD9C73711b891Ca5" // Pickle
 		token, e3           = types.NewInternalERC20Token(sdk.NewInt(414), myTokenContractAddr)
@@ -719,7 +719,7 @@ func TestBatchesNotCreatedWhenBridgePaused(t *testing.T) {
 
 	var (
 		now                     = time.Now().UTC()
-		mySender, e1            = sdk.AccAddressFromBech32("treasurenet1ahx7f8wyertuus9r20284ej0asrs085ceqtfnm")
+		mySender, e1            = sdk.AccAddressFromBech32("treasurenet102e577f29shw9ngdp462ml3nj44mdrg4hy2y07")
 		myReceiver, e2          = types.NewEthAddress("0xd041c41EA1bf0F006ADBb6d2c9ef9D425dE5eaD7")
 		myTokenContractAddr, e3 = types.NewEthAddress("0x429881672B9AE42b8EbA0E26cD9C73711b891Ca5") // Pickle
 		token, e4               = types.NewInternalERC20Token(sdk.NewInt(99999), myTokenContractAddr.GetAddress().Hex())
@@ -794,7 +794,7 @@ func TestEthereumBlacklistBatches(t *testing.T) {
 	ctx := input.Context
 	var (
 		now                     = time.Now().UTC()
-		mySender, e1            = sdk.AccAddressFromBech32("treasurenet1ahx7f8wyertuus9r20284ej0asrs085ceqtfnm")
+		mySender, e1            = sdk.AccAddressFromBech32("treasurenet102e577f29shw9ngdp462ml3nj44mdrg4hy2y07")
 		myReceiver, e2          = types.NewEthAddress("0xd041c41EA1bf0F006ADBb6d2c9ef9D425dE5eaD7")
 		blacklistedReceiver, e3 = types.NewEthAddress("0x4d16b9E4a27c3313440923fEfCd013178149A5bD")
 		myTokenContractAddr, e4 = types.NewEthAddress("0x429881672B9AE42b8EbA0E26cD9C73711b891Ca5") // Pickle
@@ -919,7 +919,7 @@ func TestBatchConfirms(t *testing.T) {
 	ctx := input.Context
 	var (
 		now                     = time.Now().UTC()
-		mySender, e1            = sdk.AccAddressFromBech32("treasurenet1ahx7f8wyertuus9r20284ej0asrs085ceqtfnm")
+		mySender, e1            = sdk.AccAddressFromBech32("treasurenet102e577f29shw9ngdp462ml3nj44mdrg4hy2y07")
 		myReceiver, e2          = types.NewEthAddress("0xd041c41EA1bf0F006ADBb6d2c9ef9D425dE5eaD7")
 		myTokenContractAddr, e3 = types.NewEthAddress("0x429881672B9AE42b8EbA0E26cD9C73711b891Ca5") // Pickle
 		token, e4               = types.NewInternalERC20Token(sdk.NewInt(1000000), myTokenContractAddr.GetAddress().Hex())
