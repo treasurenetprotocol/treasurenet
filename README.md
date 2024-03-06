@@ -15,10 +15,11 @@ Treasurenet Protocol offers a remedy for the significant shortfall of enduring a
 For prerequisites and detailed build instructions please read the [Installation](https://wiki.treasurenet.io/docs/For-Validators/quickStart/) instructions. Once the dependencies are installed, run:
 
 ```shell
-make install
+make build
 ```
 
 Or check out the latest [release](https://github.com/treasurenetprotocol/treasurenet/releases).
+
 ## Usage
 
 Our documentation is hosted in a separate repository and can be found at [here](https://wiki.treasurenet.io).
@@ -31,6 +32,8 @@ TBA
 Treasurenet Protocol is licensed under GNU Lesser General Public License v3.0. See [`LICENSE`](LICENSE) file for the terms and conditions.
 
 Treasurenet Protocl includes third-party open-source code. In general, a source subtree with a LICENSE or COPYRIGHT file is from a third party, and our modifications thereto are licensed under the same third-party open source license.
+
+[Treasurenet Chain - Legacy REST and gRPC Gateway docs](http://124.70.23.119:8282/#/)
 
 ## Contributing
 
