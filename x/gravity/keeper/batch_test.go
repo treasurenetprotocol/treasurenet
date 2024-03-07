@@ -20,14 +20,17 @@ func TestBatches(t *testing.T) {
 
 	ctx := input.Context
 	var (
-		now                    = time.Now().UTC()
-		mySender, _            = sdk.AccAddressFromBech32("gravity1ahx7f8wyertuus9r20284ej0asrs085ceqtfnm")
-		myReceiver, _          = types.NewEthAddress("0xd041c41EA1bf0F006ADBb6d2c9ef9D425dE5eaD7")
-		myTokenContractAddr, _ = types.NewEthAddress("0x429881672B9AE42b8EbA0E26cD9C73711b891Ca5") // Pickle
-		token, err             = types.NewInternalERC20Token(sdk.NewInt(99999), myTokenContractAddr.GetAddress().Hex())
-		allVouchers            = sdk.NewCoins(token.GravityCoin())
+		now                     = time.Now().UTC()
+		mySender, e1            = sdk.AccAddressFromBech32("treasurenet102e577f29shw9ngdp462ml3nj44mdrg4hy2y07")
+		myReceiver, e2          = types.NewEthAddress("0xd041c41EA1bf0F006ADBb6d2c9ef9D425dE5eaD7")
+		myTokenContractAddr, e3 = types.NewEthAddress("0x429881672B9AE42b8EbA0E26cD9C73711b891Ca5") // Pickle
+		token, e4               = types.NewInternalERC20Token(sdk.NewInt(99999), myTokenContractAddr.GetAddress().Hex())
+		allVouchers             = sdk.NewCoins(token.GravityCoin())
 	)
-	require.NoError(t, err)
+	require.NoError(t, e1)
+	require.NoError(t, e2)
+	require.NoError(t, e3)
+	require.NoError(t, e4)
 
 	// mint some voucher first
 	require.NoError(t, input.BankKeeper.MintCoins(ctx, types.ModuleName, allVouchers))
@@ -315,16 +318,18 @@ func TestBatchesFullCoins(t *testing.T) {
 	ctx := input.Context
 	var (
 		now                 = time.Now().UTC()
-		mySender, _         = sdk.AccAddressFromBech32("gravity1ahx7f8wyertuus9r20284ej0asrs085ceqtfnm")
+		mySender, e1        = sdk.AccAddressFromBech32("treasurenet102e577f29shw9ngdp462ml3nj44mdrg4hy2y07")
 		myReceiver          = "0xd041c41EA1bf0F006ADBb6d2c9ef9D425dE5eaD7"
-		receiverAddr, _     = types.NewEthAddress(myReceiver)
+		receiverAddr, e2    = types.NewEthAddress(myReceiver)
 		myTokenContractAddr = "0x429881672B9AE42b8EbA0E26cD9C73711b891Ca5"   // Pickle
 		totalCoins, _       = sdk.NewIntFromString("1500000000000000000000") // 1,500 ETH worth
 		oneEth, _           = sdk.NewIntFromString("1000000000000000000")
-		token, err          = types.NewInternalERC20Token(totalCoins, myTokenContractAddr)
+		token, e3           = types.NewInternalERC20Token(totalCoins, myTokenContractAddr)
 		allVouchers         = sdk.NewCoins(token.GravityCoin())
 	)
-	require.NoError(t, err)
+	require.NoError(t, e1)
+	require.NoError(t, e2)
+	require.NoError(t, e3)
 	tokenContract, err := types.NewEthAddress(myTokenContractAddr)
 	require.NoError(t, err)
 
@@ -529,7 +534,7 @@ func TestManyBatches(t *testing.T) {
 	ctx := input.Context
 	var (
 		now                = time.Now().UTC()
-		mySender, _        = sdk.AccAddressFromBech32("gravity1ahx7f8wyertuus9r20284ej0asrs085ceqtfnm")
+		mySender, _        = sdk.AccAddressFromBech32("treasurenet102e577f29shw9ngdp462ml3nj44mdrg4hy2y07")
 		myReceiver         = "0xd041c41EA1bf0F006ADBb6d2c9ef9D425dE5eaD7"
 		tokenContractAddr1 = "0x429881672B9AE42b8EbA0E26cD9C73711b891Ca5"
 		tokenContractAddr2 = "0xF815240800ddf3E0be80e0d848B13ecaa504BF37"
@@ -630,17 +635,19 @@ func TestPoolTxRefund(t *testing.T) {
 	ctx := input.Context
 	var (
 		now                 = time.Now().UTC()
-		mySender, _         = sdk.AccAddressFromBech32("gravity1ahx7f8wyertuus9r20284ej0asrs085ceqtfnm")
-		notMySender, _      = sdk.AccAddressFromBech32("gravity1ahx7f8wyertuus9r20284ej0asrs085case3km")
+		mySender, e1        = sdk.AccAddressFromBech32("treasurenet102e577f29shw9ngdp462ml3nj44mdrg4hy2y07")
+		notMySender, e2     = sdk.AccAddressFromBech32("treasurenet1n0paayv2g40q7hl8g9g4l2v0r763xpsz0nzqs0")
 		myReceiver          = "0xd041c41EA1bf0F006ADBb6d2c9ef9D425dE5eaD7"
 		myTokenContractAddr = "0x429881672B9AE42b8EbA0E26cD9C73711b891Ca5" // Pickle
-		token, err          = types.NewInternalERC20Token(sdk.NewInt(414), myTokenContractAddr)
+		token, e3           = types.NewInternalERC20Token(sdk.NewInt(414), myTokenContractAddr)
 		allVouchers         = sdk.NewCoins(token.GravityCoin())
-		denomToken, dErr    = types.NewInternalERC20Token(sdk.NewInt(1), myTokenContractAddr)
+		denomToken, e4      = types.NewInternalERC20Token(sdk.NewInt(1), myTokenContractAddr)
 		myDenom             = denomToken.GravityCoin().Denom
 	)
-	require.NoError(t, err)
-	require.NoError(t, dErr)
+	require.NoError(t, e1)
+	require.NoError(t, e2)
+	require.NoError(t, e3)
+	require.NoError(t, e4)
 	contract, err := types.NewEthAddress(myTokenContractAddr)
 	require.NoError(t, err)
 	receiver, err := types.NewEthAddress(myReceiver)
@@ -711,14 +718,17 @@ func TestBatchesNotCreatedWhenBridgePaused(t *testing.T) {
 	input.GravityKeeper.SetParams(ctx, params)
 
 	var (
-		now                    = time.Now().UTC()
-		mySender, _            = sdk.AccAddressFromBech32("gravity1ahx7f8wyertuus9r20284ej0asrs085ceqtfnm")
-		myReceiver, _          = types.NewEthAddress("0xd041c41EA1bf0F006ADBb6d2c9ef9D425dE5eaD7")
-		myTokenContractAddr, _ = types.NewEthAddress("0x429881672B9AE42b8EbA0E26cD9C73711b891Ca5") // Pickle
-		token, err             = types.NewInternalERC20Token(sdk.NewInt(99999), myTokenContractAddr.GetAddress().Hex())
-		allVouchers            = sdk.NewCoins(token.GravityCoin())
+		now                     = time.Now().UTC()
+		mySender, e1            = sdk.AccAddressFromBech32("treasurenet102e577f29shw9ngdp462ml3nj44mdrg4hy2y07")
+		myReceiver, e2          = types.NewEthAddress("0xd041c41EA1bf0F006ADBb6d2c9ef9D425dE5eaD7")
+		myTokenContractAddr, e3 = types.NewEthAddress("0x429881672B9AE42b8EbA0E26cD9C73711b891Ca5") // Pickle
+		token, e4               = types.NewInternalERC20Token(sdk.NewInt(99999), myTokenContractAddr.GetAddress().Hex())
+		allVouchers             = sdk.NewCoins(token.GravityCoin())
 	)
-	require.NoError(t, err)
+	require.NoError(t, e1)
+	require.NoError(t, e2)
+	require.NoError(t, e3)
+	require.NoError(t, e4)
 
 	// mint some voucher first
 	require.NoError(t, input.BankKeeper.MintCoins(ctx, types.ModuleName, allVouchers))
@@ -752,7 +762,7 @@ func TestBatchesNotCreatedWhenBridgePaused(t *testing.T) {
 	ctx = ctx.WithBlockTime(now)
 
 	// tx batch size is 2, so that some of them stay behind
-	_, err = input.GravityKeeper.BuildOutgoingTXBatch(ctx, *myTokenContractAddr, 2)
+	_, err := input.GravityKeeper.BuildOutgoingTXBatch(ctx, *myTokenContractAddr, 2)
 	require.Error(t, err)
 
 	// then batch is persisted
@@ -783,15 +793,19 @@ func TestEthereumBlacklistBatches(t *testing.T) {
 
 	ctx := input.Context
 	var (
-		now                    = time.Now().UTC()
-		mySender, _            = sdk.AccAddressFromBech32("gravity1ahx7f8wyertuus9r20284ej0asrs085ceqtfnm")
-		myReceiver, _          = types.NewEthAddress("0xd041c41EA1bf0F006ADBb6d2c9ef9D425dE5eaD7")
-		blacklistedReceiver, _ = types.NewEthAddress("0x4d16b9E4a27c3313440923fEfCd013178149A5bD")
-		myTokenContractAddr, _ = types.NewEthAddress("0x429881672B9AE42b8EbA0E26cD9C73711b891Ca5") // Pickle
-		token, err             = types.NewInternalERC20Token(sdk.NewInt(99999), myTokenContractAddr.GetAddress().Hex())
-		allVouchers            = sdk.NewCoins(token.GravityCoin())
+		now                     = time.Now().UTC()
+		mySender, e1            = sdk.AccAddressFromBech32("treasurenet102e577f29shw9ngdp462ml3nj44mdrg4hy2y07")
+		myReceiver, e2          = types.NewEthAddress("0xd041c41EA1bf0F006ADBb6d2c9ef9D425dE5eaD7")
+		blacklistedReceiver, e3 = types.NewEthAddress("0x4d16b9E4a27c3313440923fEfCd013178149A5bD")
+		myTokenContractAddr, e4 = types.NewEthAddress("0x429881672B9AE42b8EbA0E26cD9C73711b891Ca5") // Pickle
+		token, e5               = types.NewInternalERC20Token(sdk.NewInt(99999), myTokenContractAddr.GetAddress().Hex())
+		allVouchers             = sdk.NewCoins(token.GravityCoin())
 	)
-	require.NoError(t, err)
+	require.NoError(t, e1)
+	require.NoError(t, e2)
+	require.NoError(t, e3)
+	require.NoError(t, e4)
+	require.NoError(t, e5)
 
 	// add the blacklisted address to the blacklist
 	params := input.GravityKeeper.GetParams(ctx)
@@ -904,14 +918,17 @@ func TestBatchConfirms(t *testing.T) {
 	input := CreateTestEnv(t)
 	ctx := input.Context
 	var (
-		now                    = time.Now().UTC()
-		mySender, _            = sdk.AccAddressFromBech32("gravity1ahx7f8wyertuus9r20284ej0asrs085ceqtfnm")
-		myReceiver, _          = types.NewEthAddress("0xd041c41EA1bf0F006ADBb6d2c9ef9D425dE5eaD7")
-		myTokenContractAddr, _ = types.NewEthAddress("0x429881672B9AE42b8EbA0E26cD9C73711b891Ca5") // Pickle
-		token, err             = types.NewInternalERC20Token(sdk.NewInt(1000000), myTokenContractAddr.GetAddress().Hex())
-		allVouchers            = sdk.NewCoins(token.GravityCoin())
+		now                     = time.Now().UTC()
+		mySender, e1            = sdk.AccAddressFromBech32("treasurenet102e577f29shw9ngdp462ml3nj44mdrg4hy2y07")
+		myReceiver, e2          = types.NewEthAddress("0xd041c41EA1bf0F006ADBb6d2c9ef9D425dE5eaD7")
+		myTokenContractAddr, e3 = types.NewEthAddress("0x429881672B9AE42b8EbA0E26cD9C73711b891Ca5") // Pickle
+		token, e4               = types.NewInternalERC20Token(sdk.NewInt(1000000), myTokenContractAddr.GetAddress().Hex())
+		allVouchers             = sdk.NewCoins(token.GravityCoin())
 	)
-	require.NoError(t, err)
+	require.NoError(t, e1)
+	require.NoError(t, e2)
+	require.NoError(t, e3)
+	require.NoError(t, e4)
 
 	// mint some voucher first
 	require.NoError(t, input.BankKeeper.MintCoins(ctx, types.ModuleName, allVouchers))

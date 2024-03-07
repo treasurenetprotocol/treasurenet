@@ -15,10 +15,10 @@ IP_ADDR="0.0.0.0"
 MODE="rpc"
 
 KEY="mykey"
-CHAINID="ethermint_5005-1"
+CHAINID="treasurenet_5005-1"
 MONIKER="mymoniker"
 
-## default port prefixes for ethermintd
+## default port prefixes for treasurenetd
 NODE_P2P_PORT="2660"
 NODE_PORT="2663"
 NODE_RPC_PORT="2666"
