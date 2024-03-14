@@ -9,7 +9,7 @@ on:
     branches:
       - main
 env:
-  SOURCE_DIR: treasurenet/build/treasurenetd
+  SOURCE_DIR: treasurenet/treasurenet/build/treasurenetd
   TARGET_DIR: /home/tnuser
   GO_VERSION: 1.18
 jobs:
