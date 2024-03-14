@@ -1,7 +1,8 @@
 name: deploy
 on:
   pull_request:
-    types: [closed]
+    types:
+      - closed
     branches:
       - main
   push:
@@ -13,7 +14,6 @@ env:
   GO_VERSION: 1.18
 jobs:
   build:
-    if: github.event.pull_request.merged == true
     name: build
     runs-on: ubuntu-latest
     steps:
