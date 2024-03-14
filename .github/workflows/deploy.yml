@@ -1,8 +1,6 @@
 name: deploy
 on:
   pull_request:
-    paths:
-      - 'x/**'
     types: [closed]
     branches:
       - main
