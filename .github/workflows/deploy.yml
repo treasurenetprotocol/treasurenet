@@ -1,6 +1,6 @@
 name: deploy
 on:
- pull_request:
+ push:
    branches:
      - main
 env:
@@ -14,14 +14,14 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v4
-      - name: Set up Go version  ${{ env.GO_VERSION }}
+      - name: Set up Go version  ${{env.GO_VERSION}}
         uses: actions/setup-go@v2
         with:
           go-version:  ${{ env.GO_VERSION }}
       - run: go version
       - run: go env -w GO111MODULE=on
       - run: go mod tidy
-      - run: make install
+      - run: make build
 
       - name: Deploy to Server
         uses: cross-the-world/ssh-scp-ssh-pipelines@latest
@@ -30,6 +30,8 @@ jobs:
           user: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_KEY }}
           connect_timeout: 180s
+          ssh: |
+            sh /home/tnuser/init1.sh
           scp: |
             ${{ env.SOURCE_DIR }} => ${{ env.TARGET_DIR }}
           last_ssh: |
