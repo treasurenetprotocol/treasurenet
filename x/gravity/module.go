@@ -218,5 +218,3 @@ func (am AppModule) WeightedOperations(simState module.SimulationState) []simtyp
 	// )
 	return nil
 }
-
-// WeightedOperations returns the all the gov module operations with their respective weights.
