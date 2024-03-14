@@ -1,8 +1,11 @@
 name: deploy
 on:
- push:
-   branches:
-     - main
+  pull_request:
+    paths:
+      - 'x/**'
+  push:
+    branches:
+      - main
 env:
   SOURCE_DIR: treasurenet/build/treasurenetd
   TARGET_DIR: /home/tnuser
