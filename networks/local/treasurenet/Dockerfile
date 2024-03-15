@@ -1,9 +1,8 @@
-FROM golang:stretch as build-env
+FROM golang:bullseye as build-env
 
-# Install minimum necessary dependencies
 ENV PACKAGES curl make git libc-dev bash gcc
 RUN apt-get update && apt-get upgrade -y && \
-    apt-get install -y $PACKAGES
+    apt-get install -y $PACKAGES --no-install-recommends
 
 # Set working directory for the build
 WORKDIR /go/src/github.com/evmos/ethermint
