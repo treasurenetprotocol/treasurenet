@@ -3,7 +3,7 @@ version: "3"
 services:
   treasurenetdnode0:
     container_name: treasurenetdnode0
-    image: "treasurenetd/node"
+    image: "treasurenet/node:1.0"
     ports:
       - "26657:26657"
       - "8545:8545"
