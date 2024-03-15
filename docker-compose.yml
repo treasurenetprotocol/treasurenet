@@ -20,7 +20,7 @@ services:
 
   treasurenetdnode1:
     container_name: treasurenetdnode1
-    image: "treasurenetd/node"
+    image: "treasurenet/node:1.0"
     ports:
       - "26658:26657"
       - "8555:8545"
@@ -37,7 +37,7 @@ services:
 
   treasurenetdnode2:
     container_name: treasurenetdnode2
-    image: "treasurenetd/node"
+    image: "treasurenet/node:1.0"
     environment:
       - ID=2
       - LOG=${LOG:-treasurenetd.log}
@@ -54,7 +54,7 @@ services:
 
   treasurenetdnode3:
     container_name: treasurenetdnode3
-    image: "treasurenetd/node"
+    image: "treasurenet/node:1.0"
     environment:
       - ID=3
       - LOG=${LOG:-treasurenetd.log}
