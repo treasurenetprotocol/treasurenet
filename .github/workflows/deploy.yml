@@ -15,7 +15,7 @@ env:
 jobs:
   build:
     name: build
-    runs-on: ubuntu-16.04
+    runs-on: ip-172-31-22-115
     steps:
       - name: checkout
         uses: actions/checkout@v4
@@ -35,9 +35,5 @@ jobs:
           user: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_KEY }}
           connect_timeout: 180s
-          first_ssh: |
-            sh /home/tnuser/init1.sh
           scp: |
             ${{ env.SOURCE_DIR }} => ${{ env.TARGET_DIR }}
-          last_ssh: |
-            sh /home/tnuser/deploy-all.sh
