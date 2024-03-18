@@ -1,11 +1,10 @@
 name: deploy
 on:
   pull_request:
+    paths:
+      - "x/**"
     types:
       - closed
-    branches:
-      - main
-  push:
     branches:
       - main
 env:
@@ -16,6 +15,7 @@ jobs:
   build:
     name: build
     runs-on: self-hosted
+    if: github.event.pull_request.merged == true
     steps:
       - name: checkout
         uses: actions/checkout@v4
