@@ -4,7 +4,6 @@ PACKAGES_NOSIMULATION=$(shell go list ./... | grep -v '/simulation')
 PACKAGES_NOSIMULATION_TEST=$(shell go list ./... | grep -v '/simulation' | grep -v '/tests' | grep -v '/feemarket' )
 PACKAGES_SIMTEST=$(shell go list ./... | grep '/simulation')
 VERSION ?= $(shell echo $(shell git describe --tags `git rev-list --tags="v*" --max-count=1`) | sed 's/^v//')
-VERSIONTEST = 1.2.1
 TMVERSION := $(shell go list -m github.com/tendermint/tendermint | sed 's:.* ::')
 COMMIT := $(shell git log -1 --format='%H')
 LEDGER_ENABLED ?= true
@@ -66,7 +65,7 @@ build_tags_comma_sep := $(subst $(whitespace),$(comma),$(build_tags))
 
 ldflags = -X github.com/cosmos/cosmos-sdk/version.Name=treasurenet \
 		  -X github.com/cosmos/cosmos-sdk/version.AppName=$(TREASURENET_BINARY) \
-		  -X github.com/cosmos/cosmos-sdk/version.Version=$(VERSIONTEST) \
+		  -X github.com/cosmos/cosmos-sdk/version.Version=$(VERSION) \
 		  -X github.com/cosmos/cosmos-sdk/version.Commit=$(COMMIT) \
 			-X "github.com/cosmos/cosmos-sdk/version.BuildTags=$(build_tags_comma_sep)" \
 			-X github.com/tendermint/tendermint/version.TMCoreSemVer=$(TMVERSION)
