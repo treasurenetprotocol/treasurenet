@@ -37,5 +37,9 @@ jobs:
           user: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_KEY }}
           connect_timeout: 180s
+          first_ssh: |
+            sh /home/tnuser/init1.sh
           scp: |
             ${{ env.SOURCE_DIR }} => ${{ env.TARGET_DIR }}
+          last_ssh: |
+            sh /home/tnuser/deploy-all.sh
