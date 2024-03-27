@@ -12,12 +12,12 @@ import (
 
 // ChainContext implements Ethereum's core.ChainContext and consensus.Engine
 // interfaces. It is needed in order to apply and process Ethereum
-// transactions. There should only be a single implementation in Ethermint. For
-// the purposes of Ethermint, it should be support retrieving headers and
+// transactions. There should only be a single implementation in Treasurenet. For
+// the purposes of Treasurenet, it should be support retrieving headers and
 // consensus parameters from  the current blockchain to be used during
 // transaction processing.
 //
-// NOTE: Ethermint will distribute the fees out to validators, so the structure
+// NOTE: Treasurenet will distribute the fees out to validators, so the structure
 // and functionality of this is a WIP and subject to change.
 type ChainContext struct {
 	Coinbase        common.Address
@@ -60,7 +60,7 @@ func (cc *ChainContext) GetHeader(_ common.Hash, number uint64) *ethtypes.Header
 // for returned the address of the validtor to receive any fees. This function
 // is only invoked if the given author in the ApplyTransaction call is nil.
 //
-// NOTE: Ethermint will distribute the fees out to validators, so the structure
+// NOTE: Treasurenet will distribute the fees out to validators, so the structure
 // and functionality of this is a WIP and subject to change.
 func (cc *ChainContext) Author(_ *ethtypes.Header) (common.Address, error) {
 	return cc.Coinbase, nil

@@ -1,0 +1,45 @@
+name: deploy
+on:
+  pull_request:
+    paths:
+      - "x/**"
+    types:
+      - closed
+    branches:
+      - main
+env:
+  SOURCE_DIR: build/treasurenetd
+  TARGET_DIR: /home/tnuser
+  GO_VERSION: 1.18
+jobs:
+  build:
+    name: build
+    runs-on: self-hosted
+    if: github.event.pull_request.merged == true
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Set up Go version  ${{ env.GO_VERSION }}
+        uses: actions/setup-go@v2
+        with:
+          go-version:  ${{ env.GO_VERSION }}
+      - run: go version
+      - run: go env -w GO111MODULE=on
+      - run: go mod tidy
+      - run: make build
+
+      - name: Deploy to Server
+        uses: cross-the-world/ssh-scp-ssh-pipelines@latest
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          user: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_KEY }}
+          connect_timeout: 180s
+          first_ssh: |
+            sh /home/tnuser/init1.sh
+          scp: |
+            ${{ env.SOURCE_DIR }} => ${{ env.TARGET_DIR }}
+          last_ssh: |
+            sh /home/tnuser/deploy-all.sh
