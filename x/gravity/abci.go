@@ -514,7 +514,7 @@ func pruneAttestations(ctx sdk.Context, k keeper.Keeper) {
 		// This order is not important.
 		for _, att := range attmap[nonce] {
 			// delete all before the cutoff
-			if nonce < cutoff {
+			if nonce < cutoff || nonce == cutoff {
 				k.DeleteAttestation(ctx, att)
 			}
 		}
