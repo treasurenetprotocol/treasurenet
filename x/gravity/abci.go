@@ -540,4 +540,5 @@ func pruneAttestations(ctx sdk.Context, k keeper.Keeper) {
 			k.SetLastEventNonceByValidator(ctx, val, 0)
 		}
 	}
+	k.SetLastObservedEventNonce(ctx, 0)
 }
