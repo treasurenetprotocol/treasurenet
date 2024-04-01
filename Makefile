@@ -296,6 +296,8 @@ test:
 lint:
 	@@test -n "$$golangci-lint version | awk '$4 >= 1.42')"
 	golangci-lint run --out-format=tab -n
+run-integration-tests:
+	@nix-shell ./tests/integration_tests/shell.nix --run ./scripts/run-integration-tests.sh
 
 lint-py:
 	flake8 --show-source --count --statistics \
