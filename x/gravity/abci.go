@@ -501,12 +501,55 @@ func pruneAttestations(ctx sdk.Context, k keeper.Keeper) {
 	const eventsToKeep = 0
 	lastNonce := uint64(k.GetLastObservedEventNonce(ctx))
 
-	addr, _ := sdk.AccAddressFromBech32("treasurenet12sl76425hhc232rhz8fh0cumgtnnqwyjmz59qf")
-	validator, _ := k.GetOrchestratorValidator(ctx, addr)
-	lastEventNonce := k.GetLastEventNonceByValidator(ctx, validator.GetOperator())
-	fmt.Printf("lastEventNonce %v", lastEventNonce)
-	k.SetLastEventNonceByValidator(ctx, validator.GetOperator(), 0)
-	k.SetLastObservedEventNonce(ctx, 0)
+	addr1, _ := sdk.AccAddressFromBech32("treasurenet1nptva92v7jczqz5yxckljn6rrpg0j29wkvrxqv")
+	validator1, _ := k.GetOrchestratorValidator(ctx, addr1)
+	lastEventNonce1 := k.GetLastEventNonceByValidator(ctx, validator1.GetOperator())
+	fmt.Printf("lastEventNonce1 %v", lastEventNonce1)
+	k.SetLastEventNonceByValidator(ctx, validator1.GetOperator(), 0)
+	addr2, _ := sdk.AccAddressFromBech32("treasurenet179wrztvjkx7eqka0f4wmuavcvkynj33r7jywx0")
+	validator2, _ := k.GetOrchestratorValidator(ctx, addr2)
+	lastEventNonce2 := k.GetLastEventNonceByValidator(ctx, validator2.GetOperator())
+	fmt.Printf("lastEventNonce2 %v", lastEventNonce2)
+	k.SetLastEventNonceByValidator(ctx, validator2.GetOperator(), 0)
+	addr3, _ := sdk.AccAddressFromBech32("treasurenet1jz68cpsjqkstc2pdxlpkdfcw35uwp0uyxrgvac")
+	validator3, _ := k.GetOrchestratorValidator(ctx, addr3)
+	lastEventNonce3 := k.GetLastEventNonceByValidator(ctx, validator3.GetOperator())
+	fmt.Printf("lastEventNonce3 %v", lastEventNonce3)
+	k.SetLastEventNonceByValidator(ctx, validator3.GetOperator(), 0)
+	addr4, _ := sdk.AccAddressFromBech32("treasurenet1fa0srrtfmm0wvt04mmhwvzry0f0gttcekqqt39")
+	validator4, _ := k.GetOrchestratorValidator(ctx, addr4)
+	lastEventNonce4 := k.GetLastEventNonceByValidator(ctx, validator4.GetOperator())
+	fmt.Printf("lastEventNonce4 %v", lastEventNonce4)
+	k.SetLastEventNonceByValidator(ctx, validator4.GetOperator(), 0)
+	addr5, _ := sdk.AccAddressFromBech32("treasurenet1rrc6tv02rx9jqfncmyteghj35xv3d2yskgle0s")
+	validator5, _ := k.GetOrchestratorValidator(ctx, addr5)
+	lastEventNonce5 := k.GetLastEventNonceByValidator(ctx, validator5.GetOperator())
+	fmt.Printf("lastEventNonce5 %v", lastEventNonce5)
+	k.SetLastEventNonceByValidator(ctx, validator5.GetOperator(), 0)
+	addr6, _ := sdk.AccAddressFromBech32("treasurenet1rfanxd2agtt3a9xcpsgge5ad03hsfj4z0qd5zl")
+	validator6, _ := k.GetOrchestratorValidator(ctx, addr6)
+	lastEventNonce6 := k.GetLastEventNonceByValidator(ctx, validator6.GetOperator())
+	fmt.Printf("lastEventNonce6 %v", lastEventNonce6)
+	k.SetLastEventNonceByValidator(ctx, validator6.GetOperator(), 0)
+	addr7, _ := sdk.AccAddressFromBech32("treasurenet1gez03q60xkff4qa5w7ceckmnqemyxgftqx5tp0")
+	validator7, _ := k.GetOrchestratorValidator(ctx, addr7)
+	lastEventNonce7 := k.GetLastEventNonceByValidator(ctx, validator7.GetOperator())
+	fmt.Printf("lastEventNonce7 %v", lastEventNonce7)
+	k.SetLastEventNonceByValidator(ctx, validator7.GetOperator(), 0)
+	addr8, _ := sdk.AccAddressFromBech32("treasurenet1a9q070tme8yz8rtslyj7eqx7feu8yfj7q8rh45")
+	validator8, _ := k.GetOrchestratorValidator(ctx, addr8)
+	lastEventNonce8 := k.GetLastEventNonceByValidator(ctx, validator8.GetOperator())
+	fmt.Printf("lastEventNonce8 %v", lastEventNonce8)
+	k.SetLastEventNonceByValidator(ctx, validator8.GetOperator(), 0)
+	addr9, _ := sdk.AccAddressFromBech32("treasurenet1hxz67nw5qfgyyddyvzkytfwfuyp7jvz6y0alk4")
+	validator9, _ := k.GetOrchestratorValidator(ctx, addr9)
+	lastEventNonce9 := k.GetLastEventNonceByValidator(ctx, validator9.GetOperator())
+	fmt.Printf("lastEventNonce9 %v", lastEventNonce9)
+	k.SetLastEventNonceByValidator(ctx, validator9.GetOperator(), 0)
+	// validator, _ := k.GetOrchestratorValidator(ctx, addr)
+	// lastEventNonce := k.GetLastEventNonceByValidator(ctx, validator.GetOperator())
+	// fmt.Printf("lastEventNonce %v", lastEventNonce)
+	// k.SetLastEventNonceByValidator(ctx, validator.GetOperator(), 0)
 
 	var cutoff uint64
 	if lastNonce <= eventsToKeep {
@@ -529,25 +572,25 @@ func pruneAttestations(ctx sdk.Context, k keeper.Keeper) {
 			}
 		}
 	}
-
+	k.SetLastObservedEventNonce(ctx, 0)
 	/*
 	  When switching to an Ethereum network, Attention and LastEventNonceByValidator need to be reset to 0
 	*/
 	// void and setMember are necessary for sets to work
-	type void struct{}
-	numValidators := len(k.StakingKeeper.GetBondedValidatorsByPower(ctx))
-	// Initialize a Set of validators
-	affectedValidatorsSet := make(map[string]void, numValidators)
-	// Reset the last event nonce for all validators affected by history deletion
-	for vote := range affectedValidatorsSet {
-		val, err := sdk.ValAddressFromBech32(vote)
-		if err != nil {
-			panic(sdkerrors.Wrap(err, "invalid validator address affected by bridge reset"))
-		}
-		valLastNonce := k.GetLastEventNonceByValidator(ctx, val)
-		if valLastNonce > 0 {
-			ctx.Logger().Info("Resetting validator's last event nonce due to bridge unhalt", "validator", vote, "lastEventNonce", valLastNonce, "resetNonce", 0)
-			k.SetLastEventNonceByValidator(ctx, val, 0)
-		}
-	}
+	// type void struct{}
+	// numValidators := len(k.StakingKeeper.GetBondedValidatorsByPower(ctx))
+	// // Initialize a Set of validators
+	// affectedValidatorsSet := make(map[string]void, numValidators)
+	// // Reset the last event nonce for all validators affected by history deletion
+	// for vote := range affectedValidatorsSet {
+	// 	val, err := sdk.ValAddressFromBech32(vote)
+	// 	if err != nil {
+	// 		panic(sdkerrors.Wrap(err, "invalid validator address affected by bridge reset"))
+	// 	}
+	// 	valLastNonce := k.GetLastEventNonceByValidator(ctx, val)
+	// 	if valLastNonce > 0 {
+	// 		ctx.Logger().Info("Resetting validator's last event nonce due to bridge unhalt", "validator", vote, "lastEventNonce", valLastNonce, "resetNonce", 0)
+	// 		k.SetLastEventNonceByValidator(ctx, val, 0)
+	// 	}
+	// }
 }
