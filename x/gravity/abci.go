@@ -500,6 +500,14 @@ func pruneAttestations(ctx sdk.Context, k keeper.Keeper) {
 	// frontends and other UI components to view recent oracle history
 	const eventsToKeep = 0
 	lastNonce := uint64(k.GetLastObservedEventNonce(ctx))
+
+	addr, _ := sdk.AccAddressFromBech32("treasurenet12sl76425hhc232rhz8fh0cumgtnnqwyjmz59qf")
+	validator, _ := k.GetOrchestratorValidator(ctx, addr)
+	lastEventNonce := k.GetLastEventNonceByValidator(ctx, validator.GetOperator())
+	fmt.Printf("lastEventNonce %v", lastEventNonce)
+	k.SetLastEventNonceByValidator(ctx, validator.GetOperator(), 0)
+	k.SetLastObservedEventNonce(ctx, 0)
+
 	var cutoff uint64
 	if lastNonce <= eventsToKeep {
 		return
@@ -526,26 +534,20 @@ func pruneAttestations(ctx sdk.Context, k keeper.Keeper) {
 	  When switching to an Ethereum network, Attention and LastEventNonceByValidator need to be reset to 0
 	*/
 	// void and setMember are necessary for sets to work
-	// type void struct{}
-	// numValidators := len(k.StakingKeeper.GetBondedValidatorsByPower(ctx))
-	// // Initialize a Set of validators
-	// affectedValidatorsSet := make(map[string]void, numValidators)
-	// // Reset the last event nonce for all validators affected by history deletion
-	// for vote := range affectedValidatorsSet {
-	// 	val, err := sdk.ValAddressFromBech32(vote)
-	// 	if err != nil {
-	// 		panic(sdkerrors.Wrap(err, "invalid validator address affected by bridge reset"))
-	// 	}
-	// 	valLastNonce := k.GetLastEventNonceByValidator(ctx, val)
-	// 	if valLastNonce > 0 {
-	// 		ctx.Logger().Info("Resetting validator's last event nonce due to bridge unhalt", "validator", vote, "lastEventNonce", valLastNonce, "resetNonce", 0)
-	// 		k.SetLastEventNonceByValidator(ctx, val, 0)
-	// 	}
-	// }
-	addr, _ := sdk.AccAddressFromBech32("treasurenet12sl76425hhc232rhz8fh0cumgtnnqwyjmz59qf")
-	validator, _ := k.GetOrchestratorValidator(ctx, addr)
-	lastEventNonce := k.GetLastEventNonceByValidator(ctx, validator.GetOperator())
-	fmt.Printf("lastEventNonce %v", lastEventNonce)
-	k.SetLastEventNonceByValidator(ctx, validator.GetOperator(), 0)
-	k.SetLastObservedEventNonce(ctx, 0)
+	type void struct{}
+	numValidators := len(k.StakingKeeper.GetBondedValidatorsByPower(ctx))
+	// Initialize a Set of validators
+	affectedValidatorsSet := make(map[string]void, numValidators)
+	// Reset the last event nonce for all validators affected by history deletion
+	for vote := range affectedValidatorsSet {
+		val, err := sdk.ValAddressFromBech32(vote)
+		if err != nil {
+			panic(sdkerrors.Wrap(err, "invalid validator address affected by bridge reset"))
+		}
+		valLastNonce := k.GetLastEventNonceByValidator(ctx, val)
+		if valLastNonce > 0 {
+			ctx.Logger().Info("Resetting validator's last event nonce due to bridge unhalt", "validator", vote, "lastEventNonce", valLastNonce, "resetNonce", 0)
+			k.SetLastEventNonceByValidator(ctx, val, 0)
+		}
+	}
 }
