@@ -13,7 +13,7 @@ TEST_QTD=1
 REMOVE_DATA_DIR=false
 
 #PORT AND RPC_PORT 3 initial digits, to be concat with a suffix later when node is initialized
-RPC_PORT="854"
+RPC_PORT="8545"
 IP_ADDR="0.0.0.0"
 
 KEY="mykey"
@@ -21,7 +21,7 @@ CHAINID="treasurenet_5005-1"
 MONIKER="mymoniker"
 
 ## default port prefixes for treasurenetd
-NODE_P2P_PORT="2660"
+NODE_P2P_PORT="26656"
 NODE_PORT="2663"
 NODE_RPC_PORT="2666"
 
@@ -70,7 +70,7 @@ init_func() {
     "$PWD"/build/treasurenetd keys add $KEY"$i" --keyring-backend test --home "$DATA_DIR$i" --no-backup --algo "eth_secp256k1"
     "$PWD"/build/treasurenetd init $MONIKER --chain-id $CHAINID --home "$DATA_DIR$i"
     "$PWD"/build/treasurenetd add-genesis-account \
-    "$("$PWD"/build/treasurenetd keys show "$KEY$i" --keyring-backend test -a --home "$DATA_DIR$i")" 1000000000000000000aphoton,1000000000000000000stake \
+    "$("$PWD"/build/treasurenetd keys show "$KEY$i" --keyring-backend test -a --home "$DATA_DIR$i")" 30000000000000000000aunit,1000000000000000000stake \
     --keyring-backend test --home "$DATA_DIR$i"
     "$PWD"/build/treasurenetd gentx "$KEY$i" 1000000000000000000stake --chain-id $CHAINID --keyring-backend test --home "$DATA_DIR$i"
     "$PWD"/build/treasurenetd collect-gentxs --home "$DATA_DIR$i"
