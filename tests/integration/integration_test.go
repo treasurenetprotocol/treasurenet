@@ -19,7 +19,7 @@ func TestIntegrationTestSuite(t *testing.T) {
 }
 func (s *IntegrationTestSuite) TestGetBalance() {
 	// 脚本的路径
-	scriptPath := "../../../../scripts/bank.sh"
+	scriptPath := "../../scripts/integration/bank.sh"
 
 	// 使用os/exec包来启动脚本
 	cmd := exec.Command(scriptPath)
