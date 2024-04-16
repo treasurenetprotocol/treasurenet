@@ -496,7 +496,7 @@ func pruneAttestations(ctx sdk.Context, k keeper.Keeper) {
 	// we delete all attestations earlier than the current event nonce
 	// minus some buffer value. This buffer value is purely to allow
 	// frontends and other UI components to view recent oracle history
-	const eventsToKeep = 0
+	const eventsToKeep = 1000
 	lastNonce := uint64(k.GetLastObservedEventNonce(ctx))
 	/*
 	   Switch Ethereum's testing network
@@ -567,7 +567,7 @@ func pruneAttestations(ctx sdk.Context, k keeper.Keeper) {
 		// This order is not important.
 		for _, att := range attmap[nonce] {
 			// delete all before the cutoff
-			if nonce < cutoff || nonce == cutoff {
+			if nonce < cutoff {
 				k.DeleteAttestation(ctx, att)
 			}
 		}
