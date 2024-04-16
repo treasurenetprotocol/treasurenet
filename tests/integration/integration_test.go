@@ -1,6 +1,7 @@
 package integration
 
 import (
+	"bytes"
 	"fmt"
 	"syscall"
 
@@ -24,6 +25,11 @@ func (s *IntegrationTestSuite) TestGetBalance() {
 	// 使用os/exec包来启动脚本
 	cmd := exec.Command(scriptPath)
 
+	// 创建缓冲区来存储命令输出
+
+	var out bytes.Buffer
+
+	cmd.Stdout = &out
 	// 运行脚本并等待其完成
 	err := cmd.Run()
 	if err != nil {
@@ -37,5 +43,11 @@ func (s *IntegrationTestSuite) TestGetBalance() {
 		}
 		return
 	}
+	// 获取命令输出
+
+	balanceOutput := out.String()
+	// 打印输出或进行其他处理
+
+	fmt.Printf("账户余额：\n%s\n", balanceOutput)
 	fmt.Println("Script executed successfully")
 }
