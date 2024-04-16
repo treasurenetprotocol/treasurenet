@@ -2,7 +2,7 @@
   
 # 定义RPC端点和账户地址  
 RPC_ENDPOINT="http://127.0.0.1:26657"  
-ADDRESS="treasurenet1u2nl4da6rpkag4wymwwy8c673nmqgpfq2e7fmx"  
+ADDRESS="treasurenet1u7hutc4r88x7anfyjmqgslmqp57y5j9yd2z0zy"  
   
 # 使用evmosd命令行工具查询余额  
 BALANCE=$(treasurenetd query bank balances $ADDRESS --node $RPC_ENDPOINT --trust-node=true)  
