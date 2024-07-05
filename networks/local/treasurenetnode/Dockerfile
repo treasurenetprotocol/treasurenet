@@ -1,6 +1,5 @@
 # FROM golang:stretch as build-env
 FROM golang:buster as build-env
-# FROM golang:1.22.4-alpine3.20 AS build-env
 # Install minimum necessary dependencies
 ENV PACKAGES curl make git libc-dev bash gcc
 RUN apt-get update && apt-get upgrade -y && \
@@ -17,7 +16,6 @@ RUN make build-linux
 
 # Final image
 FROM golang:1.18 as final
-# FROM golang:1.22.4 as final
 
 WORKDIR /
 
