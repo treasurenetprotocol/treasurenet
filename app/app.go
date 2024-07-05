@@ -804,19 +804,11 @@ func Int64ToBytes(i int64) []byte {
 func (app *TreasurenetApp) BeginBlocker(ctx sdk.Context, req abci.RequestBeginBlock) abci.ResponseBeginBlock {
 	var delta sdk.Dec
 	paramsnew := app.MintKeeper.GetParams(ctx)
-	// stakingparamsnew := app.StakingKeeper.GetParams(ctx)
-	// stakingparamsnew.UnbondingTime = time.Hour * 24 * 7 * 3
-	// app.StakingKeeper.SetParams(ctx, stakingparamsnew)
-	if paramsnew.EndBlock < int64(6311521) {
-		paramsnew.EndBlock = int64(6311520)
-		// paramsnew.EndBlock = int64(120) + req.Header.Height
+	peryear := paramsnew.BlocksPerYear
+	if paramsnew.EndBlock < int64(peryear+1) {
+		paramsnew.EndBlock = int64(peryear)
 		app.MintKeeper.SetParams(ctx, paramsnew)
 	}
-	// if paramsnew.EndBlock < req.Header.Height-int64(2) || paramsnew.EndBlock == int64(6311520) {
-	// 	// paramsnew.EndBlock = int64(6311520)
-	// 	paramsnew.EndBlock = int64(120) + req.Header.Height
-	// 	app.MintKeeper.SetParams(ctx, paramsnew)
-	// }
 	reqnew := req.Header.Height
 
 	if paramsnew.EndBlock == reqnew {
@@ -866,8 +858,7 @@ func (app *TreasurenetApp) BeginBlocker(ctx sdk.Context, req abci.RequestBeginBl
 				}
 			}
 		}
-		// paramsnew.EndBlock += int64(120)
-		paramsnew.EndBlock += int64(6311520)
+		paramsnew.EndBlock += int64(peryear)
 		app.MintKeeper.SetParams(ctx, paramsnew)
 		year, _ := app.MintKeeper.GettMinterYear(ctx)
 		yearnew, _ := year.Add(sdk.OneInt()).MarshalJSON()
@@ -880,24 +871,14 @@ func (app *TreasurenetApp) EndBlocker(ctx sdk.Context, req abci.RequestEndBlock)
 	var msgLogs sdk.ABCIMessageLogs
 	params := app.MintKeeper.GetParams(ctx)
 	events := sdk.Events{sdk.NewEvent("transfer", sdk.NewAttribute("sender", "foo"))}
-	// if params.HeightBlock == int64(12) {
-	// 	params.HeightBlock = int64(2)
-	// 	app.MintKeeper.SetParams(ctx, params)
-	// }
 	StartBlock := params.StartBlock
 	EndBlock := params.StartBlock + params.HeightBlock
 	HeightBlock := params.HeightBlock
-	// EndBlock := params.StartBlock + params.HeightBlock
-	// fmt.Println("loger:", app.Logger().With())
 	newreq := req.Height
 	if EndBlock < newreq {
 		params.StartBlock = newreq
 		app.MintKeeper.SetParams(ctx, params)
 	}
-	// if EndBlock != newreq && HeightBlock == int64(2) {
-	// 	msgLog = sdk.NewABCIMessageLog(uint32(2), "  We haven't started bidding yet EndBlock != newreq height=2 ", events)
-	// 	msgLogs = sdk.ABCIMessageLogs{msgLog}
-	// }
 	if EndBlock == newreq && HeightBlock == int64(2) {
 		nowTime := time.Now().Add(2 * time.Second)
 		ctx1, _ := context.WithDeadline(context.Background(), nowTime)
@@ -912,11 +893,6 @@ func (app *TreasurenetApp) EndBlocker(ctx sdk.Context, req abci.RequestEndBlock)
 		msgLog = sdk.NewABCIMessageLog(uint32(3), "  We haven't started bidding yet EndBlock != newreq height=2 ", events)
 		msgLogs = sdk.ABCIMessageLogs{msgLog}
 	}
-	// if EndBlock != newreq && HeightBlock == int64(60) && StartBlock+int64(1) != newreq {
-	// 	msgLog = sdk.NewABCIMessageLog(uint32(2), " We haven't started a new round of bidding yet EndBlock != newreq height=60", events)
-	// 	msgLogs = sdk.ABCIMessageLogs{msgLog}
-	// 	// return app.mm.EndBlock(ctx, req)
-	// }
 	if EndBlock == newreq && HeightBlock == int64(60) {
 		nowTime := time.Now().Add(2 * time.Second)
 		ctx1, _ := context.WithDeadline(context.Background(), nowTime)
@@ -940,7 +916,6 @@ func (app *TreasurenetApp) EndBlocker(ctx sdk.Context, req abci.RequestEndBlock)
 			NewHeight := heigehtnew1.Int64()
 			fmt.Println("NewHeight:", NewHeight)
 			params.HeightBlock = int64(60)
-			// params.StartBlock = NewHeight3 + int64(60)
 			params.StartBlock = NewHeight
 			app.MintKeeper.SetParams(ctx, params)
 		} else {
@@ -955,7 +930,6 @@ func (app *TreasurenetApp) EndBlocker(ctx sdk.Context, req abci.RequestEndBlock)
 		res, _ := json.Marshal(EvenNew.Data)
 		msgLog = sdk.NewABCIMessageLog(uint32(1), string(res), events)
 		msgLogs = sdk.ABCIMessageLogs{msgLog}
-		// return app.mm.NewEndBlock(ctx, req, msgLogs)
 	}
 	if StartBlock+int64(1) != newreq && HeightBlock == int64(60) {
 		msgLog = sdk.NewABCIMessageLog(uint32(2), " We haven't started a new round of bidding yet ", events)

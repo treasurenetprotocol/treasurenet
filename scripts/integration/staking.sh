@@ -25,29 +25,28 @@ RPC_ENDPOINT="http://127.0.0.1:26657"
 
 # 定义账户地址和验证人地址  
 
-DELEGATOR_ADDRESS="treasurenet1u2nl4da6rpkag4wymwwy8c673nmqgpfq2e7fmx"  
+DELEGATOR_ADDRESS="treasurenet1u7hutc4r88x7anfyjmqgslmqp57y5j9yd2z0zy"  
 
-VALIDATOR_ADDRESS="treasurenetvaloper1u2nl4da6rpkag4wymwwy8c673nmqgpfqt8dg6w"
+VALIDATOR_ADDRESS="treasurenetvaloper1u7hutc4r88x7anfyjmqgslmqp57y5j9yv53wrv"
 
 
 
 # validate dependencies are installed
 # 定义委托的金额  
 AMOUNT="10000000000000000000aunit" # 请根据实际情况修改金额和币种  
-   
-  
+
 # 使用evmosd命令行工具执行staking委托操作  
-DELEGATE_TX=$($BIN tx staking delegate $VALIDATOR_ADDRESS $AMOUNT \  
-    --from $KEY1 \  
-    --keyring-backend $KEYRING \  
-    --keyring-dir ~/.treasureenetd \  
-    --node $RPC_ENDPOINT \  
-    --chain-id $CHAIN_ID \  
-    --gas auto \  
-    --gas-prices 10aunit \  
-    --yes \  
-    --trust-node=true)  
-  
+# DELEGATE_TX=$($BIN tx staking delegate $VALIDATOR_ADDRESS $AMOUNT  
+#     --from $KEY1 \  
+#     --keyring-backend $KEYRING \  
+#     --keyring-dir ~/.treasureenetd \  
+#     --node $RPC_ENDPOINT \  
+#     --chain-id $CHAIN_ID \  
+#     --gas auto \  
+#     --gas-prices 10aunit \  
+#     --yes)  
+DELEGATE_TX=$($BIN tx staking delegate $VALIDATOR_ADDRESS $AMOUNT  --from $KEY1 --keyring-backend $KEYRING --keyring-dir ~/.treasurenetd --node $RPC_ENDPOINT --chain-id $CHAIN_ID --gas auto --fees 1unit --yes)
+        
 # 输出委托操作的结果  
 echo "委托操作结果："  
 echo "$DELEGATE_TX"
