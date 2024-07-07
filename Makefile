@@ -16,7 +16,9 @@ HTTPS_GIT := https://github.com/evmos/ethermint.git
 PROJECT_NAME = $(shell git remote get-url origin | xargs basename -s .git)
 DOCKER := $(shell which docker)
 DOCKER_BUF := $(DOCKER) run --rm -v $(CURDIR):/workspace --workdir /workspace bufbuild/buf:1.0.0-rc8
-
+NAMESPACE := treasurenetd
+DOCKER_IMAGE := $(NAMESPACE)
+DOCKER_TAG := latest
 export GO111MODULE = on
 
 # Default target executed when no arguments are given to make.
