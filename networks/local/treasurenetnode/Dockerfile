@@ -7,6 +7,7 @@ RUN apt-get update && apt-get upgrade -y && \
 
 # Set working directory for the build
 # WORKDIR /go/src/github.com/treasurenet
+
 WORKDIR /root/go/src/treasurenet
 # Add source files
 COPY . .

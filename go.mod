@@ -171,5 +171,6 @@ replace (
 	github.com/gogo/protobuf => github.com/regen-network/protobuf v1.3.3-alpha.regen.1
 	github.com/osmosis-labs/bech32-ibc v0.3.0-rc1 => github.com/treasurenetprotocol/treasurenet-bech32-pack v1.0.0-231027-tn
 	github.com/tendermint/tendermint v0.34.21 => ./tendermint_pack
+	golang.org/x/crypto v0.24.0 => golang.org/x/crypto v0.19.0
 	google.golang.org/grpc => google.golang.org/grpc v1.33.2
 )
