@@ -133,7 +133,7 @@ docker-build:
 	docker create --name treasurenetd -t -i treasurenetd:latest treasurenetd
 	# move the binaries to the ./build directory
 	mkdir -p ./build/
-	docker cp treasurenet:/usr/bin/treasurenetd ./build/
+	docker cp treasurenetd:/usr/bin/treasurenetd ./build/
 
 $(MOCKS_DIR):
 	mkdir -p $(MOCKS_DIR)
