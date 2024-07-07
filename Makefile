@@ -128,9 +128,9 @@ docker-build:
 	docker tag ${DOCKER_IMAGE}:${DOCKER_TAG} ${DOCKER_IMAGE}:latest
 	# docker tag ${DOCKER_IMAGE}:${DOCKER_TAG} ${DOCKER_IMAGE}:${COMMIT_HASH}
 	# update old container
-	docker rm treasurenet || true
+	docker rm treasurenetd || true
 	# create a new container from the latest image
-	docker create --name treasurenet -t -i treasurenet:latest treasurenet
+	docker create --name treasurenetd -t -i treasurenetd:latest treasurenetd
 	# move the binaries to the ./build directory
 	mkdir -p ./build/
 	docker cp treasurenet:/usr/bin/treasurenetd ./build/
