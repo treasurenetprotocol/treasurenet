@@ -5,9 +5,8 @@ RUN apt-get update && apt-get upgrade -y && \
     apt-get install -y $PACKAGES
 
 # Set working directory for the build
-# WORKDIR /go/src/github.com/treasurenet
 
-WORKDIR /root/go/src/treasurenet
+WORKDIR /go/src/github.com/treasurenetprotocol/treasurenet
 # Add source files
 COPY . .
 
@@ -22,7 +21,7 @@ WORKDIR /
 RUN apt-get update
 
 # Copy over binaries from the build-env
-COPY --from=build-env /root/go/src/treasurenet/build/treasurenetd /usr/bin/treasurenetd
+COPY --from=build-env /go/src/github.com/treasurenetprotocol/treasurenet/build/treasurenetd /usr/bin/treasurenetd
 
 EXPOSE 26656 26657 1317 8545 8546
 # Run ethermintd by default

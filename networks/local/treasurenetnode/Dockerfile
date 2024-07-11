@@ -6,7 +6,6 @@ RUN apt-get update && apt-get upgrade -y && \
     apt-get install -y $PACKAGES
 
 # Set working directory for the build
-# WORKDIR /go/src/github.com/treasurenet
 
 WORKDIR /root/go/src/treasurenet
 # Add source files
@@ -23,10 +22,9 @@ WORKDIR /
 RUN apt-get update
 
 # Copy over binaries from the build-env
-# COPY --from=build-env /go/src/github.com/treasurenet/build/treasurennetd /
-# COPY --from=build-env /go/src/github.com/treasurenet/scripts/start-docker.sh /
-COPY --from=build-env /root/go/src/treasurenet/build/treasurenetd /
-COPY --from=build-env /root/go/src/treasurenet/scripts/start-docker.sh /
+
+COPY --from=build-env /go/src/github.com/treasurenetprotocol/treasurenet/build/treasurenetd /
+COPY --from=build-env /go/src/github.com/treasurenetprotocol/treasurenet/scripts/start-docker.sh /
 
 EXPOSE 26656 26657 1317 8545 8546
 
