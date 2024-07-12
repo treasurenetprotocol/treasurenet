@@ -49,7 +49,7 @@ func (s *IntegrationTestSuite) TestGetBalance() {
 
 	balanceOutput := out.String()
 	// print output or perform other processing
-	fmt.Printf("账户余额：\n%s\n", balanceOutput)
+	fmt.Printf("account balance：\n%s\n", balanceOutput)
 	fmt.Println("Script executed successfully,Successfully obtained account balance. ---bank module")
 }
 
@@ -202,7 +202,7 @@ func (s *IntegrationTestSuite) TestStakingValidator() {
 
 	//retrieve old node weights
 	_, token, _ := s.TestGetTokens()
-	fmt.Println("质押前的validator权重为：", token)
+	fmt.Println("validator weight before staking is：", token)
 	// script path
 	scriptPath := "../../scripts/integration/staking.sh"
 
@@ -252,22 +252,17 @@ func (s *IntegrationTestSuite) TestGetRewards() (error, string, string, string) 
 	// script path
 	scriptPath := "../../scripts/integration/queryreward.sh"
 
-	// 定义与JSON中rewards数组项相对应的结构体
-
 	type Reward struct {
 		Denom string `json:"denom"`
 
 		Amount string `json:"amount"`
 	}
 
-	// 定义与JSON中rewards对象相对应的结构体
-
 	type ValidatorReward struct {
 		ValidatorAddress string `json:"validator_address"`
 
 		Reward []Reward `json:"reward"`
 	}
-	// 定义与JSON中total对象相对应的结构体
 
 	type TotalReward struct {
 		Denom string `json:"denom"`
@@ -356,8 +351,8 @@ func (s *IntegrationTestSuite) TestDistribution() {
 
 	//retrieve old node weights
 	_, denom, amount, validator := s.TestGetRewards()
-	fmt.Printf("在validator: %v 提取奖励之前的renward为:%v%v \n", validator, amount, denom)
-	fmt.Printf("开始执行奖励提取操作...\n")
+	fmt.Printf("validator: %v before extracting rewards renward is:%v%v \n", validator, amount, denom)
+	fmt.Printf("start executing reward extraction operation...\n")
 	time.Sleep(5 * time.Second)
 	// script path
 	scriptPath := "../../scripts/integration/distribution.sh"
