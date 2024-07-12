@@ -20,7 +20,7 @@ jobs:
 
     - name: Check for Unwanted Characters
       run: |
-        if grep -rHnP --exclude-dir='.git' --exclude='*.png' --exclude='*.jpg' "[\x{4e00}-\x{9fff}]" . ; then
+        if grep -rHnP --exclude-dir='.git' --exclude='*.wasm' --exclude='*.png' --exclude='*.jpg' "[\x{4e00}-\x{9fff}]" . ; then
           echo "Unwanted characters found!"
           exit 1
         else

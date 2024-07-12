@@ -1,4 +1,4 @@
 all:
-	docker build --no-cache --tag treasurenet/node ../.. -f treasurenet/Dockerfile
+	docker build --no-cache --tag treasurenetd/node ../.. -f treasurenetnode/Dockerfile
 
 .PHONY: all

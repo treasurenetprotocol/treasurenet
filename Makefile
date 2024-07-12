@@ -16,7 +16,9 @@ HTTPS_GIT := https://github.com/treasurenetprotocol/treasurenet.git
 PROJECT_NAME = $(shell git remote get-url origin | xargs basename -s .git)
 DOCKER := $(shell which docker)
 DOCKER_BUF := $(DOCKER) run --rm -v $(CURDIR):/workspace --workdir /workspace bufbuild/buf:1.0.0-rc8
-
+NAMESPACE := treasurenetd
+DOCKER_IMAGE := $(NAMESPACE)
+DOCKER_TAG := latest
 export GO111MODULE = on
 
 # Default target executed when no arguments are given to make.
@@ -126,12 +128,12 @@ docker-build:
 	docker tag ${DOCKER_IMAGE}:${DOCKER_TAG} ${DOCKER_IMAGE}:latest
 	# docker tag ${DOCKER_IMAGE}:${DOCKER_TAG} ${DOCKER_IMAGE}:${COMMIT_HASH}
 	# update old container
-	docker rm treasurenet || true
+	docker rm treasurenetd || true
 	# create a new container from the latest image
-	docker create --name treasurenet -t -i treasurenet:latest treasurenet
+	docker create --name treasurenetd -t -i treasurenetd:latest treasurenetd
 	# move the binaries to the ./build directory
 	mkdir -p ./build/
-	docker cp treasurenet:/usr/bin/treasurenetd ./build/
+	docker cp treasurenetd:/usr/bin/treasurenetd ./build/
 
 $(MOCKS_DIR):
 	mkdir -p $(MOCKS_DIR)
@@ -296,6 +298,8 @@ test:
 lint:
 	@@test -n "$$golangci-lint version | awk '$4 >= 1.42')"
 	golangci-lint run --out-format=tab -n
+run-integration-tests:
+	@nix-shell ./tests/integration_tests/shell.nix --run ./scripts/run-integration-tests.sh
 
 lint-py:
 	flake8 --show-source --count --statistics \
@@ -400,13 +404,13 @@ ifeq ($(OS),Windows_NT)
 	mkdir localnet-setup &
 	@$(MAKE) localnet-build
 
-	IF not exist "build/node0/$(TREASURENET_BINARY)/config/genesis.json" docker run --rm -v $(CURDIR)/build\treasurenet\Z treasurenet/node "./treasurenetd testnet --v 4 -o /treasurenet --keyring-backend=test --ip-addresses treasurenetdnode0,treasurenetdnode1,treasurenetdnode2,treasurenetdnode3"
+	IF not exist "build/node0/$(TREASURENET_BINARY)/config/genesis.json" docker run --rm -v $(CURDIR)/build\treasurenet\Z treasurenetd/node "./treasurenetd testnet init-files --v 4 -o /treasurenet --keyring-backend=test  --starting-ip-address 192.167.10.2"
 	docker-compose up -d
 else
 	mkdir -p localnet-setup
 	@$(MAKE) localnet-build
 
-	if ! [ -f localnet-setup/node0/$(TREASURENET_BINARY)/config/genesis.json ]; then docker run --rm -v $(CURDIR)/localnet-setup:/treasurenet:Z treasurenet/node "./treasurenetd testnet --v 4 -o /treasurenet --keyring-backend=test --ip-addresses treasurenetdnode0,treasurenetdnode1,treasurenetdnode2,treasurenetdnode3"; fi
+	if ! [ -f localnet-setup/node0/$(TREASURENET_BINARY)/config/genesis.json ]; then docker run --rm -v $(CURDIR)/localnet-setup:/treasurenet:Z treasurenetd/node "./treasurenetd testnet init-files --v 4 -o /treasurenet --keyring-backend=test  --starting-ip-address 192.167.10.2"; fi
 	docker-compose up -d
 endif
 
@@ -423,15 +427,15 @@ localnet-clean:
 localnet-unsafe-reset:
 	docker-compose down
 ifeq ($(OS),Windows_NT)
-	@docker run --rm -v $(CURDIR)\localnet-setup\node0\ethermitd:treasurenet\Z treasurenet/node "./treasurenetd unsafe-reset-all --home=/treasurenet"
-	@docker run --rm -v $(CURDIR)\localnet-setup\node1\ethermitd:treasurenet\Z treasurenet/node "./treasurenetd unsafe-reset-all --home=/treasurenet"
-	@docker run --rm -v $(CURDIR)\localnet-setup\node2\ethermitd:treasurenet\Z treasurenet/node "./treasurenetd unsafe-reset-all --home=/treasurenet"
-	@docker run --rm -v $(CURDIR)\localnet-setup\node3\ethermitd:treasurenet\Z treasurenet/node "./treasurenetd unsafe-reset-all --home=/treasurenet"
+	@docker run --rm -v $(CURDIR)\localnet-setup\node0\treasurenetd:treasurenet\Z treasurenetd/node "./treasurenetd unsafe-reset-all --home=/treasurenet"
+	@docker run --rm -v $(CURDIR)\localnet-setup\node1\treasurenetd:treasurenet\Z treasurenetd/node "./treasurenetd unsafe-reset-all --home=/treasurenet"
+	@docker run --rm -v $(CURDIR)\localnet-setup\node2\treasurenetd:treasurenet\Z treasurenetd/node "./treasurenetd unsafe-reset-all --home=/treasurenet"
+	@docker run --rm -v $(CURDIR)\localnet-setup\node3\treasurenetd:treasurenet\Z treasurenetd/node "./treasurenetd unsafe-reset-all --home=/treasurenet"
 else
-	@docker run --rm -v $(CURDIR)/localnet-setup/node0/ethermitd:/treasurenet:Z treasurenet/node "./treasurenetd unsafe-reset-all --home=/treasurenet"
-	@docker run --rm -v $(CURDIR)/localnet-setup/node1/ethermitd:/treasurenet:Z treasurenet/node "./treasurenetd unsafe-reset-all --home=/treasurenet"
-	@docker run --rm -v $(CURDIR)/localnet-setup/node2/ethermitd:/treasurenet:Z treasurenet/node "./treasurenetd unsafe-reset-all --home=/treasurenet"
-	@docker run --rm -v $(CURDIR)/localnet-setup/node3/ethermitd:/treasurenet:Z treasurenet/node "./treasurenetd unsafe-reset-all --home=/treasurenet"
+	@docker run --rm -v $(CURDIR)/localnet-setup/node0/treasurenetd:/treasurenet:Z treasurenetd/node "./treasurenetd unsafe-reset-all --home=/treasurenet"
+	@docker run --rm -v $(CURDIR)/localnet-setup/node1/treasurenetd:/treasurenet:Z treasurenetd/node "./treasurenetd unsafe-reset-all --home=/treasurenet"
+	@docker run --rm -v $(CURDIR)/localnet-setup/node2/treasurenetd:/treasurenet:Z treasurenetd/node "./treasurenetd unsafe-reset-all --home=/treasurenet"
+	@docker run --rm -v $(CURDIR)/localnet-setup/node3/treasurenetd:/treasurenet:Z treasurenetd/node "./treasurenetd unsafe-reset-all --home=/treasurenet"
 endif
 
 # Clean testnet
