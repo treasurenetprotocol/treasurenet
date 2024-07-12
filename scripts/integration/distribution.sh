@@ -17,13 +17,13 @@ LOGLEVEL="info"
 TRACE="--trace"
 # TRACE=""
 
-# 定义RPC端点  
+# define rpc endpoints 
 
 RPC_ENDPOINT="http://127.0.0.1:26657"  
 
   
 
-# 定义账户地址和验证人地址  
+# define account address and verifier address 
 
 DELEGATOR_ADDRESS="treasurenet1u7hutc4r88x7anfyjmqgslmqp57y5j9yd2z0zy"  
 
@@ -32,8 +32,8 @@ VALIDATOR_ADDRESS="treasurenetvaloper1u7hutc4r88x7anfyjmqgslmqp57y5j9yv53wrv"
 
 
 # validate dependencies are installed
-# 定义委托的金额  
-AMOUNT="10000000000000000000aunit" # 请根据实际情况修改金额和币种  
+# define amount of commission  
+AMOUNT="10000000000000000000aunit" #please modify amount and currency according to actual situation  
 
 DISTRIBUTION_TX=$($BIN tx distribution withdraw-all-rewards  --from $KEY1 --keyring-backend $KEYRING --keyring-dir ~/.treasurenetd --node $RPC_ENDPOINT --chain-id $CHAIN_ID --gas auto --fees 1unit --yes)
          

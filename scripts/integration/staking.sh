@@ -17,14 +17,13 @@ LOGLEVEL="info"
 TRACE="--trace"
 # TRACE=""
 
-# 定义RPC端点  
+#define rpc endpoints  
 
 RPC_ENDPOINT="http://127.0.0.1:26657"  
 
   
 
-# 定义账户地址和验证人地址  
-
+# define account address and verifier address
 DELEGATOR_ADDRESS="treasurenet1u7hutc4r88x7anfyjmqgslmqp57y5j9yd2z0zy"  
 
 VALIDATOR_ADDRESS="treasurenetvaloper1u7hutc4r88x7anfyjmqgslmqp57y5j9yv53wrv"
@@ -32,10 +31,10 @@ VALIDATOR_ADDRESS="treasurenetvaloper1u7hutc4r88x7anfyjmqgslmqp57y5j9yv53wrv"
 
 
 # validate dependencies are installed
-# 定义委托的金额  
-AMOUNT="10000000000000000000aunit" # 请根据实际情况修改金额和币种  
+# define amount of commission  
+AMOUNT="10000000000000000000aunit" # please modify amount and currency according to actual situation  
 
-# 使用evmosd命令行工具执行staking委托操作  
+# execute staking delegation operation using treasurenetd command-line tool 
 # DELEGATE_TX=$($BIN tx staking delegate $VALIDATOR_ADDRESS $AMOUNT  
 #     --from $KEY1 \  
 #     --keyring-backend $KEYRING \  
@@ -47,6 +46,6 @@ AMOUNT="10000000000000000000aunit" # 请根据实际情况修改金额和币种
 #     --yes)  
 DELEGATE_TX=$($BIN tx staking delegate $VALIDATOR_ADDRESS $AMOUNT  --from $KEY1 --keyring-backend $KEYRING --keyring-dir ~/.treasurenetd --node $RPC_ENDPOINT --chain-id $CHAIN_ID --gas auto --fees 1unit --yes)
         
-# 输出委托操作的结果  
-echo "委托操作结果："  
+# output result of delegated operation 
+echo "commissioned operation result："  
 echo "$DELEGATE_TX"

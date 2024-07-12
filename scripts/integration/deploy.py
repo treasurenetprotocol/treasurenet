@@ -2,13 +2,11 @@ from web3 import Web3, HTTPProvider
 
 from solc import compile_standard  
 
-import json  
-
-# 连接到EVMOS测试网络  
+import json    
 
 w3 = Web3(HTTPProvider('http://127.0.0.1:8545'))  
 
-# 编译智能合约  
+# compile smart contracts  
 
 with open('../contract/Auction.sol', 'r') as file:  
 
@@ -26,37 +24,37 @@ compiled_sol = compile_standard(
 
     },  
 
-    solc_version="0.8.0"  # 根据你的solidity版本进行调整  
+    solc_version="0.8.0"  # adjust according to your solidity version 
 
 )  
 
-# 获取合约的ABI和二进制代码  
+# obtain abi and binary code of contract
 
 abi = compiled_sol['contracts']['Auction.sol']['Auction']['abi']  
 
 bin = compiled_sol['contracts']['Auction.sol']['Auction']['bin']  
 
   
-# 部署合约  
+# deploy contract  
 
 AuctionContract = w3.eth.contract(abi=abi, bytecode=bin)  
 
 construct_txn = AuctionContract.constructor().buildTransaction({  
 
-    'from': w3.eth.accounts[0],  # 使用第一个账户作为发送者  
+    'from': w3.eth.accounts[0],  # use first account as sender  
 
-    'gas': 4700000,  # 设置gas限制  
+    'gas': 4700000,  # set gas restrictions 
 
-    'gasPrice': w3.toWei('10', 'aunit')  # 设置gas价格  
+    'gasPrice': w3.toWei('10', 'aunit')  # set gas price  
 
 })  
 
-signed_txn = w3.eth.account.signTransaction(construct_txn, private_key='YOUR_PRIVATE_KEY')  # 替换成你的私钥  
+signed_txn = w3.eth.account.signTransaction(construct_txn, private_key='YOUR_PRIVATE_KEY')  # replace with your private key  
 
 tx_hash = w3.eth.sendRawTransaction(signed_txn.rawTransaction)  
 
   
-# 等待交易被打包进区块  
+# waiting for transactions to be packaged into blocks 
 
 tx_receipt = w3.eth.waitForTransactionReceipt(tx_hash)  
 
@@ -65,29 +63,28 @@ contract_address = tx_receipt.contractAddress
 print(f"Contract deployed to: {contract_address}")  
 
   
-# 创建合约实例  
-
+# create contract instance
 auction = w3.eth.contract(address=contract_address, abi=abi)  
 
-# 触发BidRecord事件  
+# trigger bidrecord event  
 
-amount = 1000000000000000000  # 假设我们要发送1 ETH, 这里是10^18 wei  
+amount = 1000000000000000000  # assuming we want to send 1 eth, this is 10 ^ 18 wei 
 
 bid_txn = auction.functions.bid(amount).buildTransaction({  
 
-    'from': w3.eth.accounts[0],  # 使用相同的账户作为发送者  
+    'from': w3.eth.accounts[0],  # using same account as sender  
 
-    'gas': 4700000,  # 设置gas限制  
+    'gas': 4700000,  # set gas restrictions  
 
-    'gasPrice': w3.toWei('10', 'aunit')  # 设置gas价格  
+    'gasPrice': w3.toWei('10', 'aunit')  # set gas price  
 
 })  
 
-signed_bid_txn = w3.eth.account.signTransaction(bid_txn, private_key='YOUR_PRIVATE_KEY')  # 替换成你的私钥  
+signed_bid_txn = w3.eth.account.signTransaction(bid_txn, private_key='YOUR_PRIVATE_KEY')  # replace with your private key  
 
 bid_tx_hash = w3.eth.sendRawTransaction(signed_bid_txn.rawTransaction)  
 
-# 等待交易被打包进区块  
+# waiting for transactions to be packaged into blocks
 
 w3.eth.waitForTransactionReceipt(bid_tx_hash)  
 
