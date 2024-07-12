@@ -24,5 +24,6 @@ RUN apt-get update
 COPY --from=build-env /go/src/github.com/treasurenetprotocol/treasurenet/build/treasurenetd /usr/bin/treasurenetd
 
 EXPOSE 26656 26657 1317 8545 8546
-# Run ethermintd by default
+
+# Run treasurenetd by default
 CMD ["treasurenetd"]
