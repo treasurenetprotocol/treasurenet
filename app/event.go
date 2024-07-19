@@ -51,8 +51,7 @@ func getLogs(ctx context.Context, start, end int64) {
 			return
 		default:
 			// Even = new(EventLog)
-			client, err := ethclient.Dial("ws://node0.testnet.treasurenet.io:8546")
-			// client, err := ethclient.Dial("ws://121.36.103.84:8546")
+			client, err := ethclient.Dial("ws://127.0.0.1:8546")
 			if err != nil {
 				fmt.Println("No listening:", err)
 				EvenNew = EventLogNew{
@@ -130,8 +129,7 @@ func getBidStartLogsNew(ctx context.Context, start, end int64) {
 		case <-ctx.Done():
 			return
 		default:
-			client, err := ethclient.Dial("ws://node0.testnet.treasurenet.io:8546")
-			// client, err := ethclient.Dial("ws://121.36.103.84:8546")
+			client, err := ethclient.Dial("ws://127.0.0.1:8546")
 			if err != nil {
 				fmt.Println("getBidStartLogs No listening:", err)
 				Even = EventLog{
