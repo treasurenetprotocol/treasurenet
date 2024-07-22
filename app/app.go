@@ -869,6 +869,8 @@ func (app *TreasurenetApp) BeginBlocker(ctx sdk.Context, req abci.RequestBeginBl
 func (app *TreasurenetApp) EndBlocker(ctx sdk.Context, req abci.RequestEndBlock) abci.ResponseEndBlock {
 	var msgLog sdk.ABCIMessageLog
 	var msgLogs sdk.ABCIMessageLogs
+	var resultsNew <-chan EventLog
+	var results <-chan EventLog
 	params := app.MintKeeper.GetParams(ctx)
 	events := sdk.Events{sdk.NewEvent("transfer", sdk.NewAttribute("sender", "foo"))}
 	StartBlock := params.StartBlock
@@ -882,8 +884,8 @@ func (app *TreasurenetApp) EndBlocker(ctx sdk.Context, req abci.RequestEndBlock)
 	if EndBlock == newreq && HeightBlock == int64(2) {
 		nowTime := time.Now().Add(2 * time.Second)
 		ctx1, _ := context.WithDeadline(context.Background(), nowTime)
-		// go getLogsNew(ctx1, StartBlock, EndBlock)
-		go getBidStartLogsNew(ctx1, StartBlock, EndBlock)
+		// go getBidStartLogsNew(ctx1, StartBlock, EndBlock)
+		resultsNew = getBidStartLogsNew(ctx1, StartBlock, EndBlock)
 		params.StartBlock = EndBlock
 		app.MintKeeper.SetParams(ctx, params)
 		msgLog = sdk.NewABCIMessageLog(uint32(3), "  We haven't started bidding yet EndBlock == newreq height=2 ", events)
@@ -896,8 +898,8 @@ func (app *TreasurenetApp) EndBlocker(ctx sdk.Context, req abci.RequestEndBlock)
 	if EndBlock == newreq && HeightBlock == int64(60) {
 		nowTime := time.Now().Add(2 * time.Second)
 		ctx1, _ := context.WithDeadline(context.Background(), nowTime)
-		go getLogs(ctx1, StartBlock, EndBlock)
-		// go getLogsNew(ctx1, StartBlock, EndBlock)
+		// go getLogs(ctx1, StartBlock, EndBlock)
+		results = getLogs(ctx1, StartBlock, EndBlock)
 		params.StartBlock = EndBlock
 		app.MintKeeper.SetParams(ctx, params)
 		msgLog = sdk.NewABCIMessageLog(uint32(2), " We haven't started a new round of bidding yet ", events)
@@ -905,31 +907,37 @@ func (app *TreasurenetApp) EndBlocker(ctx sdk.Context, req abci.RequestEndBlock)
 		// return app.mm.EndBlock(ctx, req)
 	}
 	if StartBlock+int64(1) == newreq && HeightBlock != int64(60) {
-		if Even.Code == 200 && len(Even.Data) > 0 {
-			res1 := Even.Data[0]
-			fmt.Println(reflect.TypeOf(Even.Data[0]))
-			fmt.Println("res1:", res1[0])
-			res2, _ := json.Marshal(res1[0])
-			fmt.Println("res2:", string(res2))
-			heigehtnew := string(res2)
-			heigehtnew1, _ := sdk.NewIntFromString(heigehtnew)
-			NewHeight := heigehtnew1.Int64()
-			fmt.Println("NewHeight:", NewHeight)
-			params.HeightBlock = int64(60)
-			params.StartBlock = NewHeight
-			app.MintKeeper.SetParams(ctx, params)
-		} else {
-			params.HeightBlock = int64(2)
-			app.MintKeeper.SetParams(ctx, params)
+
+		if Even, ok := <-resultsNew; ok {
+			fmt.Printf("EventLog: %+v\n", Even)
+			if Even.Code == 200 && len(Even.Data) > 0 {
+				res1 := Even.Data[0]
+				fmt.Println(reflect.TypeOf(Even.Data[0]))
+				fmt.Println("res1:", res1)
+				res2, _ := json.Marshal(res1)
+				fmt.Println("res2:", string(res2))
+				heigehtnew := string(res2)
+				heigehtnew1, _ := sdk.NewIntFromString(heigehtnew)
+				NewHeight := heigehtnew1.Int64()
+				fmt.Println("NewHeight:", NewHeight)
+				params.HeightBlock = int64(60)
+				params.StartBlock = NewHeight
+				app.MintKeeper.SetParams(ctx, params)
+			} else {
+				params.HeightBlock = int64(2)
+				app.MintKeeper.SetParams(ctx, params)
+			}
 		}
 		msgLog = sdk.NewABCIMessageLog(uint32(3), " We haven't started bidding yetStartBlock+int64(1) == newreq height!=60 ", events)
 		msgLogs = sdk.ABCIMessageLogs{msgLog}
 	}
 	if StartBlock+int64(1) == newreq && HeightBlock == int64(60) {
 		fmt.Println("Log acquisition succeeded")
-		res, _ := json.Marshal(EvenNew.Data)
-		msgLog = sdk.NewABCIMessageLog(uint32(1), string(res), events)
-		msgLogs = sdk.ABCIMessageLogs{msgLog}
+		if EvenNew, ok := <-results; ok {
+			res, _ := json.Marshal(EvenNew.Data)
+			msgLog = sdk.NewABCIMessageLog(uint32(1), string(res), events)
+			msgLogs = sdk.ABCIMessageLogs{msgLog}
+		}
 	}
 	if StartBlock+int64(1) != newreq && HeightBlock == int64(60) {
 		msgLog = sdk.NewABCIMessageLog(uint32(2), " We haven't started a new round of bidding yet ", events)

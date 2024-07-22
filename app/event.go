@@ -3,114 +3,120 @@ package app
 import (
 	"context"
 	"fmt"
-	"log"
-	"math/big"
+
+	// "log"
 	"strings"
-	"time"
+	// "time"
+	"math/big"
 
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
-
 	store "github.com/treasurenetprotocol/treasurenet/app/contract"
 )
 
 type EventLog struct {
-	Code int             `json:"code"`
-	Msg  string          `json:"msg"`
-	Data [][]interface{} `json:"data"`
+	Code int    `json:"code"`
+	Msg  string `json:"msg"`
+	Data []interface{}
+	Err  error `json:"err,omitempty"` // 添加错误信息字段
 }
 
-type EventLogNew struct {
-	Code int             `json:"code"`
-	Msg  string          `json:"msg"`
-	Data [][]interface{} `json:"data"`
-}
-
-func getLogs(ctx context.Context, start, end int64) {
-	for {
-		select {
-		case <-ctx.Done():
-			return
-		default:
-			if err := fetchLogs(ctx, start, end, "BidRecord"); err != nil {
-				log.Println("Error fetching logs:", err)
-			}
-			time.Sleep(200 * time.Millisecond)
-		}
-	}
-}
-
-func getBidStartLogsNew(ctx context.Context, start, end int64) {
-	for {
-		select {
-		case <-ctx.Done():
-			return
-		default:
-			if err := fetchLogs(ctx, start, end, "BidStart"); err != nil {
-				log.Println("Error fetching BidStart logs:", err)
-			}
-			time.Sleep(200 * time.Millisecond)
-		}
-	}
-}
-
-func fetchLogs(ctx context.Context, start, end int64, eventName string) error {
+func getEvents(ctx context.Context, eventSignature []byte, start, end int64) EventLog {
+	// var Even EventLog
 	client, err := ethclient.Dial("ws://127.0.0.1:8546")
 	if err != nil {
-		return fmt.Errorf("ethclient Listening error: %w", err)
+		return EventLog{
+			Code: 300,
+			Msg:  "ethclient Listening error",
+			Err:  err,
+		}
 	}
 	defer client.Close()
 
-	eventSignature := []byte(eventName)
 	hash := crypto.Keccak256Hash(eventSignature)
 	topic := hash.Hex()
-	fmt.Println("Event title new", eventName, topic)
+	fmt.Println("Listening start：", start)
+	fmt.Println("Listening end：", end)
 
 	query := ethereum.FilterQuery{
 		FromBlock: big.NewInt(start),
 		ToBlock:   big.NewInt(end),
 		Topics: [][]common.Hash{
 			{
-				hash,
+				common.HexToHash(topic),
 			},
 		},
 	}
-	fmt.Println(eventName, "Listening start：", start)
-	fmt.Println(eventName, "Listening end：", end)
 
 	logs, err := client.FilterLogs(ctx, query)
 	if err != nil {
-		return fmt.Errorf("%s FilterLogs Listening error: %w", eventName, err)
+		return EventLog{
+			Code: 400,
+			Msg:  "FilterLogs Listening error",
+			Err:  err,
+		}
 	}
 
 	contractAbi, err := abi.JSON(strings.NewReader(string(store.ContractABI)))
 	if err != nil {
-		return fmt.Errorf("%s contractAbi Listening error: %w", eventName, err)
+		return EventLog{
+			Code: 500,
+			Msg:  "contractAbi Listening error",
+			Err:  err,
+		}
 	}
-	fmt.Printf("%s contractAbi:%+v\n", eventName, contractAbi)
+
+	dst := make([]interface{}, len(logs))
+	for index, vLog := range logs {
+		var eventData map[string]interface{}
+		err := contractAbi.UnpackIntoInterface(&eventData, "BidRecord", vLog.Data)
+		if err != nil {
+			return EventLog{
+				Code: 600,
+				Msg:  "Log unpacking error",
+				Err:  err,
+			}
+		}
+		dst[index] = eventData
+	}
 
 	if len(logs) == 0 {
-		return fmt.Errorf("%s Log is empty", eventName)
-	}
-
-	dst := make([][]interface{}, len(logs))
-	for index, vLog := range logs {
-		LogAbi, err := contractAbi.Unpack(eventName, vLog.Data)
-		if err != nil {
-			return fmt.Errorf("unpacking %s log data error: %w", eventName, err)
+		return EventLog{
+			Code: 600,
+			Msg:  "Log is empty",
 		}
-		dst[index] = LogAbi
 	}
 
-	eventLog := EventLog{
+	return EventLog{
 		Code: 200,
 		Msg:  "successful",
 		Data: dst,
 	}
-	fmt.Printf("%s logabi:%+v\n", eventName, dst)
+}
 
-	return nil
+func getLogs(ctx context.Context, start, end int64) <-chan EventLog {
+	results := make(chan EventLog, 1)
+	go func() {
+		defer close(results)
+		eventSignature := []byte("BidRecord(address,uint256)")
+		Even := getEvents(ctx, eventSignature, start, end)
+		results <- Even
+		fmt.Printf("EventLog: %+v\n", Even)
+	}()
+	return results
+}
+
+func getBidStartLogsNew(ctx context.Context, start, end int64) <-chan EventLog {
+	resultsNew := make(chan EventLog, 1)
+	go func() {
+		defer close(resultsNew)
+		eventSignature := []byte("BidStart(uint256)")
+		EvenNew := getEvents(ctx, eventSignature, start, end)
+		resultsNew <- EvenNew
+		fmt.Printf("EventLog: %+v\n", EvenNew)
+	}()
+	return resultsNew
 }
