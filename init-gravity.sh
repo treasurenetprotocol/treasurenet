@@ -144,7 +144,6 @@ $BIN collect-gentxs
 # fi
 
 # Start the node (remove the --pruning=nothing flag if historical queries are not needed) --json-rpc.ws-address localhost:8546
-#./treasurenetd query staking validator ethvaloper1s8znfe26xwq8lm5dhzxh4rjr7n90wrl2hn4dwj -o json --chain-id treasurenet_4143179869527-1 --home /data/mytreasurenet/node8//treasurenetd
 #./treasurenetd tx slashing unjail --from node8 --chain-id treasurenet_4143179869527-1 --home /data/mytreasurenet/node8/treasurenetd --keyring-backend test --gas-prices 20aunit
 #treasurenetd start --pruning=nothing --trace --log_level info --minimum-gas-prices=0.0001aunit --json-rpc.api eth,txpool,personal,net,debug,web3,miner --p2p.persistent_peers=a2f4cd782091b4429efc0748109d326053c99a59@54.241.61.93:26656,56490415fafa170557e410069faf05e3077500fd@54.193.100.97:26656,a82f9a917b35c77c572f6b9139635cec3c5f0317@18.144.45.142:26656
 # --json-rpc.address 0.0.0.0:8555  
