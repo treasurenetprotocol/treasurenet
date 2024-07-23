@@ -813,8 +813,11 @@ func (app *TreasurenetApp) BeginBlocker(ctx sdk.Context, req abci.RequestBeginBl
 
 	if paramsnew.EndBlock == reqnew {
 		nowTime := time.Now().Add(2 * time.Second)
-		ctx1, _ := context.WithDeadline(context.Background(), nowTime)
-		go getMintat(ctx1)
+		ctx1, cancel := context.WithDeadline(context.Background(), nowTime)
+		go func(ctx context.Context, cancel context.CancelFunc) {
+			defer cancel() // 在 goroutine 结束时调用取消函数
+			getMintat(ctx1)
+		}(ctx1, cancel)
 	}
 
 	if paramsnew.EndBlock+int64(1) == reqnew && !tat.IsNil() {
@@ -882,10 +885,13 @@ func (app *TreasurenetApp) EndBlocker(ctx sdk.Context, req abci.RequestEndBlock)
 		app.MintKeeper.SetParams(ctx, params)
 	}
 	if EndBlock == newreq && HeightBlock == int64(2) {
-		nowTime := time.Now().Add(2 * time.Second)
-		ctx1, _ := context.WithDeadline(context.Background(), nowTime)
+		nowTime := time.Now().Add(1 * time.Second)
+		ctx1, cancel := context.WithDeadline(context.Background(), nowTime)
 		// go getBidStartLogsNew(ctx1, StartBlock, EndBlock)
-		resultsNew = getBidStartLogsNew(ctx1, StartBlock, EndBlock)
+		go func(ctx context.Context, cancel context.CancelFunc) {
+			defer cancel() // 在 goroutine 结束时调用取消函数
+			resultsNew = getBidStartLogsNew(ctx1, StartBlock, EndBlock)
+		}(ctx1, cancel)
 		params.StartBlock = EndBlock
 		app.MintKeeper.SetParams(ctx, params)
 		msgLog = sdk.NewABCIMessageLog(uint32(3), "  We haven't started bidding yet EndBlock == newreq height=2 ", events)
@@ -896,10 +902,13 @@ func (app *TreasurenetApp) EndBlocker(ctx sdk.Context, req abci.RequestEndBlock)
 		msgLogs = sdk.ABCIMessageLogs{msgLog}
 	}
 	if EndBlock == newreq && HeightBlock == int64(60) {
-		nowTime := time.Now().Add(2 * time.Second)
-		ctx1, _ := context.WithDeadline(context.Background(), nowTime)
+		nowTime := time.Now().Add(1 * time.Second)
+		ctx1, cancel := context.WithDeadline(context.Background(), nowTime)
 		// go getLogs(ctx1, StartBlock, EndBlock)
-		results = getLogs(ctx1, StartBlock, EndBlock)
+		go func(ctx context.Context, cancel context.CancelFunc) {
+			defer cancel() // 在 goroutine 结束时调用取消函数
+			results = getLogs(ctx1, StartBlock, EndBlock)
+		}(ctx1, cancel)
 		params.StartBlock = EndBlock
 		app.MintKeeper.SetParams(ctx, params)
 		msgLog = sdk.NewABCIMessageLog(uint32(2), " We haven't started a new round of bidding yet ", events)
@@ -907,26 +916,33 @@ func (app *TreasurenetApp) EndBlocker(ctx sdk.Context, req abci.RequestEndBlock)
 		// return app.mm.EndBlock(ctx, req)
 	}
 	if StartBlock+int64(1) == newreq && HeightBlock != int64(60) {
-
-		if Even, ok := <-resultsNew; ok {
-			fmt.Printf("EventLog: %+v\n", Even)
-			if Even.Code == 200 && len(Even.Data) > 0 {
-				res1 := Even.Data[0]
-				fmt.Println(reflect.TypeOf(Even.Data[0]))
-				fmt.Println("res1:", res1)
-				res2, _ := json.Marshal(res1)
-				fmt.Println("res2:", string(res2))
-				heigehtnew := string(res2)
-				heigehtnew1, _ := sdk.NewIntFromString(heigehtnew)
-				NewHeight := heigehtnew1.Int64()
-				fmt.Println("NewHeight:", NewHeight)
-				params.HeightBlock = int64(60)
-				params.StartBlock = NewHeight
-				app.MintKeeper.SetParams(ctx, params)
+		select {
+		case Even, ok := <-resultsNew:
+			if !ok {
+				fmt.Println("Channel closed")
 			} else {
-				params.HeightBlock = int64(2)
-				app.MintKeeper.SetParams(ctx, params)
+				fmt.Printf("EventLog: %+v\n", Even)
+				if Even.Code == 200 && len(Even.Data) > 0 {
+					res1 := Even.Data[0]
+					fmt.Println(reflect.TypeOf(Even.Data[0]))
+					fmt.Println("res1:", res1)
+					res2, _ := json.Marshal(res1)
+					fmt.Println("res2:", string(res2))
+					heigehtnew := string(res2)
+					heigehtnew1, _ := sdk.NewIntFromString(heigehtnew)
+					NewHeight := heigehtnew1.Int64()
+					fmt.Println("NewHeight:", NewHeight)
+					params.HeightBlock = int64(60)
+					params.StartBlock = NewHeight
+					app.MintKeeper.SetParams(ctx, params)
+				} else {
+					params.HeightBlock = int64(2)
+					app.MintKeeper.SetParams(ctx, params)
+				}
 			}
+		default:
+			params.HeightBlock = int64(2)
+			app.MintKeeper.SetParams(ctx, params)
 		}
 		msgLog = sdk.NewABCIMessageLog(uint32(3), " We haven't started bidding yetStartBlock+int64(1) == newreq height!=60 ", events)
 		msgLogs = sdk.ABCIMessageLogs{msgLog}

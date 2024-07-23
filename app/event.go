@@ -26,11 +26,13 @@ type EventLog struct {
 
 func getEvents(ctx context.Context, eventSignature []byte, start, end int64) EventLog {
 	// var Even EventLog
+	data1 := make([]interface{}, 0)
 	client, err := ethclient.Dial("ws://127.0.0.1:8546")
 	if err != nil {
 		return EventLog{
 			Code: 300,
 			Msg:  "ethclient Listening error",
+			Data: data1,
 			Err:  err,
 		}
 	}
@@ -56,6 +58,7 @@ func getEvents(ctx context.Context, eventSignature []byte, start, end int64) Eve
 		return EventLog{
 			Code: 400,
 			Msg:  "FilterLogs Listening error",
+			Data: data1,
 			Err:  err,
 		}
 	}
@@ -65,6 +68,7 @@ func getEvents(ctx context.Context, eventSignature []byte, start, end int64) Eve
 		return EventLog{
 			Code: 500,
 			Msg:  "contractAbi Listening error",
+			Data: data1,
 			Err:  err,
 		}
 	}
@@ -77,6 +81,7 @@ func getEvents(ctx context.Context, eventSignature []byte, start, end int64) Eve
 			return EventLog{
 				Code: 600,
 				Msg:  "Log unpacking error",
+				Data: data1,
 				Err:  err,
 			}
 		}
@@ -87,6 +92,7 @@ func getEvents(ctx context.Context, eventSignature []byte, start, end int64) Eve
 		return EventLog{
 			Code: 600,
 			Msg:  "Log is empty",
+			Data: data1,
 		}
 	}
 
