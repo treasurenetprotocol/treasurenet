@@ -889,7 +889,7 @@ func (app *TreasurenetApp) EndBlocker(ctx sdk.Context, req abci.RequestEndBlock)
 		ctx1, cancel := context.WithDeadline(context.Background(), nowTime)
 		// go getBidStartLogsNew(ctx1, StartBlock, EndBlock)
 		go func(ctx context.Context, cancel context.CancelFunc) {
-			defer cancel() // 在 goroutine 结束时调用取消函数
+			defer cancel()
 			resultsNew = getBidStartLogsNew(ctx1, StartBlock, EndBlock)
 		}(ctx1, cancel)
 		params.StartBlock = EndBlock
@@ -906,7 +906,7 @@ func (app *TreasurenetApp) EndBlocker(ctx sdk.Context, req abci.RequestEndBlock)
 		ctx1, cancel := context.WithDeadline(context.Background(), nowTime)
 		// go getLogs(ctx1, StartBlock, EndBlock)
 		go func(ctx context.Context, cancel context.CancelFunc) {
-			defer cancel() // 在 goroutine 结束时调用取消函数
+			defer cancel()
 			results = getLogs(ctx1, StartBlock, EndBlock)
 		}(ctx1, cancel)
 		params.StartBlock = EndBlock
