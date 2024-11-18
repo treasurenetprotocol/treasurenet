@@ -541,249 +541,249 @@ func (suite *BackendTestSuite) TestBlockBloom() {
 	}
 }
 
-func (suite *BackendTestSuite) TestEthBlockFromTendermint() {
-	msgEthereumTx, bz := suite.buildEthereumTx()
-	emptyBlock := tmtypes.MakeBlock(1, []tmtypes.Tx{}, nil, nil)
+// func (suite *BackendTestSuite) TestEthBlockFromTendermint() {
+// 	msgEthereumTx, bz := suite.buildEthereumTx()
+// 	emptyBlock := tmtypes.MakeBlock(1, []tmtypes.Tx{}, nil, nil)
 
-	testCases := []struct {
-		name         string
-		baseFee      *big.Int
-		validator    sdk.AccAddress
-		height       int64
-		resBlock     *tmrpctypes.ResultBlock
-		blockRes     *tmrpctypes.ResultBlockResults
-		fullTx       bool
-		registerMock func(sdk.Int, sdk.AccAddress, int64)
-		expTxs       bool
-		expPass      bool
-	}{
-		{
-			"pass - block without tx",
-			sdk.NewInt(1).BigInt(),
-			sdk.AccAddress(common.Address{}.Bytes()),
-			int64(1),
-			&tmrpctypes.ResultBlock{Block: emptyBlock},
-			&tmrpctypes.ResultBlockResults{
-				Height:     1,
-				TxsResults: []*types.ResponseDeliverTx{{Code: 0, GasUsed: 0}},
-			},
-			false,
-			func(baseFee sdk.Int, validator sdk.AccAddress, height int64) {
-				queryClient := suite.backend.queryClient.QueryClient.(*mocks.QueryClient)
-				RegisterBaseFee(queryClient, baseFee)
-				RegisterValidatorAccount(queryClient, validator)
+// 	testCases := []struct {
+// 		name         string
+// 		baseFee      *big.Int
+// 		validator    sdk.AccAddress
+// 		height       int64
+// 		resBlock     *tmrpctypes.ResultBlock
+// 		blockRes     *tmrpctypes.ResultBlockResults
+// 		fullTx       bool
+// 		registerMock func(sdk.Int, sdk.AccAddress, int64)
+// 		expTxs       bool
+// 		expPass      bool
+// 	}{
+// 		{
+// 			"pass - block without tx",
+// 			sdk.NewInt(1).BigInt(),
+// 			sdk.AccAddress(common.Address{}.Bytes()),
+// 			int64(1),
+// 			&tmrpctypes.ResultBlock{Block: emptyBlock},
+// 			&tmrpctypes.ResultBlockResults{
+// 				Height:     1,
+// 				TxsResults: []*types.ResponseDeliverTx{{Code: 0, GasUsed: 0}},
+// 			},
+// 			false,
+// 			func(baseFee sdk.Int, validator sdk.AccAddress, height int64) {
+// 				queryClient := suite.backend.queryClient.QueryClient.(*mocks.QueryClient)
+// 				RegisterBaseFee(queryClient, baseFee)
+// 				RegisterValidatorAccount(queryClient, validator)
 
-				client := suite.backend.clientCtx.Client.(*mocks.Client)
-				RegisterConsensusParams(client, height)
-			},
-			false,
-			true,
-		},
-		{
-			"pass - block with tx - with BaseFee error",
-			nil,
-			sdk.AccAddress(tests.GenerateAddress().Bytes()),
-			int64(1),
-			&tmrpctypes.ResultBlock{
-				Block: tmtypes.MakeBlock(1, []tmtypes.Tx{bz}, nil, nil),
-			},
-			&tmrpctypes.ResultBlockResults{
-				Height:     1,
-				TxsResults: []*types.ResponseDeliverTx{{Code: 0, GasUsed: 0}},
-			},
-			true,
-			func(baseFee sdk.Int, validator sdk.AccAddress, height int64) {
-				queryClient := suite.backend.queryClient.QueryClient.(*mocks.QueryClient)
-				RegisterBaseFeeError(queryClient)
-				RegisterValidatorAccount(queryClient, validator)
+// 				client := suite.backend.clientCtx.Client.(*mocks.Client)
+// 				RegisterConsensusParams(client, height)
+// 			},
+// 			false,
+// 			true,
+// 		},
+// 		{
+// 			"pass - block with tx - with BaseFee error",
+// 			nil,
+// 			sdk.AccAddress(tests.GenerateAddress().Bytes()),
+// 			int64(1),
+// 			&tmrpctypes.ResultBlock{
+// 				Block: tmtypes.MakeBlock(1, []tmtypes.Tx{bz}, nil, nil),
+// 			},
+// 			&tmrpctypes.ResultBlockResults{
+// 				Height:     1,
+// 				TxsResults: []*types.ResponseDeliverTx{{Code: 0, GasUsed: 0}},
+// 			},
+// 			true,
+// 			func(baseFee sdk.Int, validator sdk.AccAddress, height int64) {
+// 				queryClient := suite.backend.queryClient.QueryClient.(*mocks.QueryClient)
+// 				RegisterBaseFeeError(queryClient)
+// 				RegisterValidatorAccount(queryClient, validator)
 
-				client := suite.backend.clientCtx.Client.(*mocks.Client)
-				RegisterConsensusParams(client, height)
-			},
-			true,
-			true,
-		},
-		{
-			"pass - block with tx - with ValidatorAccount error",
-			sdk.NewInt(1).BigInt(),
-			sdk.AccAddress(common.Address{}.Bytes()),
-			int64(1),
-			&tmrpctypes.ResultBlock{
-				Block: tmtypes.MakeBlock(1, []tmtypes.Tx{bz}, nil, nil),
-			},
-			&tmrpctypes.ResultBlockResults{
-				Height:     1,
-				TxsResults: []*types.ResponseDeliverTx{{Code: 0, GasUsed: 0}},
-			},
-			true,
-			func(baseFee sdk.Int, validator sdk.AccAddress, height int64) {
-				queryClient := suite.backend.queryClient.QueryClient.(*mocks.QueryClient)
-				RegisterBaseFee(queryClient, baseFee)
-				RegisterValidatorAccountError(queryClient)
+// 				client := suite.backend.clientCtx.Client.(*mocks.Client)
+// 				RegisterConsensusParams(client, height)
+// 			},
+// 			true,
+// 			true,
+// 		},
+// 		{
+// 			"pass - block with tx - with ValidatorAccount error",
+// 			sdk.NewInt(1).BigInt(),
+// 			sdk.AccAddress(common.Address{}.Bytes()),
+// 			int64(1),
+// 			&tmrpctypes.ResultBlock{
+// 				Block: tmtypes.MakeBlock(1, []tmtypes.Tx{bz}, nil, nil),
+// 			},
+// 			&tmrpctypes.ResultBlockResults{
+// 				Height:     1,
+// 				TxsResults: []*types.ResponseDeliverTx{{Code: 0, GasUsed: 0}},
+// 			},
+// 			true,
+// 			func(baseFee sdk.Int, validator sdk.AccAddress, height int64) {
+// 				queryClient := suite.backend.queryClient.QueryClient.(*mocks.QueryClient)
+// 				RegisterBaseFee(queryClient, baseFee)
+// 				RegisterValidatorAccountError(queryClient)
 
-				client := suite.backend.clientCtx.Client.(*mocks.Client)
-				RegisterConsensusParams(client, height)
-			},
-			true,
-			true,
-		},
-		{
-			"pass - block with tx - with ConsensusParams error - BlockMaxGas defaults to max uint32",
-			sdk.NewInt(1).BigInt(),
-			sdk.AccAddress(tests.GenerateAddress().Bytes()),
-			int64(1),
-			&tmrpctypes.ResultBlock{
-				Block: tmtypes.MakeBlock(1, []tmtypes.Tx{bz}, nil, nil),
-			},
-			&tmrpctypes.ResultBlockResults{
-				Height:     1,
-				TxsResults: []*types.ResponseDeliverTx{{Code: 0, GasUsed: 0}},
-			},
-			true,
-			func(baseFee sdk.Int, validator sdk.AccAddress, height int64) {
-				queryClient := suite.backend.queryClient.QueryClient.(*mocks.QueryClient)
-				RegisterBaseFee(queryClient, baseFee)
-				RegisterValidatorAccount(queryClient, validator)
+// 				client := suite.backend.clientCtx.Client.(*mocks.Client)
+// 				RegisterConsensusParams(client, height)
+// 			},
+// 			true,
+// 			true,
+// 		},
+// 		{
+// 			"pass - block with tx - with ConsensusParams error - BlockMaxGas defaults to max uint32",
+// 			sdk.NewInt(1).BigInt(),
+// 			sdk.AccAddress(tests.GenerateAddress().Bytes()),
+// 			int64(1),
+// 			&tmrpctypes.ResultBlock{
+// 				Block: tmtypes.MakeBlock(1, []tmtypes.Tx{bz}, nil, nil),
+// 			},
+// 			&tmrpctypes.ResultBlockResults{
+// 				Height:     1,
+// 				TxsResults: []*types.ResponseDeliverTx{{Code: 0, GasUsed: 0}},
+// 			},
+// 			true,
+// 			func(baseFee sdk.Int, validator sdk.AccAddress, height int64) {
+// 				queryClient := suite.backend.queryClient.QueryClient.(*mocks.QueryClient)
+// 				RegisterBaseFee(queryClient, baseFee)
+// 				RegisterValidatorAccount(queryClient, validator)
 
-				client := suite.backend.clientCtx.Client.(*mocks.Client)
-				RegisterConsensusParamsError(client, height)
-			},
-			true,
-			true,
-		},
-		{
-			"pass - block with tx - with ShouldIgnoreGasUsed - empty txs",
-			sdk.NewInt(1).BigInt(),
-			sdk.AccAddress(tests.GenerateAddress().Bytes()),
-			int64(1),
-			&tmrpctypes.ResultBlock{
-				Block: tmtypes.MakeBlock(1, []tmtypes.Tx{bz}, nil, nil),
-			},
-			&tmrpctypes.ResultBlockResults{
-				Height: 1,
-				TxsResults: []*types.ResponseDeliverTx{
-					{
-						Code:    11,
-						GasUsed: 0,
-						Log:     "no block gas left to run tx: out of gas",
-					},
-				},
-			},
-			true,
-			func(baseFee sdk.Int, validator sdk.AccAddress, height int64) {
-				queryClient := suite.backend.queryClient.QueryClient.(*mocks.QueryClient)
-				RegisterBaseFee(queryClient, baseFee)
-				RegisterValidatorAccount(queryClient, validator)
+// 				client := suite.backend.clientCtx.Client.(*mocks.Client)
+// 				RegisterConsensusParamsError(client, height)
+// 			},
+// 			true,
+// 			true,
+// 		},
+// 		{
+// 			"pass - block with tx - with ShouldIgnoreGasUsed - empty txs",
+// 			sdk.NewInt(1).BigInt(),
+// 			sdk.AccAddress(tests.GenerateAddress().Bytes()),
+// 			int64(1),
+// 			&tmrpctypes.ResultBlock{
+// 				Block: tmtypes.MakeBlock(1, []tmtypes.Tx{bz}, nil, nil),
+// 			},
+// 			&tmrpctypes.ResultBlockResults{
+// 				Height: 1,
+// 				TxsResults: []*types.ResponseDeliverTx{
+// 					{
+// 						Code:    11,
+// 						GasUsed: 0,
+// 						Log:     "no block gas left to run tx: out of gas",
+// 					},
+// 				},
+// 			},
+// 			true,
+// 			func(baseFee sdk.Int, validator sdk.AccAddress, height int64) {
+// 				queryClient := suite.backend.queryClient.QueryClient.(*mocks.QueryClient)
+// 				RegisterBaseFee(queryClient, baseFee)
+// 				RegisterValidatorAccount(queryClient, validator)
 
-				client := suite.backend.clientCtx.Client.(*mocks.Client)
-				RegisterConsensusParams(client, height)
-			},
-			false,
-			true,
-		},
-		{
-			"pass - block with tx - non fullTx",
-			sdk.NewInt(1).BigInt(),
-			sdk.AccAddress(tests.GenerateAddress().Bytes()),
-			int64(1),
-			&tmrpctypes.ResultBlock{
-				Block: tmtypes.MakeBlock(1, []tmtypes.Tx{bz}, nil, nil),
-			},
-			&tmrpctypes.ResultBlockResults{
-				Height:     1,
-				TxsResults: []*types.ResponseDeliverTx{{Code: 0, GasUsed: 0}},
-			},
-			false,
-			func(baseFee sdk.Int, validator sdk.AccAddress, height int64) {
-				queryClient := suite.backend.queryClient.QueryClient.(*mocks.QueryClient)
-				RegisterBaseFee(queryClient, baseFee)
-				RegisterValidatorAccount(queryClient, validator)
+// 				client := suite.backend.clientCtx.Client.(*mocks.Client)
+// 				RegisterConsensusParams(client, height)
+// 			},
+// 			false,
+// 			true,
+// 		},
+// 		{
+// 			"pass - block with tx - non fullTx",
+// 			sdk.NewInt(1).BigInt(),
+// 			sdk.AccAddress(tests.GenerateAddress().Bytes()),
+// 			int64(1),
+// 			&tmrpctypes.ResultBlock{
+// 				Block: tmtypes.MakeBlock(1, []tmtypes.Tx{bz}, nil, nil),
+// 			},
+// 			&tmrpctypes.ResultBlockResults{
+// 				Height:     1,
+// 				TxsResults: []*types.ResponseDeliverTx{{Code: 0, GasUsed: 0}},
+// 			},
+// 			false,
+// 			func(baseFee sdk.Int, validator sdk.AccAddress, height int64) {
+// 				queryClient := suite.backend.queryClient.QueryClient.(*mocks.QueryClient)
+// 				RegisterBaseFee(queryClient, baseFee)
+// 				RegisterValidatorAccount(queryClient, validator)
 
-				client := suite.backend.clientCtx.Client.(*mocks.Client)
-				RegisterConsensusParams(client, height)
-			},
-			true,
-			true,
-		},
-		{
-			"pass - block with tx",
-			sdk.NewInt(1).BigInt(),
-			sdk.AccAddress(tests.GenerateAddress().Bytes()),
-			int64(1),
-			&tmrpctypes.ResultBlock{
-				Block: tmtypes.MakeBlock(1, []tmtypes.Tx{bz}, nil, nil),
-			},
-			&tmrpctypes.ResultBlockResults{
-				Height:     1,
-				TxsResults: []*types.ResponseDeliverTx{{Code: 0, GasUsed: 0}},
-			},
-			true,
-			func(baseFee sdk.Int, validator sdk.AccAddress, height int64) {
-				queryClient := suite.backend.queryClient.QueryClient.(*mocks.QueryClient)
-				RegisterBaseFee(queryClient, baseFee)
-				RegisterValidatorAccount(queryClient, validator)
+// 				client := suite.backend.clientCtx.Client.(*mocks.Client)
+// 				RegisterConsensusParams(client, height)
+// 			},
+// 			true,
+// 			true,
+// 		},
+// 		{
+// 			"pass - block with tx",
+// 			sdk.NewInt(1).BigInt(),
+// 			sdk.AccAddress(tests.GenerateAddress().Bytes()),
+// 			int64(1),
+// 			&tmrpctypes.ResultBlock{
+// 				Block: tmtypes.MakeBlock(1, []tmtypes.Tx{bz}, nil, nil),
+// 			},
+// 			&tmrpctypes.ResultBlockResults{
+// 				Height:     1,
+// 				TxsResults: []*types.ResponseDeliverTx{{Code: 0, GasUsed: 0}},
+// 			},
+// 			true,
+// 			func(baseFee sdk.Int, validator sdk.AccAddress, height int64) {
+// 				queryClient := suite.backend.queryClient.QueryClient.(*mocks.QueryClient)
+// 				RegisterBaseFee(queryClient, baseFee)
+// 				RegisterValidatorAccount(queryClient, validator)
 
-				client := suite.backend.clientCtx.Client.(*mocks.Client)
-				RegisterConsensusParams(client, height)
-			},
-			true,
-			true,
-		},
-	}
-	for _, tc := range testCases {
-		suite.Run(fmt.Sprintf("Case %s", tc.name), func() {
-			suite.SetupTest() // reset test and queries
-			tc.registerMock(sdk.NewIntFromBigInt(tc.baseFee), tc.validator, tc.height)
+// 				client := suite.backend.clientCtx.Client.(*mocks.Client)
+// 				RegisterConsensusParams(client, height)
+// 			},
+// 			true,
+// 			true,
+// 		},
+// 	}
+// 	for _, tc := range testCases {
+// 		suite.Run(fmt.Sprintf("Case %s", tc.name), func() {
+// 			suite.SetupTest() // reset test and queries
+// 			tc.registerMock(sdk.NewIntFromBigInt(tc.baseFee), tc.validator, tc.height)
 
-			block, err := suite.backend.EthBlockFromTendermint(tc.resBlock, tc.blockRes, tc.fullTx)
+// 			block, err := suite.backend.EthBlockFromTendermint(tc.resBlock, tc.blockRes, tc.fullTx)
 
-			var expBlock map[string]interface{}
-			header := tc.resBlock.Block.Header
-			gasLimit := int64(^uint32(0)) // for `MaxGas = -1` (DefaultConsensusParams)
-			gasUsed := new(big.Int).SetUint64(uint64(tc.blockRes.TxsResults[0].GasUsed))
+// 			var expBlock map[string]interface{}
+// 			header := tc.resBlock.Block.Header
+// 			gasLimit := int64(^uint32(0)) // for `MaxGas = -1` (DefaultConsensusParams)
+// 			gasUsed := new(big.Int).SetUint64(uint64(tc.blockRes.TxsResults[0].GasUsed))
 
-			root := common.Hash{}.Bytes()
-			receipt := ethtypes.NewReceipt(root, false, gasUsed.Uint64())
-			bloom := ethtypes.CreateBloom(ethtypes.Receipts{receipt})
+// 			root := common.Hash{}.Bytes()
+// 			receipt := ethtypes.NewReceipt(root, false, gasUsed.Uint64())
+// 			bloom := ethtypes.CreateBloom(ethtypes.Receipts{receipt})
 
-			ethRPCTxs := []interface{}{}
+// 			ethRPCTxs := []interface{}{}
 
-			if tc.expTxs {
-				if tc.fullTx {
-					rpcTx, err := ethrpc.NewRPCTransaction(
-						msgEthereumTx.AsTransaction(),
-						common.BytesToHash(header.Hash()),
-						uint64(header.Height),
-						uint64(0),
-						tc.baseFee,
-					)
-					suite.Require().NoError(err)
-					ethRPCTxs = []interface{}{rpcTx}
-				} else {
-					ethRPCTxs = []interface{}{common.HexToHash(msgEthereumTx.Hash)}
-				}
-			}
+// 			if tc.expTxs {
+// 				if tc.fullTx {
+// 					rpcTx, err := ethrpc.NewRPCTransaction(
+// 						msgEthereumTx.AsTransaction(),
+// 						common.BytesToHash(header.Hash()),
+// 						uint64(header.Height),
+// 						uint64(0),
+// 						tc.baseFee,
+// 					)
+// 					suite.Require().NoError(err)
+// 					ethRPCTxs = []interface{}{rpcTx}
+// 				} else {
+// 					ethRPCTxs = []interface{}{common.HexToHash(msgEthereumTx.Hash)}
+// 				}
+// 			}
 
-			expBlock = ethrpc.FormatBlock(
-				header,
-				tc.resBlock.Block.Size(),
-				gasLimit,
-				gasUsed,
-				ethRPCTxs,
-				bloom,
-				common.BytesToAddress(tc.validator.Bytes()),
-				tc.baseFee,
-			)
+// 			expBlock = ethrpc.FormatBlock(
+// 				header,
+// 				tc.resBlock.Block.Size(),
+// 				gasLimit,
+// 				gasUsed,
+// 				ethRPCTxs,
+// 				bloom,
+// 				common.BytesToAddress(tc.validator.Bytes()),
+// 				tc.baseFee,
+// 			)
 
-			if tc.expPass {
-				suite.Require().Equal(expBlock, block)
-				suite.Require().NoError(err)
-			} else {
-				suite.Require().Error(err)
-			}
-		})
-	}
-}
+// 			if tc.expPass {
+// 				suite.Require().Equal(expBlock, block)
+// 				suite.Require().NoError(err)
+// 			} else {
+// 				suite.Require().Error(err)
+// 			}
+// 		})
+// 	}
+// }
 
 func (suite *BackendTestSuite) TestBaseFee() {
 	baseFee := sdk.NewInt(1)

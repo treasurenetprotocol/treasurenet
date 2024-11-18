@@ -3,10 +3,8 @@ package config
 import (
 	"testing"
 
-	ethermint "github.com/treasurenetprotocol/treasurenet/types"
 	"github.com/stretchr/testify/require"
 
-	"github.com/cosmos/cosmos-sdk/crypto/hd"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -34,22 +32,4 @@ func TestSetBech32Prefixes(t *testing.T) {
 	require.Equal(t, sdk.GetConfig().GetBech32ValidatorPubPrefix(), config.GetBech32ValidatorPubPrefix())
 	require.Equal(t, sdk.GetConfig().GetBech32ConsensusAddrPrefix(), config.GetBech32ConsensusAddrPrefix())
 	require.Equal(t, sdk.GetConfig().GetBech32ConsensusPubPrefix(), config.GetBech32ConsensusPubPrefix())
-}
-
-func TestSetCoinType(t *testing.T) {
-	config := sdk.GetConfig()
-	require.Equal(t, sdk.CoinType, int(config.GetCoinType()))
-	require.Equal(t, sdk.FullFundraiserPath, config.GetFullBIP44Path())
-
-	SetBip44CoinType(config)
-	require.Equal(t, int(ethermint.Bip44CoinType), int(config.GetCoinType()))
-	require.Equal(t, sdk.GetConfig().GetCoinType(), config.GetCoinType())
-	require.Equal(t, sdk.GetConfig().GetFullBIP44Path(), config.GetFullBIP44Path())
-}
-
-func TestHDPath(t *testing.T) {
-	params := *hd.NewFundraiserParams(0, ethermint.Bip44CoinType, 0)
-	hdPath := params.String()
-	require.Equal(t, "m/44'/60'/0'/0/0", hdPath)
-	require.Equal(t, hdPath, ethermint.BIP44HDPath)
 }

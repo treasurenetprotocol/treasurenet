@@ -5,11 +5,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/treasurenetprotocol/treasurenet/x/gravity/types"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/stretchr/testify/require"
+	"github.com/treasurenetprotocol/treasurenet/x/gravity/types"
 )
 
 // nolint: exhaustruct
@@ -21,7 +21,7 @@ func TestSubmitBadSignatureEvidenceBatchExists(t *testing.T) {
 
 	var (
 		now                 = time.Now().UTC()
-		mySender, _         = sdk.AccAddressFromBech32("gravity1ahx7f8wyertuus9r20284ej0asrs085ceqtfnm")
+		mySender, _         = sdk.AccAddressFromBech32("treasurenet102e577f29shw9ngdp462ml3nj44mdrg4hy2y07")
 		myReceiver          = "0xd041c41EA1bf0F006ADBb6d2c9ef9D425dE5eaD7"
 		myTokenContractAddr = "0x429881672B9AE42b8EbA0E26cD9C73711b891Ca5" // Pickle
 		token, err          = types.NewInternalERC20Token(sdk.NewInt(99999), myTokenContractAddr)

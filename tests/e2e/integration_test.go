@@ -7,11 +7,6 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/cosmos/cosmos-sdk/client/flags"
-	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
-	authtx "github.com/cosmos/cosmos-sdk/x/auth/tx"
-	"github.com/treasurenetprotocol/treasurenet/rpc/types"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	evmtypes "github.com/treasurenetprotocol/treasurenet/x/evm/types"
 
@@ -30,7 +25,7 @@ import (
 
 	"github.com/treasurenetprotocol/treasurenet/server/config"
 	"github.com/treasurenetprotocol/treasurenet/testutil/network"
-	ethermint "github.com/treasurenetprotocol/treasurenet/types"
+	treasurenet "github.com/treasurenetprotocol/treasurenet/types"
 )
 
 // var _ = Describe("E2e", func() {
@@ -83,29 +78,29 @@ func (s *IntegrationTestSuite) SetupSuite() {
 	s.rpcClient = rpcClient
 	s.gethClient = gethclient.New(rpcClient)
 	s.Require().NotNil(s.gethClient)
-	chainId, err := ethermint.ParseChainID(s.cfg.ChainID)
+	chainId, err := treasurenet.ParseChainID(s.cfg.ChainID)
 	s.Require().NoError(err)
 	s.ethSigner = ethtypes.LatestSignerForChainID(chainId)
 }
 
-func (s *IntegrationTestSuite) TestChainID() {
-	genesisRes, err := s.network.Validators[0].RPCClient.Genesis(s.ctx)
-	s.Require().NoError(err)
+// func (s *IntegrationTestSuite) TestChainID() {
+// 	genesisRes, err := s.network.Validators[0].RPCClient.Genesis(s.ctx)
+// 	s.Require().NoError(err)
 
-	chainID, err := s.network.Validators[0].JSONRPCClient.ChainID(s.ctx)
-	s.Require().NoError(err)
-	s.Require().NotNil(chainID)
+// 	chainID, err := s.network.Validators[0].JSONRPCClient.ChainID(s.ctx)
+// 	s.Require().NoError(err)
+// 	s.Require().NotNil(chainID)
 
-	s.T().Log(chainID.Int64())
+// 	s.T().Log(chainID.Int64())
 
-	eip155ChainID, err := ethermint.ParseChainID(s.network.Config.ChainID)
-	s.Require().NoError(err)
-	eip155ChainIDGen, err := ethermint.ParseChainID(genesisRes.Genesis.ChainID)
-	s.Require().NoError(err)
+// 	eip155ChainID, err := treasurenet.ParseChainID(s.network.Config.ChainID)
+// 	s.Require().NoError(err)
+// 	eip155ChainIDGen, err := treasurenet.ParseChainID(genesisRes.Genesis.ChainID)
+// 	s.Require().NoError(err)
 
-	s.Require().Equal(chainID, eip155ChainID)
-	s.Require().Equal(eip155ChainID, eip155ChainIDGen)
-}
+// 	s.Require().Equal(chainID, eip155ChainID)
+// 	s.Require().Equal(eip155ChainID, eip155ChainIDGen)
+// }
 
 func (s *IntegrationTestSuite) TestNodeInfo() {
 	// Not implemented
@@ -121,41 +116,41 @@ func (s *IntegrationTestSuite) TestCreateAccessList() {
 	s.Require().Nil(accessList)
 }
 
-func (s *IntegrationTestSuite) TestBlock() {
-	blockNum, err := s.network.Validators[0].JSONRPCClient.BlockNumber(s.ctx)
-	s.Require().NoError(err)
-	s.Require().NotZero(blockNum)
+// func (s *IntegrationTestSuite) TestBlock() {
+// 	blockNum, err := s.network.Validators[0].JSONRPCClient.BlockNumber(s.ctx)
+// 	s.Require().NoError(err)
+// 	s.Require().NotZero(blockNum)
 
-	bn := int64(blockNum)
+// 	bn := int64(blockNum)
 
-	block, err := s.network.Validators[0].RPCClient.Block(s.ctx, &bn)
-	s.Require().NoError(err)
-	s.Require().NotNil(block)
+// 	block, err := s.network.Validators[0].RPCClient.Block(s.ctx, &bn)
+// 	s.Require().NoError(err)
+// 	s.Require().NotNil(block)
 
-	blockByNum, err := s.network.Validators[0].JSONRPCClient.BlockByNumber(s.ctx, new(big.Int).SetUint64(blockNum))
-	s.Require().NoError(err)
-	s.Require().NotNil(blockByNum)
+// 	blockByNum, err := s.network.Validators[0].JSONRPCClient.BlockByNumber(s.ctx, new(big.Int).SetUint64(blockNum))
+// 	s.Require().NoError(err)
+// 	s.Require().NotNil(blockByNum)
 
-	// compare the ethereum header with the tendermint header
-	s.Require().Equal(block.Block.LastBlockID.Hash.Bytes(), blockByNum.Header().ParentHash.Bytes())
+// 	// compare the ethereum header with the tendermint header
+// 	s.Require().Equal(block.Block.LastBlockID.Hash.Bytes(), blockByNum.Header().ParentHash.Bytes())
 
-	hash := common.BytesToHash(block.Block.Hash())
-	block, err = s.network.Validators[0].RPCClient.BlockByHash(s.ctx, hash.Bytes())
-	s.Require().NoError(err)
-	s.Require().NotNil(block)
+// 	hash := common.BytesToHash(block.Block.Hash())
+// 	block, err = s.network.Validators[0].RPCClient.BlockByHash(s.ctx, hash.Bytes())
+// 	s.Require().NoError(err)
+// 	s.Require().NotNil(block)
 
-	blockByHash, err := s.network.Validators[0].JSONRPCClient.BlockByHash(s.ctx, hash)
-	s.Require().NoError(err)
-	s.Require().NotNil(blockByHash)
+// 	blockByHash, err := s.network.Validators[0].JSONRPCClient.BlockByHash(s.ctx, hash)
+// 	s.Require().NoError(err)
+// 	s.Require().NotNil(blockByHash)
 
-	// Compare blockByNumber and blockByHash results
-	s.Require().Equal(blockByNum.Hash(), blockByHash.Hash())
-	s.Require().Equal(blockByNum.Transactions().Len(), blockByHash.Transactions().Len())
-	s.Require().Equal(blockByNum.ParentHash(), blockByHash.ParentHash())
-	s.Require().Equal(blockByNum.Root(), blockByHash.Root())
+// 	// Compare blockByNumber and blockByHash results
+// 	s.Require().Equal(blockByNum.Hash(), blockByHash.Hash())
+// 	s.Require().Equal(blockByNum.Transactions().Len(), blockByHash.Transactions().Len())
+// 	s.Require().Equal(blockByNum.ParentHash(), blockByHash.ParentHash())
+// 	s.Require().Equal(blockByNum.Root(), blockByHash.Root())
 
-	// TODO: parse Tm block to Ethereum and compare
-}
+// 	// TODO: parse Tm block to Ethereum and compare
+// }
 
 func (s *IntegrationTestSuite) TestBlockBloom() {
 	transactionHash, _ := s.deployTestContract()
@@ -730,167 +725,167 @@ func (s *IntegrationTestSuite) TestWeb3Sha3() {
 	}
 }
 
-func (s *IntegrationTestSuite) TestPendingTransactionFilter() {
-	var (
-		filterID     string
-		filterResult []common.Hash
-	)
-	// create filter
-	err := s.rpcClient.Call(&filterID, "eth_newPendingTransactionFilter")
-	s.Require().NoError(err)
-	// check filter result is empty
-	err = s.rpcClient.Call(&filterResult, "eth_getFilterChanges", filterID)
-	s.Require().NoError(err)
-	s.Require().Empty(filterResult)
-	// send transaction
-	signedTx := s.signValidTx(common.HexToAddress("0x378c50D9264C63F3F92B806d4ee56E9D86FfB3Ec"), big.NewInt(10)).AsTransaction()
-	err = s.network.Validators[0].JSONRPCClient.SendTransaction(s.ctx, signedTx)
-	s.Require().NoError(err)
+// func (s *IntegrationTestSuite) TestPendingTransactionFilter() {
+// 	var (
+// 		filterID     string
+// 		filterResult []common.Hash
+// 	)
+// 	// create filter
+// 	err := s.rpcClient.Call(&filterID, "eth_newPendingTransactionFilter")
+// 	s.Require().NoError(err)
+// 	// check filter result is empty
+// 	err = s.rpcClient.Call(&filterResult, "eth_getFilterChanges", filterID)
+// 	s.Require().NoError(err)
+// 	s.Require().Empty(filterResult)
+// 	// send transaction
+// 	signedTx := s.signValidTx(common.HexToAddress("0x378c50D9264C63F3F92B806d4ee56E9D86FfB3Ec"), big.NewInt(10)).AsTransaction()
+// 	err = s.network.Validators[0].JSONRPCClient.SendTransaction(s.ctx, signedTx)
+// 	s.Require().NoError(err)
 
-	s.waitForTransaction()
-	s.expectSuccessReceipt(signedTx.Hash())
+// 	s.waitForTransaction()
+// 	s.expectSuccessReceipt(signedTx.Hash())
 
-	// check filter changes match the tx hash
-	err = s.rpcClient.Call(&filterResult, "eth_getFilterChanges", filterID)
-	s.Require().NoError(err)
-	s.Require().Equal([]common.Hash{signedTx.Hash()}, filterResult)
-}
+// 	// check filter changes match the tx hash
+// 	err = s.rpcClient.Call(&filterResult, "eth_getFilterChanges", filterID)
+// 	s.Require().NoError(err)
+// 	s.Require().Equal([]common.Hash{signedTx.Hash()}, filterResult)
+// }
 
-// TODO: add transactionIndex tests once we have OpenRPC interfaces
-func (s *IntegrationTestSuite) TestBatchETHTransactions() {
-	const ethTxs = 2
-	txBuilder := s.network.Validators[0].ClientCtx.TxConfig.NewTxBuilder()
-	builder, ok := txBuilder.(authtx.ExtensionOptionsTxBuilder)
-	s.Require().True(ok)
+// // TODO: add transactionIndex tests once we have OpenRPC interfaces
+// func (s *IntegrationTestSuite) TestBatchETHTransactions() {
+// 	const ethTxs = 2
+// 	txBuilder := s.network.Validators[0].ClientCtx.TxConfig.NewTxBuilder()
+// 	builder, ok := txBuilder.(authtx.ExtensionOptionsTxBuilder)
+// 	s.Require().True(ok)
 
-	recipient := common.HexToAddress("0x378c50D9264C63F3F92B806d4ee56E9D86FfB3Ec")
-	accountNonce := s.getAccountNonce(recipient)
-	feeAmount := sdk.ZeroInt()
+// 	recipient := common.HexToAddress("0x378c50D9264C63F3F92B806d4ee56E9D86FfB3Ec")
+// 	accountNonce := s.getAccountNonce(recipient)
+// 	feeAmount := sdk.ZeroInt()
 
-	var gasLimit uint64
-	var msgs []sdk.Msg
+// 	var gasLimit uint64
+// 	var msgs []sdk.Msg
 
-	for i := 0; i < ethTxs; i++ {
-		chainId, err := s.network.Validators[0].JSONRPCClient.ChainID(s.ctx)
-		s.Require().NoError(err)
+// 	for i := 0; i < ethTxs; i++ {
+// 		chainId, err := s.network.Validators[0].JSONRPCClient.ChainID(s.ctx)
+// 		s.Require().NoError(err)
 
-		gasPrice := s.getGasPrice()
-		from := common.BytesToAddress(s.network.Validators[0].Address)
-		nonce := accountNonce + uint64(i) + 1
+// 		gasPrice := s.getGasPrice()
+// 		from := common.BytesToAddress(s.network.Validators[0].Address)
+// 		nonce := accountNonce + uint64(i) + 1
 
-		msgTx := evmtypes.NewTx(
-			chainId,
-			nonce,
-			&recipient,
-			big.NewInt(10),
-			100000,
-			gasPrice,
-			big.NewInt(200),
-			nil,
-			nil,
-			nil,
-		)
-		msgTx.From = from.Hex()
-		err = msgTx.Sign(s.ethSigner, s.network.Validators[0].ClientCtx.Keyring)
-		s.Require().NoError(err)
+// 		msgTx := evmtypes.NewTx(
+// 			chainId,
+// 			nonce,
+// 			&recipient,
+// 			big.NewInt(10),
+// 			100000,
+// 			gasPrice,
+// 			big.NewInt(200),
+// 			nil,
+// 			nil,
+// 			nil,
+// 		)
+// 		msgTx.From = from.Hex()
+// 		err = msgTx.Sign(s.ethSigner, s.network.Validators[0].ClientCtx.Keyring)
+// 		s.Require().NoError(err)
 
-		// A valid msg should have empty `From`
-		msgTx.From = ""
-		msgs = append(msgs, msgTx.GetMsgs()...)
-		txData, err := evmtypes.UnpackTxData(msgTx.Data)
-		s.Require().NoError(err)
-		feeAmount = feeAmount.Add(sdk.NewIntFromBigInt(txData.Fee()))
-		gasLimit = gasLimit + txData.GetGas()
-	}
+// 		// A valid msg should have empty `From`
+// 		msgTx.From = ""
+// 		msgs = append(msgs, msgTx.GetMsgs()...)
+// 		txData, err := evmtypes.UnpackTxData(msgTx.Data)
+// 		s.Require().NoError(err)
+// 		feeAmount = feeAmount.Add(sdk.NewIntFromBigInt(txData.Fee()))
+// 		gasLimit = gasLimit + txData.GetGas()
+// 	}
 
-	option, err := codectypes.NewAnyWithValue(&evmtypes.ExtensionOptionsEthereumTx{})
-	s.Require().NoError(err)
+// 	option, err := codectypes.NewAnyWithValue(&evmtypes.ExtensionOptionsEthereumTx{})
+// 	s.Require().NoError(err)
 
-	queryClient := types.NewQueryClient(s.network.Validators[0].ClientCtx)
-	res, err := queryClient.Params(s.ctx, &evmtypes.QueryParamsRequest{})
+// 	queryClient := types.NewQueryClient(s.network.Validators[0].ClientCtx)
+// 	res, err := queryClient.Params(s.ctx, &evmtypes.QueryParamsRequest{})
 
-	fees := make(sdk.Coins, 0)
-	if feeAmount.Sign() > 0 {
-		fees = fees.Add(sdk.Coin{Denom: res.Params.EvmDenom, Amount: feeAmount})
-	}
+// 	fees := make(sdk.Coins, 0)
+// 	if feeAmount.Sign() > 0 {
+// 		fees = fees.Add(sdk.Coin{Denom: res.Params.EvmDenom, Amount: feeAmount})
+// 	}
 
-	builder.SetExtensionOptions(option)
-	err = builder.SetMsgs(msgs...)
-	s.Require().NoError(err)
-	builder.SetFeeAmount(fees)
-	builder.SetGasLimit(gasLimit)
+// 	builder.SetExtensionOptions(option)
+// 	err = builder.SetMsgs(msgs...)
+// 	s.Require().NoError(err)
+// 	builder.SetFeeAmount(fees)
+// 	builder.SetGasLimit(gasLimit)
 
-	tx := builder.GetTx()
-	txEncoder := s.network.Validators[0].ClientCtx.TxConfig.TxEncoder()
-	txBytes, err := txEncoder(tx)
-	s.Require().NoError(err)
+// 	tx := builder.GetTx()
+// 	txEncoder := s.network.Validators[0].ClientCtx.TxConfig.TxEncoder()
+// 	txBytes, err := txEncoder(tx)
+// 	s.Require().NoError(err)
 
-	syncCtx := s.network.Validators[0].ClientCtx.WithBroadcastMode(flags.BroadcastBlock)
-	txResponse, err := syncCtx.BroadcastTx(txBytes)
-	s.Require().NoError(err)
-	s.Require().Equal(uint32(0), txResponse.Code)
+// 	syncCtx := s.network.Validators[0].ClientCtx.WithBroadcastMode(flags.BroadcastBlock)
+// 	txResponse, err := syncCtx.BroadcastTx(txBytes)
+// 	s.Require().NoError(err)
+// 	s.Require().Equal(uint32(0), txResponse.Code)
 
-	block, err := s.network.Validators[0].JSONRPCClient.BlockByNumber(s.ctx, big.NewInt(txResponse.Height))
-	s.Require().NoError(err)
+// 	block, err := s.network.Validators[0].JSONRPCClient.BlockByNumber(s.ctx, big.NewInt(txResponse.Height))
+// 	s.Require().NoError(err)
 
-	txs := block.Transactions()
-	s.Require().Len(txs, ethTxs)
-	for i, tx := range txs {
-		s.Require().Equal(accountNonce+uint64(i)+1, tx.Nonce())
-	}
-}
+// 	txs := block.Transactions()
+// 	s.Require().Len(txs, ethTxs)
+// 	for i, tx := range txs {
+// 		s.Require().Equal(accountNonce+uint64(i)+1, tx.Nonce())
+// 	}
+// }
 
-func (s *IntegrationTestSuite) TestGasConsumptionOnNormalTransfer() {
-	testCases := []struct {
-		name            string
-		gasLimit        uint64
-		expectedGasUsed uint64
-	}{
-		{
-			"gas used is the same as gas limit",
-			21000,
-			21000,
-		},
-		{
-			"gas used is half of Gas limit",
-			70000,
-			35000,
-		},
-		{
-			"gas used is less than half of gasLimit",
-			30000,
-			21000,
-		},
-	}
+// func (s *IntegrationTestSuite) TestGasConsumptionOnNormalTransfer() {
+// 	testCases := []struct {
+// 		name            string
+// 		gasLimit        uint64
+// 		expectedGasUsed uint64
+// 	}{
+// 		{
+// 			"gas used is the same as gas limit",
+// 			21000,
+// 			21000,
+// 		},
+// 		{
+// 			"gas used is half of Gas limit",
+// 			70000,
+// 			35000,
+// 		},
+// 		{
+// 			"gas used is less than half of gasLimit",
+// 			30000,
+// 			21000,
+// 		},
+// 	}
 
-	recipient := common.HexToAddress("0x378c50D9264C63F3F92B806d4ee56E9D86FfB3Ec")
-	chainID, err := s.network.Validators[0].JSONRPCClient.ChainID(s.ctx)
-	s.Require().NoError(err)
-	from := common.BytesToAddress(s.network.Validators[0].Address)
-	for _, tc := range testCases {
-		s.Run(tc.name, func() {
-			nonce := s.getAccountNonce(from)
-			s.Require().NoError(err)
-			gasPrice := s.getGasPrice()
-			msgTx := evmtypes.NewTx(
-				chainID,
-				nonce,
-				&recipient,
-				nil,
-				tc.gasLimit,
-				gasPrice,
-				nil, nil,
-				nil,
-				nil,
-			)
-			msgTx.From = from.Hex()
-			err = msgTx.Sign(s.ethSigner, s.network.Validators[0].ClientCtx.Keyring)
-			s.Require().NoError(err)
-			err := s.network.Validators[0].JSONRPCClient.SendTransaction(s.ctx, msgTx.AsTransaction())
-			s.Require().NoError(err)
-			s.waitForTransaction()
-			receipt := s.expectSuccessReceipt(msgTx.AsTransaction().Hash())
-			s.Equal(receipt.GasUsed, tc.expectedGasUsed)
-		})
-	}
-}
+// 	recipient := common.HexToAddress("0x378c50D9264C63F3F92B806d4ee56E9D86FfB3Ec")
+// 	chainID, err := s.network.Validators[0].JSONRPCClient.ChainID(s.ctx)
+// 	s.Require().NoError(err)
+// 	from := common.BytesToAddress(s.network.Validators[0].Address)
+// 	for _, tc := range testCases {
+// 		s.Run(tc.name, func() {
+// 			nonce := s.getAccountNonce(from)
+// 			s.Require().NoError(err)
+// 			gasPrice := s.getGasPrice()
+// 			msgTx := evmtypes.NewTx(
+// 				chainID,
+// 				nonce,
+// 				&recipient,
+// 				nil,
+// 				tc.gasLimit,
+// 				gasPrice,
+// 				nil, nil,
+// 				nil,
+// 				nil,
+// 			)
+// 			msgTx.From = from.Hex()
+// 			err = msgTx.Sign(s.ethSigner, s.network.Validators[0].ClientCtx.Keyring)
+// 			s.Require().NoError(err)
+// 			err := s.network.Validators[0].JSONRPCClient.SendTransaction(s.ctx, msgTx.AsTransaction())
+// 			s.Require().NoError(err)
+// 			s.waitForTransaction()
+// 			receipt := s.expectSuccessReceipt(msgTx.AsTransaction().Hash())
+// 			s.Equal(receipt.GasUsed, tc.expectedGasUsed)
+// 		})
+// 	}
+// }

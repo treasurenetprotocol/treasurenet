@@ -5,10 +5,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/treasurenetprotocol/treasurenet/x/gravity/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
 	"github.com/stretchr/testify/require"
+	"github.com/treasurenetprotocol/treasurenet/x/gravity/types"
 )
 
 // Tests that the gravity module's balance is accounted for with unbatched txs, including tx cancellation
@@ -19,10 +19,11 @@ func TestModuleBalanceUnbatchedTxs(t *testing.T) {
 
 	ctx := input.Context
 	var (
-		mySender, _         = sdk.AccAddressFromBech32("gravity1ahx7f8wyertuus9r20284ej0asrs085ceqtfnm")
+		mySender, e1        = sdk.AccAddressFromBech32("treasurenet158ckg6g8l8zy4jckj4hc4tjzx8skeeye4de0k2")
 		myReceiver          = "0xd041c41EA1bf0F006ADBb6d2c9ef9D425dE5eaD7"
 		myTokenContractAddr = "0x429881672B9AE42b8EbA0E26cD9C73711b891Ca5"
 	)
+	require.NoError(t, e1)
 	receiver, err := types.NewEthAddress(myReceiver)
 	require.NoError(t, err)
 	// mint some voucher first
@@ -67,6 +68,8 @@ func TestModuleBalanceUnbatchedTxs(t *testing.T) {
 
 	// Ensure an error is returned for a mismatched balance
 	oneVoucher, _ := types.NewInternalERC20Token(sdk.NewInt(1), myTokenContractAddr)
+	require.NoError(t, err)
+
 	checkImbalancedModule(t, ctx, input.GravityKeeper, input.BankKeeper, mySender, sdk.NewCoins(oneVoucher.GravityCoin()))
 }
 
@@ -78,17 +81,26 @@ func TestModuleBalanceBatchedTxs(t *testing.T) {
 
 	ctx := input.Context
 	var (
-		now                     = time.Now().UTC()
-		mySender, _             = sdk.AccAddressFromBech32("gravity1ahx7f8wyertuus9r20284ej0asrs085ceqtfnm")
-		myReceiver, _           = types.NewEthAddress("0xd041c41EA1bf0F006ADBb6d2c9ef9D425dE5eaD7")
-		myTokenContractAddr1, _ = types.NewEthAddress("0x429881672B9AE42b8EbA0E26cD9C73711b891Ca5")
-		myTokenContractAddr2, _ = types.NewEthAddress("0xF815240800ddf3E0be80e0d848B13ecaa504BF37")
+		now                      = time.Now().UTC()
+		mySender, e1             = sdk.AccAddressFromBech32("treasurenet158ckg6g8l8zy4jckj4hc4tjzx8skeeye4de0k2")
+		myReceiver, e2           = types.NewEthAddress("0xd041c41EA1bf0F006ADBb6d2c9ef9D425dE5eaD7")
+		myTokenContractAddr1, e3 = types.NewEthAddress("0x429881672B9AE42b8EbA0E26cD9C73711b891Ca5")
+		myTokenContractAddr2, e4 = types.NewEthAddress("0xF815240800ddf3E0be80e0d848B13ecaa504BF37")
 	)
+	require.NoError(t, e1)
+	require.NoError(t, e2)
+	require.NoError(t, e3)
+	require.NoError(t, e4)
 	tokens := make([]*types.InternalERC20Token, 2)
-	tokens[0], _ = types.NewInternalERC20Token(sdk.NewInt(150000000000000), myTokenContractAddr1.GetAddress().Hex())
-	tokens[1], _ = types.NewInternalERC20Token(sdk.NewInt(150000000000000), myTokenContractAddr2.GetAddress().Hex())
-	voucher1, _ := types.NewInternalERC20Token(sdk.NewInt(1), myTokenContractAddr1.GetAddress().Hex())
-	voucher2, _ := types.NewInternalERC20Token(sdk.NewInt(1), myTokenContractAddr2.GetAddress().Hex())
+	var err error
+	tokens[0], err = types.NewInternalERC20Token(sdk.NewInt(150000000000000), myTokenContractAddr1.GetAddress().Hex())
+	require.NoError(t, err)
+	tokens[1], err = types.NewInternalERC20Token(sdk.NewInt(150000000000000), myTokenContractAddr2.GetAddress().Hex())
+	require.NoError(t, err)
+	voucher1, err := types.NewInternalERC20Token(sdk.NewInt(1), myTokenContractAddr1.GetAddress().Hex())
+	require.NoError(t, err)
+	voucher2, err := types.NewInternalERC20Token(sdk.NewInt(1), myTokenContractAddr2.GetAddress().Hex())
+	require.NoError(t, err)
 	voucherCoins := []sdk.Coins{
 		sdk.NewCoins(voucher1.GravityCoin()),
 		sdk.NewCoins(voucher2.GravityCoin()),

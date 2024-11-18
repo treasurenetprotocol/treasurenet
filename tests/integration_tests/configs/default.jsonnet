@@ -1,6 +1,6 @@
 {
   dotenv: '../../../scripts/.env',
-  'ethermint_5005-1': {
+  'treasurenet_5005-1': {
     cmd: 'ethermintd',
     'start-flags': '--trace',
     config: {

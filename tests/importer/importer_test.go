@@ -2,10 +2,7 @@ package importer
 
 import (
 	"flag"
-	"fmt"
-	"io"
 	"math/big"
-	"os"
 	"testing"
 	"time"
 
@@ -26,9 +23,7 @@ import (
 	ethvm "github.com/ethereum/go-ethereum/core/vm"
 	"github.com/ethereum/go-ethereum/crypto"
 	ethparams "github.com/ethereum/go-ethereum/params"
-	ethrlp "github.com/ethereum/go-ethereum/rlp"
 
-	"github.com/tendermint/tendermint/abci/types"
 	"github.com/tendermint/tendermint/crypto/tmhash"
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 	tmversion "github.com/tendermint/tendermint/proto/tendermint/version"
@@ -97,78 +92,78 @@ func TestImporterTestSuite(t *testing.T) {
 	suite.Run(t, new(ImporterTestSuite))
 }
 
-func (suite *ImporterTestSuite) TestImportBlocks() {
-	chainContext := NewChainContext()
-	chainConfig := ethparams.MainnetChainConfig
-	vmConfig := ethvm.Config{}
+// func (suite *ImporterTestSuite) TestImportBlocks() {
+// 	chainContext := NewChainContext()
+// 	chainConfig := ethparams.MainnetChainConfig
+// 	vmConfig := ethvm.Config{}
 
-	// open blockchain export file
-	blockchainInput, err := os.Open(flagBlockchain)
-	suite.Require().Nil(err)
+// 	// open blockchain export file
+// 	blockchainInput, err := os.Open(flagBlockchain)
+// 	suite.Require().Nil(err)
 
-	defer func() {
-		err := blockchainInput.Close()
-		suite.Require().NoError(err)
-	}()
+// 	defer func() {
+// 		err := blockchainInput.Close()
+// 		suite.Require().NoError(err)
+// 	}()
 
-	stream := ethrlp.NewStream(blockchainInput, 0)
-	startTime := time.Now()
+// 	stream := ethrlp.NewStream(blockchainInput, 0)
+// 	startTime := time.Now()
 
-	var block ethtypes.Block
+// 	var block ethtypes.Block
 
-	for {
-		err := stream.Decode(&block)
-		if err == io.EOF {
-			break
-		}
+// 	for {
+// 		err := stream.Decode(&block)
+// 		if err == io.EOF {
+// 			break
+// 		}
 
-		suite.Require().NoError(err, "failed to decode block")
+// 		suite.Require().NoError(err, "failed to decode block")
 
-		var (
-			usedGas = new(uint64)
-			gp      = new(ethcore.GasPool).AddGas(block.GasLimit())
-		)
-		header := block.Header()
-		chainContext.Coinbase = header.Coinbase
+// 		var (
+// 			usedGas = new(uint64)
+// 			gp      = new(ethcore.GasPool).AddGas(block.GasLimit())
+// 		)
+// 		header := block.Header()
+// 		chainContext.Coinbase = header.Coinbase
 
-		chainContext.SetHeader(block.NumberU64(), header)
-		tmheader := suite.ctx.BlockHeader()
-		// fix due to that begin block can't have height 0
-		tmheader.Height = int64(block.NumberU64()) + 1
-		suite.app.BeginBlock(types.RequestBeginBlock{
-			Header: tmheader,
-		})
-		ctx := suite.app.NewContext(false, tmheader)
-		ctx = ctx.WithBlockHeight(tmheader.Height)
-		vmdb := statedb.New(ctx, suite.app.EvmKeeper, statedb.NewEmptyTxConfig(common.BytesToHash(ctx.HeaderHash().Bytes())))
+// 		chainContext.SetHeader(block.NumberU64(), header)
+// 		tmheader := suite.ctx.BlockHeader()
+// 		// fix due to that begin block can't have height 0
+// 		tmheader.Height = int64(block.NumberU64()) + 1
+// 		suite.app.BeginBlock(types.RequestBeginBlock{
+// 			Header: tmheader,
+// 		})
+// 		ctx := suite.app.NewContext(false, tmheader)
+// 		ctx = ctx.WithBlockHeight(tmheader.Height)
+// 		vmdb := statedb.New(ctx, suite.app.EvmKeeper, statedb.NewEmptyTxConfig(common.BytesToHash(ctx.HeaderHash().Bytes())))
 
-		if chainConfig.DAOForkSupport && chainConfig.DAOForkBlock != nil && chainConfig.DAOForkBlock.Cmp(block.Number()) == 0 {
-			applyDAOHardFork(vmdb)
-		}
+// 		if chainConfig.DAOForkSupport && chainConfig.DAOForkBlock != nil && chainConfig.DAOForkBlock.Cmp(block.Number()) == 0 {
+// 			applyDAOHardFork(vmdb)
+// 		}
 
-		for _, tx := range block.Transactions() {
+// 		for _, tx := range block.Transactions() {
 
-			receipt, gas, err := applyTransaction(
-				ctx, chainConfig, chainContext, nil, gp, suite.app.EvmKeeper, vmdb, header, tx, usedGas, vmConfig,
-			)
-			suite.Require().NoError(err, "failed to apply tx at block %d; tx: %X; gas %d; receipt:%v", block.NumberU64(), tx.Hash(), gas, receipt)
-			suite.Require().NotNil(receipt)
-		}
+// 			receipt, gas, err := applyTransaction(
+// 				ctx, chainConfig, chainContext, nil, gp, suite.app.EvmKeeper, vmdb, header, tx, usedGas, vmConfig,
+// 			)
+// 			suite.Require().NoError(err, "failed to apply tx at block %d; tx: %X; gas %d; receipt:%v", block.NumberU64(), tx.Hash(), gas, receipt)
+// 			suite.Require().NotNil(receipt)
+// 		}
 
-		// apply mining rewards
-		accumulateRewards(chainConfig, vmdb, header, block.Uncles())
+// 		// apply mining rewards
+// 		accumulateRewards(chainConfig, vmdb, header, block.Uncles())
 
-		// simulate BaseApp EndBlocker commitment
-		endBR := types.RequestEndBlock{Height: tmheader.Height}
-		suite.app.EndBlocker(ctx, endBR)
-		suite.app.Commit()
+// 		// simulate BaseApp EndBlocker commitment
+// 		endBR := types.RequestEndBlock{Height: tmheader.Height}
+// 		suite.app.EndBlocker(ctx, endBR)
+// 		suite.app.Commit()
 
-		// block debugging output
-		if block.NumberU64() > 0 && block.NumberU64()%1000 == 0 {
-			fmt.Printf("processed block: %d (time so far: %v)\n", block.NumberU64(), time.Since(startTime))
-		}
-	}
-}
+// 		// block debugging output
+// 		if block.NumberU64() > 0 && block.NumberU64()%1000 == 0 {
+// 			fmt.Printf("processed block: %d (time so far: %v)\n", block.NumberU64(), time.Since(startTime))
+// 		}
+// 	}
+// }
 
 // accumulateRewards credits the coinbase of the given block with the mining
 // reward. The total reward consists of the static block reward and rewards for

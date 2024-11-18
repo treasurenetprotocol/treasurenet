@@ -5,6 +5,7 @@ CHAINID="treasurenet_5005-1"
 MONIKER="localtestnet"
 KEYRING="test"
 KEYALGO="eth_secp256k1"
+# cosmos default
 LOGLEVEL="info"
 # to trace evm
 TRACE="--trace"
@@ -86,5 +87,6 @@ if [[ $1 == "pending" ]]; then
   echo "pending mode is on, please wait for the first block committed."
 fi
 
+# Start the node (remove the --pruning=nothing flag if historical queries are not needed)
 # Start the node (remove the --pruning=nothing flag if historical queries are not needed)
 treasurenetd start --pruning=nothing --evm.tracer=json $TRACE --log_level $LOGLEVEL --minimum-gas-prices=0.0001aunit --json-rpc.api eth,txpool,personal,net,debug,web3,miner --api.enable

@@ -11,12 +11,12 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/params"
-	"github.com/treasurenetprotocol/treasurenet/tests"
-	"github.com/treasurenetprotocol/treasurenet/x/evm/keeper"
-	"github.com/treasurenetprotocol/treasurenet/x/evm/types"
 	"github.com/tendermint/tendermint/crypto/tmhash"
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 	tmtypes "github.com/tendermint/tendermint/types"
+	"github.com/treasurenetprotocol/treasurenet/tests"
+	"github.com/treasurenetprotocol/treasurenet/x/evm/keeper"
+	"github.com/treasurenetprotocol/treasurenet/x/evm/types"
 )
 
 func (suite *KeeperTestSuite) TestGetHashFn() {
@@ -415,7 +415,7 @@ func (suite *KeeperTestSuite) TestRefundGas() {
 			refund := keeper.GasToRefund(vmdb.GetRefund(), gasUsed, tc.refundQuotient)
 			suite.Require().Equal(tc.expGasRefund, refund)
 
-			err = suite.app.EvmKeeper.RefundGas(suite.ctx, m, refund, "aphoton")
+			err = suite.app.EvmKeeper.RefundGas(suite.ctx, m, refund, "aunit")
 			if tc.noError {
 				suite.Require().NoError(err)
 			} else {
@@ -493,7 +493,7 @@ func (suite *KeeperTestSuite) TestEVMConfig() {
 	// london hardfork is enabled by default
 	suite.Require().Equal(big.NewInt(0), cfg.BaseFee)
 	suite.Require().Equal(suite.address, cfg.CoinBase)
-	suite.Require().Equal(types.DefaultParams().ChainConfig.EthereumConfig(big.NewInt(9000)), cfg.ChainConfig)
+	suite.Require().Equal(types.DefaultParams().ChainConfig.EthereumConfig(big.NewInt(5005)), cfg.ChainConfig)
 }
 
 func (suite *KeeperTestSuite) TestContractDeployment() {

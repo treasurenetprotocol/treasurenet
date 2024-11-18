@@ -3,7 +3,6 @@ package types
 import (
 	"strings"
 
-	// "github.com/evmos/ethermint/crypto/ethsecp256k1"
 	"github.com/cosmos/cosmos-sdk/crypto/keys/ed25519"
 	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
 	"github.com/cosmos/cosmos-sdk/crypto/types/multisig"
@@ -14,9 +13,9 @@ import (
 
 const (
 	// MainnetChainID defines the Evmos EIP155 chain ID for mainnet
-	MainnetChainID = "treasurenet_5002-1"
+	MainnetChainID = "treasurenet_5002"
 	// TestnetChainID defines the Evmos EIP155 chain ID for testnet
-	TestnetChainID = "treasurenet_5005-1"
+	TestnetChainID = "treasurenet_5005"
 )
 
 // IsMainnet returns true if the chain-id has the Evmos mainnet EIP155 chain prefix.

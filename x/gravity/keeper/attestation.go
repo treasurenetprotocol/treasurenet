@@ -383,6 +383,19 @@ func (k Keeper) setLastObservedEventNonce(ctx sdk.Context, nonce uint64) {
 	store.Set(types.LastObservedEventNonceKey, types.UInt64Bytes(nonce))
 }
 
+// setLastObservedEventNonce sets the latest observed event nonce
+func (k Keeper) SetLastObservedEventNonce(ctx sdk.Context, nonce uint64) {
+	store := ctx.KVStore(k.storeKey)
+	// last := k.GetLastObservedEventNonce(ctx)
+	// // event nonce must increase, unless it's zero at which point allow zero to be set
+	// // as many times as needed (genesis test setup etc)
+	// zeroCase := last == 0 && nonce == 0
+	// if last >= nonce && !zeroCase {
+	// 	panic("Event nonce going backwards or replay!")
+	// }
+	store.Set(types.LastObservedEventNonceKey, types.UInt64Bytes(nonce))
+}
+
 // GetLastEventNonceByValidator returns the latest event nonce for a given validator
 func (k Keeper) GetLastEventNonceByValidator(ctx sdk.Context, validator sdk.ValAddress) uint64 {
 	if err := sdk.VerifyAddressFormat(validator); err != nil {

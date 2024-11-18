@@ -35,12 +35,17 @@ require (
 	github.com/tendermint/tendermint v0.34.21
 	github.com/tendermint/tm-db v0.6.7
 	github.com/tyler-smith/go-bip39 v1.1.0
-	golang.org/x/net v0.0.0-20220726230323-06994584191e
-	golang.org/x/text v0.3.7
+	golang.org/x/net v0.26.0
+	golang.org/x/text v0.16.0
 	google.golang.org/genproto v0.0.0-20220810155839-1856144b1d9c
 	google.golang.org/grpc v1.48.0
 	google.golang.org/protobuf v1.28.1
 	gopkg.in/yaml.v2 v2.4.0
+)
+
+require (
+	github.com/enigmampc/btcutil v1.0.3-0.20200723161021-e2fb6adb2a25 // indirect
+	github.com/google/go-cmp v0.6.0 // indirect
 )
 
 require (
@@ -76,7 +81,6 @@ require (
 	github.com/dustin/go-humanize v1.0.0 // indirect
 	github.com/dvsekhvalnov/jose2go v0.0.0-20200901110807-248326c1351b // indirect
 	github.com/edsrzf/mmap-go v1.0.0 // indirect
-	github.com/enigmampc/btcutil v1.0.3-0.20200723161021-e2fb6adb2a25 // indirect
 	github.com/felixge/httpsnoop v1.0.1 // indirect
 	github.com/fsnotify/fsnotify v1.5.4 // indirect
 	github.com/gballet/go-libpcsclite v0.0.0-20190607065134-2772fd86a8ff // indirect
@@ -147,10 +151,11 @@ require (
 	github.com/tklauser/numcpus v0.4.0 // indirect
 	github.com/zondax/hid v0.9.0 // indirect
 	go.etcd.io/bbolt v1.3.6 // indirect
-	golang.org/x/crypto v0.0.0-20220722155217-630584e8d5aa // indirect
-	golang.org/x/sync v0.0.0-20220722155255-886fb9371eb4 // indirect
-	golang.org/x/sys v0.0.0-20220727055044-e65921a090b8 // indirect
-	golang.org/x/term v0.0.0-20220722155259-a9ba230a4035 // indirect
+	golang.org/x/crypto v0.24.0 // indirect
+	golang.org/x/exp v0.0.0-20240222234643-814bf88cf225
+	golang.org/x/sync v0.7.0 // indirect
+	golang.org/x/sys v0.21.0 // indirect
+	golang.org/x/term v0.21.0 // indirect
 	gopkg.in/ini.v1 v1.66.6 // indirect
 	gopkg.in/natefinch/npipe.v2 v2.0.0-20160621034901-c1b8fa8bdcce // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
@@ -160,11 +165,12 @@ require (
 replace (
 	github.com/99designs/keyring => github.com/cosmos/keyring v1.1.7-0.20210622111912-ef00f8ac3d76
 	github.com/coinbase/rosetta-sdk-go v0.7.0 => github.com/coinbase/rosetta-sdk-go v0.6.10
-	github.com/cosmos/cosmos-sdk v0.45.8 => github.com/treasurenetprotocol/treasurenet-cosmos-pack v1.0.2-tn-ibc
+	github.com/cosmos/cosmos-sdk v0.45.8 => github.com/treasurenetprotocol/treasurenet-cosmos-pack v1.1.2-tn-crosschain
 	github.com/cosmos/iavl v0.19.1 => github.com/cosmos/iavl v0.17.3
-	github.com/cosmos/ibc-go/v3 v3.2.0 => github.com/treasurenetprotocol/treasurenet-ibc-go-pack v1.0.0-231023-tn
+	github.com/cosmos/ibc-go/v3 v3.2.0 => github.com/treasurenetprotocol/treasurenet-ibc-go-pack/v3 v3.3.0-tn-ibc
 	github.com/gogo/protobuf => github.com/regen-network/protobuf v1.3.3-alpha.regen.1
-	github.com/osmosis-labs/bech32-ibc v0.3.0-rc1 => ./bech32-ibc_pack
+	github.com/osmosis-labs/bech32-ibc v0.3.0-rc1 => github.com/treasurenetprotocol/treasurenet-bech32-pack v1.0.0-231027-tn
 	github.com/tendermint/tendermint v0.34.21 => ./tendermint_pack
+	golang.org/x/crypto v0.24.0 => golang.org/x/crypto v0.19.0
 	google.golang.org/grpc => google.golang.org/grpc v1.33.2
 )

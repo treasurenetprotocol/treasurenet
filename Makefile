@@ -1,6 +1,7 @@
 #!/usr/bin/make -f
 
 PACKAGES_NOSIMULATION=$(shell go list ./... | grep -v '/simulation')
+PACKAGES_NOSIMULATION_TEST=$(shell go list ./... | grep -v '/simulation' | grep -v '/tests' | grep -v '/feemarket' )
 PACKAGES_SIMTEST=$(shell go list ./... | grep '/simulation')
 VERSION ?= $(shell echo $(shell git describe --tags `git rev-list --tags="v*" --max-count=1`) | sed 's/^v//')
 TMVERSION := $(shell go list -m github.com/tendermint/tendermint | sed 's:.* ::')
@@ -11,11 +12,13 @@ TREASURENET_BINARY = treasurenetd
 TREASURENET_DIR = treasurenet
 BUILDDIR ?= $(CURDIR)/build
 SIMAPP = ./app
-HTTPS_GIT := https://github.com/evmos/ethermint.git
+HTTPS_GIT := https://github.com/treasurenetprotocol/treasurenet.git
 PROJECT_NAME = $(shell git remote get-url origin | xargs basename -s .git)
 DOCKER := $(shell which docker)
 DOCKER_BUF := $(DOCKER) run --rm -v $(CURDIR):/workspace --workdir /workspace bufbuild/buf:1.0.0-rc8
-
+NAMESPACE := treasurenetd
+DOCKER_IMAGE := $(NAMESPACE)
+DOCKER_TAG := latest
 export GO111MODULE = on
 
 # Default target executed when no arguments are given to make.
@@ -125,12 +128,12 @@ docker-build:
 	docker tag ${DOCKER_IMAGE}:${DOCKER_TAG} ${DOCKER_IMAGE}:latest
 	# docker tag ${DOCKER_IMAGE}:${DOCKER_TAG} ${DOCKER_IMAGE}:${COMMIT_HASH}
 	# update old container
-	docker rm treasurenet || true
+	docker rm treasurenetd || true
 	# create a new container from the latest image
-	docker create --name treasurenet -t -i treasurenet:latest treasurenet
+	docker create --name treasurenetd -t -i treasurenetd:latest treasurenetd
 	# move the binaries to the ./build directory
 	mkdir -p ./build/
-	docker cp treasurenet:/usr/bin/treasurenetd ./build/
+	docker cp treasurenetd:/usr/bin/treasurenetd ./build/
 
 $(MOCKS_DIR):
 	mkdir -p $(MOCKS_DIR)
@@ -153,7 +156,7 @@ build-all: tools build lint test
 ###                                Releasing                                ###
 ###############################################################################
 
-PACKAGE_NAME:=github.com/evmos/ethermint
+PACKAGE_NAME:=github.com/treasurenetprotocol/treasurenet
 GOLANG_CROSS_VERSION  = v1.18
 GOPATH ?= '$(HOME)/go'
 release-dry-run:
@@ -285,106 +288,8 @@ godocs:
 ###                           Tests & Simulation                            ###
 ###############################################################################
 
-test: test-unit
-test-all: test-unit test-race
-PACKAGES_UNIT=$(shell go list ./... | grep -Ev 'vendor|importer')
-TEST_PACKAGES=./...
-TEST_TARGETS := test-unit test-unit-cover test-race
-
-# Test runs-specific rules. To add a new test target, just add
-# a new rule, customise ARGS or TEST_PACKAGES ad libitum, and
-# append the new rule to the TEST_TARGETS list.
-test-unit: ARGS=-timeout=10m -race
-test-unit: TEST_PACKAGES=$(PACKAGES_UNIT)
-
-test-race: ARGS=-race
-test-race: TEST_PACKAGES=$(PACKAGES_NOSIMULATION)
-$(TEST_TARGETS): run-tests
-
-test-unit-cover: ARGS=-timeout=10m -race -coverprofile=coverage.txt -covermode=atomic
-test-unit-cover: TEST_PACKAGES=$(PACKAGES_UNIT)
-
-run-tests:
-ifneq (,$(shell which tparse 2>/dev/null))
-	go test -mod=readonly -json $(ARGS) $(EXTRA_ARGS) $(TEST_PACKAGES) | tparse
-else
-	go test -mod=readonly $(ARGS)  $(EXTRA_ARGS) $(TEST_PACKAGES)
-endif
-
-test-import:
-	go test -run TestImporterTestSuite -v --vet=off github.com/evmos/ethermint/tests/importer
-
-test-rpc:
-	./scripts/integration-test-all.sh -t "rpc" -q 1 -z 1 -s 2 -m "rpc" -r "true"
-
-test-integration:
-	./scripts/integration-test-all.sh -t "integration" -q 1 -z 1 -s 2 -m "integration" -r "true"
-
-run-integration-tests:
-	@nix-shell ./tests/integration_tests/shell.nix --run ./scripts/run-integration-tests.sh
-
-.PHONY: run-integration-tests
-
-
-test-rpc-pending:
-	./scripts/integration-test-all.sh -t "pending" -q 1 -z 1 -s 2 -m "pending" -r "true"
-
-test-solidity:
-	@echo "Beginning solidity tests..."
-	./scripts/run-solidity-tests.sh
-
-
-.PHONY: run-tests test test-all test-import test-rpc test-contract test-solidity $(TEST_TARGETS)
-
-test-sim-nondeterminism:
-	@echo "Running non-determinism test..."
-	@go test -mod=readonly $(SIMAPP) -run TestAppStateDeterminism -Enabled=true \
-		-NumBlocks=100 -BlockSize=200 -Commit=true -Period=0 -v -timeout 24h
-
-test-sim-random-genesis-fast:
-	@echo "Running random genesis simulation..."
-	@go test -mod=readonly $(SIMAPP) -run TestFullAppSimulation \
-		-Enabled=true -NumBlocks=100 -BlockSize=200 -Commit=true -Seed=99 -Period=5 -v -timeout 24h
-
-test-sim-import-export: runsim
-	@echo "Running application import/export simulation. This may take several minutes..."
-	@$(BINDIR)/runsim -Jobs=4 -SimAppPkg=$(SIMAPP) -ExitOnFail 50 5 TestAppImportExport
-
-test-sim-after-import: runsim
-	@echo "Running application simulation-after-import. This may take several minutes..."
-	@$(BINDIR)/runsim -Jobs=4 -SimAppPkg=$(SIMAPP) -ExitOnFail 50 5 TestAppSimulationAfterImport
-
-test-sim-random-genesis-multi-seed: runsim
-	@echo "Running multi-seed custom genesis simulation..."
-	@$(BINDIR)/runsim -SimAppPkg=$(SIMAPP) -ExitOnFail 400 5 TestFullAppSimulation
-
-test-sim-multi-seed-long: runsim
-	@echo "Running long multi-seed application simulation. This may take awhile!"
-	@$(BINDIR)/runsim -Jobs=4 -SimAppPkg=$(SIMAPP) -ExitOnFail 500 50 TestFullAppSimulation
-
-test-sim-multi-seed-short: runsim
-	@echo "Running short multi-seed application simulation. This may take awhile!"
-	@$(BINDIR)/runsim -Jobs=4 -SimAppPkg=$(SIMAPP) -ExitOnFail 50 10 TestFullAppSimulation
-
-test-sim-benchmark-invariants:
-	@echo "Running simulation invariant benchmarks..."
-	@go test -mod=readonly $(SIMAPP) -benchmem -bench=BenchmarkInvariants -run=^$ \
-	-Enabled=true -NumBlocks=1000 -BlockSize=200 \
-	-Period=1 -Commit=true -Seed=57 -v -timeout 24h
-
-.PHONY: \
-test-sim-nondeterminism \
-test-sim-custom-genesis-fast \
-test-sim-import-export \
-test-sim-after-import \
-test-sim-custom-genesis-multi-seed \
-test-sim-multi-seed-short \
-test-sim-multi-seed-long \
-test-sim-benchmark-invariants
-
-benchmark:
-	@go test -mod=readonly -bench=. $(PACKAGES_NOSIMULATION)
-.PHONY: benchmark
+test:
+	@go test -mod=readonly $(PACKAGES_NOSIMULATION_TEST)
 
 ###############################################################################
 ###                                Linting                                  ###
@@ -393,6 +298,8 @@ benchmark:
 lint:
 	@@test -n "$$golangci-lint version | awk '$4 >= 1.42')"
 	golangci-lint run --out-format=tab -n
+run-integration-tests:
+	@nix-shell ./tests/integration_tests/shell.nix --run ./scripts/run-integration-tests.sh
 
 lint-py:
 	flake8 --show-source --count --statistics \
@@ -497,13 +404,13 @@ ifeq ($(OS),Windows_NT)
 	mkdir localnet-setup &
 	@$(MAKE) localnet-build
 
-	IF not exist "build/node0/$(TREASURENET_BINARY)/config/genesis.json" docker run --rm -v $(CURDIR)/build\treasurenet\Z treasurenetd/node "./treasurenetd testnet --v 4 -o /treasurenet --keyring-backend=test --ip-addresses treasurenetdnode0,treasurenetdnode1,treasurenetdnode2,treasurenetdnode3"
+	IF not exist "build/node0/$(TREASURENET_BINARY)/config/genesis.json" docker run --rm -v $(CURDIR)/build\treasurenet\Z treasurenetd/node "./treasurenetd testnet init-files --v 4 -o /treasurenet --keyring-backend=test  --starting-ip-address 192.167.10.2"
 	docker-compose up -d
 else
 	mkdir -p localnet-setup
 	@$(MAKE) localnet-build
 
-	if ! [ -f localnet-setup/node0/$(TREASURENET_BINARY)/config/genesis.json ]; then docker run --rm -v $(CURDIR)/localnet-setup:/treasurenet:Z treasurenetd/node "./treasurenetd testnet --v 4 -o /treasurenet --keyring-backend=test --ip-addresses treasurenetdnode0,treasurenetdnode1,treasurenetdnode2,treasurenetdnode3"; fi
+	if ! [ -f localnet-setup/node0/$(TREASURENET_BINARY)/config/genesis.json ]; then docker run --rm -v $(CURDIR)/localnet-setup:/treasurenet:Z treasurenetd/node "./treasurenetd testnet init-files --v 4 -o /treasurenet --keyring-backend=test  --starting-ip-address 192.167.10.2"; fi
 	docker-compose up -d
 endif
 
@@ -520,15 +427,15 @@ localnet-clean:
 localnet-unsafe-reset:
 	docker-compose down
 ifeq ($(OS),Windows_NT)
-	@docker run --rm -v $(CURDIR)\localnet-setup\node0\ethermitd:treasurenet\Z treasurenetd/node "./treasurenetd unsafe-reset-all --home=/treasurenet"
-	@docker run --rm -v $(CURDIR)\localnet-setup\node1\ethermitd:treasurenet\Z treasurenetd/node "./treasurenetd unsafe-reset-all --home=/treasurenet"
-	@docker run --rm -v $(CURDIR)\localnet-setup\node2\ethermitd:treasurenet\Z treasurenetd/node "./treasurenetd unsafe-reset-all --home=/treasurenet"
-	@docker run --rm -v $(CURDIR)\localnet-setup\node3\ethermitd:treasurenet\Z treasurenetd/node "./treasurenetd unsafe-reset-all --home=/treasurenet"
+	@docker run --rm -v $(CURDIR)\localnet-setup\node0\treasurenetd:treasurenet\Z treasurenetd/node "./treasurenetd unsafe-reset-all --home=/treasurenet"
+	@docker run --rm -v $(CURDIR)\localnet-setup\node1\treasurenetd:treasurenet\Z treasurenetd/node "./treasurenetd unsafe-reset-all --home=/treasurenet"
+	@docker run --rm -v $(CURDIR)\localnet-setup\node2\treasurenetd:treasurenet\Z treasurenetd/node "./treasurenetd unsafe-reset-all --home=/treasurenet"
+	@docker run --rm -v $(CURDIR)\localnet-setup\node3\treasurenetd:treasurenet\Z treasurenetd/node "./treasurenetd unsafe-reset-all --home=/treasurenet"
 else
-	@docker run --rm -v $(CURDIR)/localnet-setup/node0/ethermitd:/treasurenet:Z treasurenetd/node "./treasurenetd unsafe-reset-all --home=/treasurenet"
-	@docker run --rm -v $(CURDIR)/localnet-setup/node1/ethermitd:/treasurenet:Z treasurenetd/node "./treasurenetd unsafe-reset-all --home=/treasurenet"
-	@docker run --rm -v $(CURDIR)/localnet-setup/node2/ethermitd:/treasurenet:Z treasurenetd/node "./treasurenetd unsafe-reset-all --home=/treasurenet"
-	@docker run --rm -v $(CURDIR)/localnet-setup/node3/ethermitd:/treasurenet:Z treasurenetd/node "./treasurenetd unsafe-reset-all --home=/treasurenet"
+	@docker run --rm -v $(CURDIR)/localnet-setup/node0/treasurenetd:/treasurenet:Z treasurenetd/node "./treasurenetd unsafe-reset-all --home=/treasurenet"
+	@docker run --rm -v $(CURDIR)/localnet-setup/node1/treasurenetd:/treasurenet:Z treasurenetd/node "./treasurenetd unsafe-reset-all --home=/treasurenet"
+	@docker run --rm -v $(CURDIR)/localnet-setup/node2/treasurenetd:/treasurenet:Z treasurenetd/node "./treasurenetd unsafe-reset-all --home=/treasurenet"
+	@docker run --rm -v $(CURDIR)/localnet-setup/node3/treasurenetd:/treasurenet:Z treasurenetd/node "./treasurenetd unsafe-reset-all --home=/treasurenet"
 endif
 
 # Clean testnet

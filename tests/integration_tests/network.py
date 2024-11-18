@@ -117,7 +117,7 @@ def setup_custom_ethermint(path, base_port, config, post_init=None, chain_binary
     try:
         wait_for_port(ports.evmrpc_port(base_port))
         wait_for_port(ports.evmrpc_ws_port(base_port))
-        yield Ethermint(path / "ethermint_5005-1")
+        yield Ethermint(path / "treasurenet_5005-1")
     finally:
         os.killpg(os.getpgid(proc.pid), signal.SIGTERM)
         proc.wait()
