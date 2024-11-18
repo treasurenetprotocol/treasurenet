@@ -30,8 +30,6 @@ func getMintat(ctx context.Context) {
 			}
 			defer conn.Close()
 			// contractAddress
-			// tokenAddress := common.HexToAddress("0x83754343cDc9dDC8A5FcDD283d0aeaF689Af6b8d")
-			// tokenAddress := common.HexToAddress("0xeC9B8297aa88603004c1aB91b10B0220C704BcC3")
 			tokenAddress := common.HexToAddress("0x465C5ed965692F850f0a3Df1aA29955953a53714")
 			instance, err := mintat.NewContract(tokenAddress, conn)
 			if err != nil {
