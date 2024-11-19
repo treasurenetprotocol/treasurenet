@@ -281,7 +281,7 @@ func (k Keeper) GetCurrentValset(ctx sdk.Context) (types.Valset, error) {
 			totalPower = totalPower.Add(p)
 		}
 	}
-	fmt.Printf("GetCurrentValset bridgeValidators:%+v\n", bridgeValidators)
+	//fmt.Printf("GetCurrentValset bridgeValidators:%+v\n", bridgeValidators)
 	// normalize power values to the maximum bridge power which is 2^32
 	for i := range bridgeValidators {
 		bridgeValidators[i].Power = normalizeValidatorPower(bridgeValidators[i].Power, totalPower)
@@ -302,13 +302,13 @@ func (k Keeper) GetCurrentValset(ctx sdk.Context) (types.Valset, error) {
 	} else {
 		rewardToken, rewardAmount = k.RewardToERC20Lookup(ctx, reward)
 	}
-	fmt.Printf("GetCurrentValset rewardToken:%+v\n", rewardToken)
-	fmt.Printf("GetCurrentValset rewardAmount:%+v\n", rewardAmount)
+	//fmt.Printf("GetCurrentValset rewardToken:%+v\n", rewardToken)
+	//fmt.Printf("GetCurrentValset rewardAmount:%+v\n", rewardAmount)
 	// increment the nonce, since this potential future valset should be after the current valset
 	valsetNonce := k.GetLatestValsetNonce(ctx) + 1
-	fmt.Printf("GetCurrentValset valsetNonce:%+v\n", valsetNonce)
+	//fmt.Printf("GetCurrentValset valsetNonce:%+v\n", valsetNonce)
 	valset, err := types.NewValset(valsetNonce, uint64(ctx.BlockHeight()), bridgeValidators, rewardAmount, *rewardToken)
-	fmt.Printf("GetCurrentValset valset:%+v\n", valset)
+	//fmt.Printf("GetCurrentValset valset:%+v\n", valset)
 	if err != nil {
 		return types.Valset{}, (sdkerrors.Wrap(err, types.ErrInvalidValset.Error()))
 	}
