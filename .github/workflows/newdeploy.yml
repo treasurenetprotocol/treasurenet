@@ -9,7 +9,7 @@ env:
   gha-role-name: "GitHubAction-AssumeRoleWithAction"
   dockerfile-path: "./Dockerfile"
   composefile-path: "./docker-compose.yaml"
-  ecr-repo-aws-region: "us-west-2"
+  ecr-repo-aws-region: "us-west-1"
 
 jobs:
   print_timestamp:
