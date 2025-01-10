@@ -1,0 +1,53 @@
+name: Build and Push Docker Image to ECR
+
+
+on:
+  push:
+    branches:
+      - feature/3.0.1  
+env:
+  gha-role-name: "GitHubAction-AssumeRoleWithAction"
+  dockerfile-path: "./Dockerfile"
+  composefile-path: "./docker-compose.yaml"
+  ecr-repo-aws-region: "us-west-2"
+
+jobs:
+  EnvSetup:
+    needs: [ print_timestamp ]
+    name: Setup Environment
+    runs-on: self-hosted
+    outputs:
+      gha-role-name: ${{ steps.set-aws-info.outputs.gha-role-name }}
+      dockerfile-path: ${{ steps.set-aws-info.outputs.dockerfile-path }}
+      composefile-path: ${{ steps.set-aws-info.outputs.composefile-path }}
+      ecr-repo: ${{ steps.extract-repo-name.outputs.repo-name }}
+      aws-secret-name: ${{ steps.extract-repo-name.outputs.secret-name }}
+      ecr-repo-aws-region: ${{ steps.set-aws-info.outputs.ecr-repo-aws-region }}
+    steps:
+      - name: Extract repo name
+        id: extract-repo-name
+        run: |
+          REPO_NAME="${{ github.repository }}"
+          SHORT_NAME=${REPO_NAME##*/}
+          echo "repo-name=$SHORT_NAME" >> $GITHUB_OUTPUT
+          echo "secret-name=testnet/$SHORT_NAME" >>$GITHUB_OUTPUT
+
+      - name: set-aws-info
+        id: set-aws-info
+        run: |
+          echo "ecr-repo-aws-region=${{ env.ecr-repo-aws-region }}" >> $GITHUB_OUTPUT
+          echo "gha-role-name=${{ env.gha-role-name }}" >> $GITHUB_OUTPUT
+          echo "dockerfile-path=${{ env.dockerfile-path }}" >> $GITHUB_OUTPUT
+          echo "composefile-path=${{ env.composefile-path }}">> $GITHUB_OUTPUT
+          
+  build-scan-publish:
+    needs: [ EnvSetup ]
+    uses: treasurenetprotocol/reusable-workflows/.github/workflows/reusable-ecr-build-push.yml@feat/add_job_deployment
+    with:
+      gha-role-name: ${{ needs.EnvSetup.outputs.gha-role-name }}
+      dockerfile-path: ${{ needs.EnvSetup.outputs.dockerfile-path }}
+      ecr-repo: ${{ needs.EnvSetup.outputs.ecr-repo }}
+      ecr-repo-aws-region: ${{ needs.EnvSetup.outputs.ecr-repo-aws-region }}
+    secrets:
+      AWS_MANAGEMENT_ACCOUNT: ${{ secrets.AWS_MANAGEMENT_ACCOUNT }}
+      AWS_TARGET_ACCOUNT: ${{ secrets.AWS_TESTNET_ACCOUNT }}
