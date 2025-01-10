@@ -12,6 +12,8 @@ env:
   ecr-repo-aws-region: "us-west-2"
 
 jobs:
+  print_timestamp:
+      uses: treasurenetprotocol/reusable-workflows/.github/workflows/reusable-timestamp.yml@main
   EnvSetup:
     needs: [ print_timestamp ]
     name: Setup Environment
