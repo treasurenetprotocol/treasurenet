@@ -81,8 +81,12 @@ jobs:
           go env -w GO111MODULE=on
           go mod tidy
           make install
+
+      - name: check build
+        run: |
           cd build
           ls
+          cd ..
 
       - name: Check if binary exists
         run: |
