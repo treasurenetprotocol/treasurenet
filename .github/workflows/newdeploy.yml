@@ -16,7 +16,7 @@ env:
 
 jobs:
   print_timestamp:
-      uses: treasurenetprotocol/reusable-workflows/.github/workflows/reusable-timestamp.yml@main
+    uses: treasurenetprotocol/reusable-workflows/.github/workflows/reusable-timestamp.yml@main
 
   EnvSetup:
     needs: [ print_timestamp ]
@@ -35,7 +35,7 @@ jobs:
         run: |
           REPO_NAME="${{ github.repository }}"
           SHORT_NAME=${REPO_NAME##*/}
-          echo "repo-name=$SHORT_NAME" >> $GITHUB_OUTPUT
+          echo "repo-name=treasurenet-$SHORT_NAME" >> $GITHUB_OUTPUT
           echo "secret-name=testnet/$SHORT_NAME" >>$GITHUB_OUTPUT
 
       - name: set-aws-info
@@ -45,9 +45,7 @@ jobs:
           echo "gha-role-name=${{ env.gha-role-name }}" >> $GITHUB_OUTPUT
           echo "dockerfile-path=${{ env.dockerfile-path }}" >> $GITHUB_OUTPUT
           echo "composefile-path=${{ env.composefile-path }}">> $GITHUB_OUTPUT
-          
-  
-  
+
   build-scan-publish:
     needs: [ EnvSetup ]
     uses: treasurenetprotocol/reusable-workflows/.github/workflows/reusable-ecr-build-push.yml@feat/add_job_deployment
