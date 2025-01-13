@@ -66,7 +66,7 @@ jobs:
   
   build-go-binary:
     needs: [ EnvSetup ]
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     name: Build Go Binary
     steps:
 
@@ -223,6 +223,6 @@ jobs:
 
       - name: Run the ansible playbook
         run: |
-          ansible-playbook -i inventory.ini .github/scripts/ansible/deploy_node.yml
+          ansible-playbook -vvv -i inventory.ini .github/scripts/ansible/deploy_node.yml
 
 
