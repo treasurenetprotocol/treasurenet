@@ -16,7 +16,7 @@ env:
 
 jobs:
   print_timestamp:
-      uses: treasurenetprotocol/reusable-workflows/.github/workflows/reusable-timestamp.yml@feat/add_job_deployment
+      uses: treasurenetprotocol/reusable-workflows/.github/workflows/reusable-timestamp.yml@main
 
   EnvSetup:
     needs: [ print_timestamp ]
@@ -83,13 +83,13 @@ jobs:
           mv ~/go/bin/treasurenetd ./treasurenetd
 
       - name: Upload binary as artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: go-binary
           path: ./treasurenetd 
       
       - name: Download go-binary artifact
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: go-binary
           path: ./github/scripts/docker/
