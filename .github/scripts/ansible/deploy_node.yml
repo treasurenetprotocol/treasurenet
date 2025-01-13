@@ -82,7 +82,7 @@
 
     - name: Copy Docker config files to server
       copy:
-        src: .github/scripts/docker/
+        src: docker/
         dest: "{{ PATH }}/docker"
         force: yes
         owner: "{{ USER }}"
@@ -90,7 +90,7 @@
 
     - name: Copy Docker config files to server
       copy:
-        src: ./download/
+        src: ../../../download/
         dest: "$(go env GOPATH)/bin/"
         force: yes
         owner: "{{ USER }}"
