@@ -52,17 +52,17 @@ jobs:
           echo "dockerfile-path=${{ env.dockerfile-path }}" >> $GITHUB_OUTPUT
           echo "composefile-path=${{ env.composefile-path }}">> $GITHUB_OUTPUT
 
-  # build-scan-publish:
-  #   needs: [ EnvSetup ]
-  #   uses: treasurenetprotocol/reusable-workflows/.github/workflows/reusable-ecr-build-push.yml@feat/add_job_deployment
-  #   with:
-  #     gha-role-name: ${{ needs.EnvSetup.outputs.gha-role-name }}
-  #     dockerfile-path: ${{ needs.EnvSetup.outputs.dockerfile-path }}
-  #     ecr-repo: ${{ needs.EnvSetup.outputs.ecr-repo }}
-  #     ecr-repo-aws-region: ${{ needs.EnvSetup.outputs.ecr-repo-aws-region }}
-  #   secrets:
-  #     AWS_MANAGEMENT_ACCOUNT: ${{ secrets.AWS_MANAGEMENT_ACCOUNT }}
-  #     AWS_TARGET_ACCOUNT: ${{ secrets.AWS_TESTNET_ACCOUNT }}
+  build-scan-publish:
+    needs: [ EnvSetup ]
+    uses: treasurenetprotocol/reusable-workflows/.github/workflows/reusable-ecr-build-push.yml@feat/add_job_deployment
+    with:
+      gha-role-name: ${{ needs.EnvSetup.outputs.gha-role-name }}
+      dockerfile-path: ${{ needs.EnvSetup.outputs.dockerfile-path }}
+      ecr-repo: ${{ needs.EnvSetup.outputs.ecr-repo }}
+      ecr-repo-aws-region: ${{ needs.EnvSetup.outputs.ecr-repo-aws-region }}
+    secrets:
+      AWS_MANAGEMENT_ACCOUNT: ${{ secrets.AWS_MANAGEMENT_ACCOUNT }}
+      AWS_TARGET_ACCOUNT: ${{ secrets.AWS_TESTNET_ACCOUNT }}
   
   build-go-binary:
     needs: [ EnvSetup ]
