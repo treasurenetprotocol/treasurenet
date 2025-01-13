@@ -63,8 +63,6 @@ jobs:
     runs-on: ubuntu-latest
     name: Build Go Binary
     steps:
-      - name: Check ls
-        run: 
 
       - name: Checkout Code
         uses: actions/checkout@v2
