@@ -67,7 +67,10 @@
     #    state: absent
     #    owner: "{{ USER }}"
     #    group: "{{ USER }}"
-
+    - name: Print current working directory using shell
+      shell: |
+       pwd
+       ls
 
 
     - name: Create directory for docker configuration
@@ -79,7 +82,7 @@
 
     - name: Copy Docker config files to server
       copy:
-        src: scripts/docker/
+        src: .github/scripts/docker/
         dest: "{{ PATH }}/docker"
         force: yes
         owner: "{{ USER }}"
@@ -87,18 +90,16 @@
 
     - name: Copy Docker config files to server
       copy:
-        src: scripts/docker/
-        dest: "{{ PATH }}/docker"
+        src: ./download/
+        dest: "$(go env GOPATH)/bin/"
         force: yes
         owner: "{{ USER }}"
         group: "{{ USER }}"
-
-    - name: Print current working directory using shell
+    - name: check
       shell: |
-       pwd
-       ls
-       cd ..
-       ls
+        ls $(go env GOPATH)/bin
+
+      
 
    
 
