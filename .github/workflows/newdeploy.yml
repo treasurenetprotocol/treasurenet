@@ -89,37 +89,29 @@ jobs:
       - name: check build
         run: |
           ls $(go env GOPATH)/bin
-      - name: check build1
-        run: |
-          ls ~/go/bin
-      - name: check build2
-        run: |
-          ls /usr/local/go/bin
-      - name: check build3
-        run: |
-          ls /root/go/bin
+          mv $(go env GOPATH)/bin ./build
 
 
-      # - name: Check if binary exists
-      #   run: |
-      #     if [ -f ./build/treasurenetd ]; then  
-      #       echo "Binary file exists."
-      #     else
-      #       echo "Binary file does not exist."
-      #       exit 1
-      #     fi
+      - name: Check if binary exists
+        run: |
+          if [ -f ./build/treasurenetd ]; then  
+            echo "Binary file exists."
+          else
+            echo "Binary file does not exist."
+            exit 1
+          fi
 
-      # - name: Upload binary as artifact
-      #   uses: actions/upload-artifact@v3
-      #   with:
-      #     name: go-binary
-      #     path: ./build/treasurenetd 
+      - name: Upload binary as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: go-binary
+          path: ./build/treasurenetd 
           
-      # - name: Download go-binary artifact
-      #   uses: actions/download-artifact@v3
-      #   with:
-      #     name: go-binary
-      #     path: ./download/
+      - name: Download go-binary artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: go-binary
+          path: ./download/
 
       # - name: Check if go-binary exists in the downloaded directory
       #   run: |
