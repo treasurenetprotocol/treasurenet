@@ -89,9 +89,9 @@ jobs:
       - name: check build
         run: |
           ls $(go env GOPATH)/bin
-          cp $(go env GOPATH)/bin ./build
+          cp $(go env GOPATH)/bin/treasurenetd ./build
 
-      - name: check build1
+      - name: check build
         run: |
           cd ./build
           pwd
