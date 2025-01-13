@@ -89,7 +89,13 @@ jobs:
       - name: check build
         run: |
           ls $(go env GOPATH)/bin
-          mv $(go env GOPATH)/bin ./build
+          cp $(go env GOPATH)/bin ./build
+
+      - name: check build1
+        run: |
+          cd ./build
+          pwd
+          ls
 
 
       - name: Check if binary exists
