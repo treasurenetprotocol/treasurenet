@@ -1,0 +1,146 @@
+---
+- name: Deploy Node Exporter using Docker Compose
+  hosts: all
+  become: yes
+
+  vars:
+    NODEEXPLORTER_PORT: 3045
+    USER: "ec2-user"
+
+  tasks:
+    - name: Ensure Docker Compose is installed
+      get_url:
+        url: "https://github.com/docker/compose/releases/download/v2.27.1/docker-compose-{{ ansible_system | lower }}-{{ ansible_architecture }}"
+        dest: /usr/local/bin/docker-compose
+        mode: '0755'
+      register: docker_compose_installed
+      until: docker_compose_installed is succeeded
+      retries: 3
+      delay: 10
+
+    - name: Create directory for Docker Compose configuration
+      file:
+        path: "/home/{{ USER }}/node-exporter"
+        state: directory
+        owner: "{{ USER }}"
+        group: "{{ USER }}"
+
+    - name: Create directory for promtail folder
+      file:
+        path: "/home/{{ USER }}/promtail"
+        state: directory
+        owner: "{{ USER }}"
+        group: "{{ USER }}"
+        recurse: yes
+
+    - name: Create promtail configuration file
+      copy:
+        content: |
+          server:
+            http_listen_port: 9080
+            grpc_listen_port: 0
+            log_level: debug
+          
+          positions:
+            filename: /tmp/positions.yaml
+          
+          clients:
+            - url: https://loki.grafana.treasurenet.io/loki/api/v1/push
+          
+          scrape_configs:
+          
+            - job_name: docker-logs
+              docker_sd_configs:
+                - host: unix:///var/run/docker.sock
+              relabel_configs:
+                - source_labels: ['__meta_docker_container_name']
+                  target_label: 'container'
+                - source_labels: ['container']
+                  regex: '/node[0-9]+\.sentry\.com'
+                  target_label: 'node'
+                  action: keep
+                - target_label: 'job'
+                  replacement: 'docker-logs'
+          
+          
+            - job_name: gbt-orchestrator-logs
+              journal:
+                path: /var/log/journal
+                max_age: 12h
+                labels:
+                  job: systemd-journal
+              relabel_configs:
+                - source_labels: ['__journal__systemd_unit']
+                  target_label: 'unit'  
+                - source_labels: ['unit']
+                  regex: 'gbt_orchestrator\.service|gbt_relayer\.service' 
+                  action: keep
+          
+            - job_name: gbt-relayer-logs
+              journal:
+                path: /var/log/journal
+                max_age: 12h
+                labels:
+                  job: systemd-journal
+              relabel_configs:
+                - source_labels: ['__journal__systemd_unit']
+                  target_label: 'unit'  
+                - source_labels: ['unit']
+                  regex: 'gbt_relayer\.service' 
+                  action: keep
+
+        dest: "/home/{{ USER }}/promtail/config.yml"
+        owner: "{{ USER }}"
+        group: "{{ USER }}"
+
+    - name: Create docker-compose.yml for Node Exporter and Promtail
+      copy:
+        content: |
+          version: '3'
+          networks: 
+            grafana:
+          
+          services:
+            node_exporter:
+              image: prom/node-exporter
+              container_name: node_exporter
+              restart: unless-stopped
+              ports:
+                - "{{ NODEEXPLORTER_PORT }}:9100"
+              healthcheck:
+                test: ["CMD-SHELL", "wget -q --spider http://localhost:9100/metrics || exit 1"]
+                interval: 1m
+                timeout: 30s
+                retries: 5
+              volumes:
+                - '/:/host:ro,rslave'
+              networks:
+                - grafana
+          
+            promtail:
+              image: grafana/promtail
+              container_name: promtail
+              restart: unless-stopped
+              command: -config.file=/etc/promtail/config.yaml
+              privileged: true
+              volumes:
+                - "/var/log/journal:/var/log/journal"
+                - "/var/run/docker.sock:/var/run/docker.sock"
+                - "/home/{{ USER }}/promtail/config.yml:/etc/promtail/config.yaml"
+          
+
+        dest: /home/{{ USER }}/node-exporter/docker-compose.yml
+        owner: "{{ USER }}"
+        group: "{{ USER }}"
+
+    - name: Ensure correct ownership of the Docker Compose directory
+      command: chown -R "{{ USER }}:{{ USER }}" /home/{{ USER }}/node-exporter
+
+    - name: Run Docker Compose to start Node Exporter
+      shell: |
+        docker-compose -f /home/{{ USER }}/node-exporter/docker-compose.yml down && docker-compose -f /home/{{ USER }}/node-exporter/docker-compose.yml up -d
+      args:
+        chdir: /home/{{ USER }}/node-exporter
+      become: yes
+      become_user: "{{ USER }}"
+      become_method: sudo

@@ -10,10 +10,14 @@ env:
   dockerfile-path: "./Dockerfile"
   composefile-path: "./docker-compose.yaml"
   ecr-repo-aws-region: "us-west-1"
+  NETWORK: "tn-testnet"
+  VALIDATOR_ROLE: "validator"
+  EXPLORER_ROLE: "explorer"
 
 jobs:
   print_timestamp:
       uses: treasurenetprotocol/reusable-workflows/.github/workflows/reusable-timestamp.yml@feat/add_job_deployment
+
   EnvSetup:
     needs: [ print_timestamp ]
     name: Setup Environment
@@ -42,6 +46,8 @@ jobs:
           echo "dockerfile-path=${{ env.dockerfile-path }}" >> $GITHUB_OUTPUT
           echo "composefile-path=${{ env.composefile-path }}">> $GITHUB_OUTPUT
           
+  
+  
   build-scan-publish:
     needs: [ EnvSetup ]
     uses: treasurenetprotocol/reusable-workflows/.github/workflows/reusable-ecr-build-push.yml@feat/add_job_deployment
@@ -53,3 +59,131 @@ jobs:
     secrets:
       AWS_MANAGEMENT_ACCOUNT: ${{ secrets.AWS_MANAGEMENT_ACCOUNT }}
       AWS_TARGET_ACCOUNT: ${{ secrets.AWS_TESTNET_ACCOUNT }}
+  
+  build-go-binary:
+    needs: [ EnvSetup ]
+    runs-on: ubuntu-latest
+    name: Build Go Binary
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: '1.18'  
+
+      - name: Build Go binary
+        run: |
+          echo "Building Go binary..."
+          go env -w GO111MODULE=on
+          go mod tidy
+          make install
+          mkdir -p ./treasurenetd
+          mv ~/go/bin/treasurenetd ./treasurenetd
+
+      - name: Upload binary as artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: go-binary
+          path: ./treasurenetd 
+      
+      - name: Download go-binary artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: go-binary
+          path: ./github/scripts/docker/
+
+
+  deploy:
+    needs: [ print_timestamp, build-go-binary ]
+    runs-on: self-hosted
+
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: arn:aws:iam::381492270411:role/full-ec2
+          aws-region: us-west-1
+          role-session-name: github-actions
+          audience: GitHub_to_AWS_via_FederatedOIDC_test
+
+      - name: Fetch the list of ec2 public IP addresses - validators
+        run: |
+          echo "Fetching IP address for instance with role: $VALIDATOR_ROLE"
+          ip=$(aws ec2 describe-instances \
+              --region us-west-1 \
+              --filters "Name=tag:Role,Values=$VALIDATOR_ROLE" "Name=instance-state-name,Values=running" \
+              --query "Reservations[*].Instances[*].PublicIpAddress" \
+              --output text)
+      
+          if [ -n "$ip" ]; then
+              sorted_ips+=("$ip")
+          else
+              echo "No IP address found for instance with role: $VALIDATOR_ROLE"
+          fi
+          
+          # Print the sorted IPs
+          echo "Sorted IP addresses:"
+          for ip in "${sorted_ips[@]}"; do
+              echo "$ip"
+          done
+
+          # Save the sorted IPs to a file
+          printf "%s\n" "${sorted_ips[@]}" >> sorted_ips.txt
+          
+
+      # - name: Fetch the list of ec2 public IP addresses - explorers
+      #   run: |
+      #     echo "Fetching IP address for instance with role: $EXPLORER_ROLE"
+      #     ip=$(aws ec2 describe-instances \
+      #         --region us-west-1 \
+      #         --filters "Name=tag:Role,Values=$EXPLORER_ROLE" "Name=instance-state-name,Values=running" \
+      #         --query "Reservations[*].Instances[*].PublicIpAddress" \
+      #         --output text)
+          
+      #     if [ -n "$ip" ]; then
+      #         sorted_ips+=("$ip")
+      #     else
+      #         echo "No IP address found for instance with role: $EXPLORER_ROLE"
+      #     fi
+          
+      #     # Print the sorted IPs
+      #     echo "Sorted IP addresses:"
+      #     for ip in "${sorted_ips[@]}"; do
+      #         echo "$ip"
+      #     done
+
+      #     # Save the sorted IPs to a file
+      #     printf "%s\n" "${sorted_ips[@]}" >> sorted_ips.txt     
+      
+      # - name: Install ansible on the runner
+      #   run: |
+      #     sudo apt update
+      #     sudo apt install -y ansible
+      
+      # - name: Add SSH Key
+      #   uses: webfactory/ssh-agent@v0.5.3
+      #   with:
+      #     ssh-private-key: ${{ secrets.GRAFANA_SSH }}
+
+      # - name: Prepare the ansible inventory file
+      #   run: |
+      #     rm -f inventory.ini && touch inventory.ini
+      #     echo "[all]" > inventory.ini
+      #     tr '\t' '\n' < sorted_ips.txt | awk '{print $0 " ansible_user=ec2-user"}' >> inventory.ini
+
+      #     # Print the inventory file
+      #     cat inventory.ini
+
+      # - name: Add EC2 instances to known_hosts
+      #   run: |
+      #     for ip in $(cat sorted_ips.txt); do
+      #       ssh-keyscan -H $ip >> ~/.ssh/known_hosts
+      #     done
+
+      # - name: Run the ansible playbook
+      #   run: |
+      #     ansible-playbook -i inventory.ini .github/scripts/ansible/deploy_node_exporter.yml
+
+
