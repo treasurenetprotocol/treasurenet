@@ -58,60 +58,62 @@ jobs:
       AWS_MANAGEMENT_ACCOUNT: ${{ secrets.AWS_MANAGEMENT_ACCOUNT }}
       AWS_TARGET_ACCOUNT: ${{ secrets.AWS_TESTNET_ACCOUNT }}
   
-build-go-binary:
-  needs: [ EnvSetup ]
-  runs-on: ubuntu-latest
-  name: Build Go Binary
-  steps:
+  build-go-binary:
+    needs: [ EnvSetup ]
+    runs-on: ubuntu-latest
+    name: Build Go Binary
+    steps:
+      - name: Check ls
+        run: 
 
-    - name: Checkout Code
-      uses: actions/checkout@v2
+      - name: Checkout Code
+        uses: actions/checkout@v2
 
-    - name: Set up Go
-      uses: actions/setup-go@v3
-      with:
-        go-version: '1.18'
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: '1.18'
 
-    - name: Build Go binary
-      run: |
-        echo "Building Go binary..."
-        pwd
-        ls
-        go env -w GO111MODULE=on
-        go mod tidy
-        make install
-        mkdir -p ./treasurenetd
-        mv ~/go/bin/treasurenetd ./treasurenetd
+      - name: Build Go binary
+        run: |
+          echo "Building Go binary..."
+          pwd
+          ls
+          go env -w GO111MODULE=on
+          go mod tidy
+          make install
+          mkdir -p ./treasurenetd
+          mv ~/go/bin/treasurenetd ./treasurenetd
 
-    - name: Check if binary exists
-      run: |
-        if [ -f ./treasurenetd ]; then
-          echo "Binary file exists."
-        else
-          echo "Binary file does not exist."
-          exit 1
-        fi
+      - name: Check if binary exists
+        run: |
+          if [ -f ./treasurenetd ]; then
+            echo "Binary file exists."
+          else
+            echo "Binary file does not exist."
+            exit 1
+          fi
 
-    - name: Upload binary as artifact
-      uses: actions/upload-artifact@v3
-      with:
-        name: go-binary
-        path: ./treasurenetd 
+      - name: Upload binary as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: go-binary
+          path: ./treasurenetd 
 
-    - name: Download go-binary artifact
-      uses: actions/download-artifact@v3
-      with:
-        name: go-binary
-        path: ./github/scripts/docker/
-      
-    - name: Check if go-binary exists in the downloaded directory
-      run: |
-        if [ -f ./github/scripts/docker/treasurenetd ]; then
-          echo "Downloaded binary file exists."
-        else
-          echo "Downloaded binary file does not exist."
-          exit 1
-        fi
+      - name: Download go-binary artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: go-binary
+          path: ./github/scripts/docker/
+        
+      - name: Check if go-binary exists in the downloaded directory
+        run: |
+          if [ -f ./github/scripts/docker/treasurenetd ]; then
+            echo "Downloaded binary file exists."
+          else
+            echo "Downloaded binary file does not exist."
+            exit 1
+          fi
 
 
     
