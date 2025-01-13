@@ -1,6 +1,6 @@
 ---
-- name: Deploy Prometheus and Grafana
-  hosts: grafana
+- name: Deploy Node
+  hosts: all
   become: yes
 
   vars:
