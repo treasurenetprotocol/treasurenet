@@ -35,7 +35,7 @@ jobs:
         run: |
           REPO_NAME="${{ github.repository }}"
           SHORT_NAME=${REPO_NAME##*/}
-          echo "repo-name=treasurenet-$SHORT_NAME" >> $GITHUB_OUTPUT
+          echo "repo-name=$SHORT_NAME" >> $GITHUB_OUTPUT
           echo "secret-name=testnet/$SHORT_NAME" >>$GITHUB_OUTPUT
 
       - name: set-aws-info
@@ -91,6 +91,9 @@ jobs:
         with:
           name: go-binary
           path: ./github/scripts/docker/
+
+    
+          
 
 
   deploy:
@@ -155,33 +158,33 @@ jobs:
       #     # Save the sorted IPs to a file
       #     printf "%s\n" "${sorted_ips[@]}" >> sorted_ips.txt     
       
-      # - name: Install ansible on the runner
-      #   run: |
-      #     sudo apt update
-      #     sudo apt install -y ansible
+      - name: Install ansible on the runner
+        run: |
+          sudo apt update
+          sudo apt install -y ansible
       
-      # - name: Add SSH Key
-      #   uses: webfactory/ssh-agent@v0.5.3
-      #   with:
-      #     ssh-private-key: ${{ secrets.GRAFANA_SSH }}
+      - name: Add SSH Key
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.GRAFANA_SSH }}
 
-      # - name: Prepare the ansible inventory file
-      #   run: |
-      #     rm -f inventory.ini && touch inventory.ini
-      #     echo "[all]" > inventory.ini
-      #     tr '\t' '\n' < sorted_ips.txt | awk '{print $0 " ansible_user=ec2-user"}' >> inventory.ini
+      - name: Prepare the ansible inventory file
+        run: |
+          rm -f inventory.ini && touch inventory.ini
+          echo "[all]" > inventory.ini
+          tr '\t' '\n' < sorted_ips.txt | awk '{print $0 " ansible_user=ec2-user"}' >> inventory.ini
 
-      #     # Print the inventory file
-      #     cat inventory.ini
+          # Print the inventory file
+          cat inventory.ini
 
-      # - name: Add EC2 instances to known_hosts
-      #   run: |
-      #     for ip in $(cat sorted_ips.txt); do
-      #       ssh-keyscan -H $ip >> ~/.ssh/known_hosts
-      #     done
+      - name: Add EC2 instances to known_hosts
+        run: |
+          for ip in $(cat sorted_ips.txt); do
+            ssh-keyscan -H $ip >> ~/.ssh/known_hosts
+          done
 
-      # - name: Run the ansible playbook
-      #   run: |
-      #     ansible-playbook -i inventory.ini .github/scripts/ansible/deploy_node_exporter.yml
+      - name: Run the ansible playbook
+        run: |
+          ansible-playbook -i inventory.ini .github/scripts/ansible/deploy_node_exporter.yml
 
 

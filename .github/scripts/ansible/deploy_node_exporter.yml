@@ -1,146 +1,210 @@
 ---
-- name: Deploy Node Exporter using Docker Compose
-  hosts: all
+- name: Deploy Prometheus and Grafana
+  hosts: grafana
   become: yes
 
   vars:
+    PATH: /home/ec2-user
+    GRAFANA_PORT: 3043
+    PROMETHEUS_PORT: 3041
     NODEEXPLORTER_PORT: 3045
-    USER: "ec2-user"
+    LOKI_PORT: 3046
+    USER: ec2-user
+
 
   tasks:
-    - name: Ensure Docker Compose is installed
-      get_url:
-        url: "https://github.com/docker/compose/releases/download/v2.27.1/docker-compose-{{ ansible_system | lower }}-{{ ansible_architecture }}"
-        dest: /usr/local/bin/docker-compose
-        mode: '0755'
-      register: docker_compose_installed
-      until: docker_compose_installed is succeeded
-      retries: 3
-      delay: 10
+    - name: Ensure Docker is installed
+      yum:
+        name: docker
+        state: present
 
-    - name: Create directory for Docker Compose configuration
+    # - name: Add Ec2-user to Docker group
+    #   user:
+    #     name: "{{ USER }}"
+    #     groups: docker
+    #     append: true
+
+    # - name: Start and enable Docker service
+    #   service:
+    #     name: docker
+    #     state: started
+    #     enabled: yes
+
+    # - name: Set permissions on Docker socket for Ec2-user access
+    #   file:
+    #     path: /var/run/docker.sock
+    #     mode: '0660'
+    #     owner: root
+    #     group: docker
+    #   notify: Restart Docker
+
+    # - name: Restart Docker
+    #   service:
+    #     name: docker
+    #     state: restarted
+
+    # - name: Ensure Docker Compose is installed
+    #   get_url:
+    #     url: "https://github.com/docker/compose/releases/download/v2.27.1/docker-compose-{{ ansible_system | lower }}-{{ ansible_architecture }}"
+    #     dest: /usr/local/bin/docker-compose
+    #     mode: '0755'
+    #   register: docker_compose_installed
+    #   until: docker_compose_installed is succeeded
+    #   retries: 3
+    #   delay: 10
+
+    #- name: Stop the started Docker container
+    #  shell: |
+    #    docker-compose down
+    #  args:
+    #    chdir: "{{ PATH }}"
+    #  become_user: "{{ USER }}"
+    #  become: yes
+
+    #- name: Delete the last launched directory
+    #  file:
+    #    path: "{{ PATH }}"
+    #    state: absent
+    #    owner: "{{ USER }}"
+    #    group: "{{ USER }}"
+
+
+
+    - name: Create directory for docker configuration
       file:
-        path: "/home/{{ USER }}/node-exporter"
+        path: "{{ PATH }}/docker"
         state: directory
         owner: "{{ USER }}"
         group: "{{ USER }}"
 
-    - name: Create directory for promtail folder
-      file:
-        path: "/home/{{ USER }}/promtail"
-        state: directory
-        owner: "{{ USER }}"
-        group: "{{ USER }}"
-        recurse: yes
-
-    - name: Create promtail configuration file
+    - name: Copy Docker config files to server
       copy:
-        content: |
-          server:
-            http_listen_port: 9080
-            grpc_listen_port: 0
-            log_level: debug
-          
-          positions:
-            filename: /tmp/positions.yaml
-          
-          clients:
-            - url: https://loki.grafana.treasurenet.io/loki/api/v1/push
-          
-          scrape_configs:
-          
-            - job_name: docker-logs
-              docker_sd_configs:
-                - host: unix:///var/run/docker.sock
-              relabel_configs:
-                - source_labels: ['__meta_docker_container_name']
-                  target_label: 'container'
-                - source_labels: ['container']
-                  regex: '/node[0-9]+\.sentry\.com'
-                  target_label: 'node'
-                  action: keep
-                - target_label: 'job'
-                  replacement: 'docker-logs'
-          
-          
-            - job_name: gbt-orchestrator-logs
-              journal:
-                path: /var/log/journal
-                max_age: 12h
-                labels:
-                  job: systemd-journal
-              relabel_configs:
-                - source_labels: ['__journal__systemd_unit']
-                  target_label: 'unit'  
-                - source_labels: ['unit']
-                  regex: 'gbt_orchestrator\.service|gbt_relayer\.service' 
-                  action: keep
-          
-            - job_name: gbt-relayer-logs
-              journal:
-                path: /var/log/journal
-                max_age: 12h
-                labels:
-                  job: systemd-journal
-              relabel_configs:
-                - source_labels: ['__journal__systemd_unit']
-                  target_label: 'unit'  
-                - source_labels: ['unit']
-                  regex: 'gbt_relayer\.service' 
-                  action: keep
-
-        dest: "/home/{{ USER }}/promtail/config.yml"
+        src: scripts/docker/
+        dest: "{{ PATH }}/docker"
+        force: yes
         owner: "{{ USER }}"
         group: "{{ USER }}"
 
-    - name: Create docker-compose.yml for Node Exporter and Promtail
-      copy:
-        content: |
-          version: '3'
-          networks: 
-            grafana:
-          
-          services:
-            node_exporter:
-              image: prom/node-exporter
-              container_name: node_exporter
-              restart: unless-stopped
-              ports:
-                - "{{ NODEEXPLORTER_PORT }}:9100"
-              healthcheck:
-                test: ["CMD-SHELL", "wget -q --spider http://localhost:9100/metrics || exit 1"]
-                interval: 1m
-                timeout: 30s
-                retries: 5
-              volumes:
-                - '/:/host:ro,rslave'
-              networks:
-                - grafana
-          
-            promtail:
-              image: grafana/promtail
-              container_name: promtail
-              restart: unless-stopped
-              command: -config.file=/etc/promtail/config.yaml
-              privileged: true
-              volumes:
-                - "/var/log/journal:/var/log/journal"
-                - "/var/run/docker.sock:/var/run/docker.sock"
-                - "/home/{{ USER }}/promtail/config.yml:/etc/promtail/config.yaml"
-          
+   
 
-        dest: /home/{{ USER }}/node-exporter/docker-compose.yml
-        owner: "{{ USER }}"
-        group: "{{ USER }}"
+ 
 
-    - name: Ensure correct ownership of the Docker Compose directory
-      command: chown -R "{{ USER }}:{{ USER }}" /home/{{ USER }}/node-exporter
 
-    - name: Run Docker Compose to start Node Exporter
-      shell: |
-        docker-compose -f /home/{{ USER }}/node-exporter/docker-compose.yml down && docker-compose -f /home/{{ USER }}/node-exporter/docker-compose.yml up -d
-      args:
-        chdir: /home/{{ USER }}/node-exporter
-      become: yes
-      become_user: "{{ USER }}"
-      become_method: sudo
+   
+
+    
+     
+    
+    # - name: Check if the directory exists
+    #   stat:
+    #     path: "{{ PATH }}/prometheus/data"
+    #   register: dir_stat
+
+    
+    # - name: Create docker-compose.yml for Prometheus and Grafana
+    #   copy:
+    #     content: |
+    #       version: '3.8'
+    #       services:
+    #         prometheus:
+    #           image: prom/prometheus
+    #           container_name: prometheus
+    #           restart: unless-stopped
+    #           user: "1000:1000"
+    #           ports:
+    #             - "{{ PROMETHEUS_PORT }}:9090"
+    #           volumes:
+    #             - "{{ PATH }}/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml"
+    #             - "{{ PATH }}/prometheus/data:/prometheus"
+    #           command:
+    #             - '--config.file=/etc/prometheus/prometheus.yml'
+    #             - '--storage.tsdb.path=/prometheus'
+    #             - '--storage.tsdb.retention.time=30d' # Retain data for 30 days
+    #             - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+    #             - '--web.console.templates=/usr/share/prometheus/consoles'
+    #           healthcheck:
+    #             test: ["CMD-SHELL", "wget -q --spider http://localhost:9090/-/healthy || exit 1"]
+    #             interval: 1m
+    #             timeout: 10s
+    #             retries: 3
+
+    #         grafana:
+    #           image: grafana/grafana
+    #           container_name: grafana
+    #           restart: unless-stopped
+    #           user: "1000:1000"
+    #           ports:
+    #             - "{{ GRAFANA_PORT }}:3000"
+    #           volumes:
+    #             - "{{ PATH }}/grafana/data:/var/lib/grafana"
+    #             - "{{ PATH }}/grafana/provisioning:/etc/grafana/provisioning"
+    #             - "{{ PATH }}/grafana/conf/grafana.ini:/etc/grafana/grafana.ini"
+    #           environment:
+    #             - GF_PATHS_CONFIG=/etc/grafana/grafana.ini
+    #           healthcheck:
+    #             test: ["CMD-SHELL", "wget -q --spider http://localhost:3000/api/health || exit 1"]
+    #             interval: 1m
+    #             timeout: 10s
+    #             retries: 3
+          
+    #         node_exporter:
+    #           image: prom/node-exporter
+    #           container_name: node-exporter
+    #           restart: unless-stopped
+    #           user: "1000:1000"
+    #           ports:
+    #             - "{{ NODEEXPLORTER_PORT }}:9100"
+    #           volumes:
+    #             - '/:/host:ro,rslave'
+          
+    #         loki:
+    #           image: grafana/loki
+    #           container_name: loki
+    #           restart: unless-stopped
+    #           ports:
+    #             - "{{ LOKI_PORT }}:3100"
+    #           command: -config.file=/etc/loki/local-config.yaml
+    #           volumes:
+    #             - "{{ PATH }}/loki/config.yml:/etc/loki/local-config.yaml"
+          
+    #         promtail:
+    #           image: grafana/promtail
+    #           container_name: promtail
+    #           restart: unless-stopped
+    #           command: -config.file=/etc/promtail/config.yaml
+    #           volumes:
+    #             - "/var/log:/var/log"
+    #             - "{{ PATH }}/promtail/config.yml:/etc/promtail/config.yaml"
+              
+          
+    #         nginx:
+    #           image: nginx:latest
+    #           restart: unless-stopped
+    #           container_name: nginx
+    #           volumes:
+    #             - "{{ PATH }}/nginx:/etc/nginx"
+    #           ports:
+    #             - 80:80
+    #             - 443:443
+
+    #     dest: "{{ PATH }}/docker-compose.yml"
+    #     owner: "{{ USER }}"
+    #     group: "{{ USER }}"
+
+    # - name: Start Prometheus Grafana Nginx and Node Exporter
+    #   shell: |
+    #     docker-compose down && docker-compose up -d
+    #   args:
+    #     chdir: "{{ PATH }}"
+    #   become_user: "{{ USER }}"
+    #   become: yes
+
+    # - name: Wait for Grafana to be ready
+    #   uri:
+    #     url: "http://localhost:{{ GRAFANA_PORT }}/api/health"
+    #     status_code: 200
+    #     timeout: 30
+    #   register: result
+    #   retries: 10
+    #   delay: 10
+    #   until: result.status == 200
