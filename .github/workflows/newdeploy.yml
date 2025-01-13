@@ -14,6 +14,12 @@ env:
   VALIDATOR_ROLE: "validator"
   EXPLORER_ROLE: "explorer"
 
+permissions:
+  id-token: write
+  contents: write
+  pull-requests: write
+  actions: write
+
 jobs:
   print_timestamp:
     uses: treasurenetprotocol/reusable-workflows/.github/workflows/reusable-timestamp.yml@main
@@ -76,50 +82,56 @@ jobs:
         run: |
           echo "Building Go binary..."
           mkdir download
-          pwd
-          ls
           go env -w GO111MODULE=on
           go mod tidy
           make install
 
       - name: check build
         run: |
-          cd build
-          ls
-          cd ..
-
-      - name: Check if binary exists
+          ls $(go env GOPATH)/bin
+      - name: check build1
         run: |
-          if [ -f ./build/treasurenetd ]; then  
-            echo "Binary file exists."
-          else
-            echo "Binary file does not exist."
-            exit 1
-          fi
+          ls ~/go/bin
+      - name: check build2
+        run: |
+          ls /usr/local/go/bin
+      - name: check build3
+        run: |
+          ls /root/go/bin
 
-      - name: Upload binary as artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: go-binary
-          path: ./build/treasurenetd 
+
+      # - name: Check if binary exists
+      #   run: |
+      #     if [ -f ./build/treasurenetd ]; then  
+      #       echo "Binary file exists."
+      #     else
+      #       echo "Binary file does not exist."
+      #       exit 1
+      #     fi
+
+      # - name: Upload binary as artifact
+      #   uses: actions/upload-artifact@v3
+      #   with:
+      #     name: go-binary
+      #     path: ./build/treasurenetd 
           
-      - name: Download go-binary artifact
-        uses: actions/download-artifact@v3
-        with:
-          name: go-binary
-          path: ./download/
+      # - name: Download go-binary artifact
+      #   uses: actions/download-artifact@v3
+      #   with:
+      #     name: go-binary
+      #     path: ./download/
 
-      - name: Check if go-binary exists in the downloaded directory
-        run: |
-          ls
-          cd ./download
-          ls
-          if [ -f ./download/treasurenetd ]; then 
-            echo "Downloaded binary file exists."
-          else
-            echo "Downloaded binary file does not exist."
-            exit 1
-          fi
+      # - name: Check if go-binary exists in the downloaded directory
+      #   run: |
+      #     ls
+      #     cd ./download
+      #     ls
+      #     if [ -f ./download/treasurenetd ]; then 
+      #       echo "Downloaded binary file exists."
+      #     else
+      #       echo "Downloaded binary file does not exist."
+      #       exit 1
+      #     fi
 
 
 
