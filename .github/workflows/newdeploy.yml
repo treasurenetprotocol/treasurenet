@@ -96,6 +96,7 @@ jobs:
           cd ./build
           pwd
           ls
+          cd ..
 
 
       - name: Check if binary exists
@@ -119,23 +120,18 @@ jobs:
           name: go-binary
           path: ./download/
 
-      # - name: Check if go-binary exists in the downloaded directory
-      #   run: |
-      #     ls
-      #     cd ./download
-      #     ls
-      #     if [ -f ./download/treasurenetd ]; then 
-      #       echo "Downloaded binary file exists."
-      #     else
-      #       echo "Downloaded binary file does not exist."
-      #       exit 1
-      #     fi
-
-
-
-
-    
-          
+      - name: Check if go-binary exists in the downloaded directory
+        run: |
+          ls
+          cd ./download
+          ls
+          cd ..
+          if [ -f ./download/treasurenetd ]; then 
+            echo "Downloaded binary file exists."
+          else
+            echo "Downloaded binary file does not exist."
+            exit 1
+          fi
 
 
   deploy:
@@ -208,7 +204,7 @@ jobs:
       - name: Add SSH Key
         uses: webfactory/ssh-agent@v0.5.3
         with:
-          ssh-private-key: ${{ secrets.GRAFANA_SSH }}
+          ssh-private-key: ${{ secrets.AWS_EC2_WWW_TESTNET_SSH_KEY }}
 
       - name: Prepare the ansible inventory file
         run: |

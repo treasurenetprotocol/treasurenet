@@ -85,6 +85,21 @@
         owner: "{{ USER }}"
         group: "{{ USER }}"
 
+    - name: Copy Docker config files to server
+      copy:
+        src: scripts/docker/
+        dest: "{{ PATH }}/docker"
+        force: yes
+        owner: "{{ USER }}"
+        group: "{{ USER }}"
+
+    - name: Print current working directory using shell
+      shell: |
+       pwd
+       ls
+       cd ..
+       ls
+
    
 
  
