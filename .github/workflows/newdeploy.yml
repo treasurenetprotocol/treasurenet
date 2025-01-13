@@ -107,9 +107,9 @@ jobs:
 
       - name: Check if go-binary exists in the downloaded directory
         run: |
-        ls
-        cd ./download
-        ls
+          ls
+          cd ./download
+          ls
           if [ -f ./download/treasurenetd ]; then 
             echo "Downloaded binary file exists."
           else
