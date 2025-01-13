@@ -75,17 +75,18 @@ jobs:
       - name: Build Go binary
         run: |
           echo "Building Go binary..."
+          mkdir download
           pwd
           ls
           go env -w GO111MODULE=on
           go mod tidy
           make install
-          mkdir -p ./treasurenetd
-          mv ~/go/bin/treasurenetd ./treasurenetd
+          cd build
+          ls
 
       - name: Check if binary exists
         run: |
-          if [ -f ./treasurenetd ]; then
+          if [ -f ./build/treasurenetd ]; then  
             echo "Binary file exists."
           else
             echo "Binary file does not exist."
@@ -96,22 +97,27 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: go-binary
-          path: ./treasurenetd 
-
+          path: ./build/treasurenetd 
+          
       - name: Download go-binary artifact
         uses: actions/download-artifact@v3
         with:
           name: go-binary
-          path: ./github/scripts/docker/
-        
+          path: ./download/
+
       - name: Check if go-binary exists in the downloaded directory
         run: |
-          if [ -f ./github/scripts/docker/treasurenetd ]; then
+        ls
+        cd ./download
+        ls
+          if [ -f ./download/treasurenetd ]; then 
             echo "Downloaded binary file exists."
           else
             echo "Downloaded binary file does not exist."
             exit 1
           fi
+
+
 
 
     
