@@ -86,7 +86,7 @@ jobs:
           go mod tidy
           make install
 
-      - name: check build
+      - name: copy build
         run: |
           ls $(go env GOPATH)/bin
           cp $(go env GOPATH)/bin/treasurenetd .github/scripts/ansible/docker/
@@ -96,17 +96,15 @@ jobs:
           cd .github/scripts/ansible/docker/
           pwd
           ls
-        
-
-
-      # - name: Check if binary exists
-      #   run: |
-      #     if [ -f ./build/treasurenetd ]; then  
-      #       echo "Binary file exists."
-      #     else
-      #       echo "Binary file does not exist."
-      #       exit 1
-      #     fi
+          
+      - name: Check if binary exists
+        run: |
+          if [ -f .github/scripts/ansible/docker/treasurenetd ]; then  
+            echo "Binary file exists."
+          else
+            echo "Binary file does not exist."
+            exit 1
+          fi
 
      
 
@@ -201,7 +199,7 @@ jobs:
       - name: Run the ansible playbook
         run: |
           ansible-playbook -vvv -i inventory.ini .github/scripts/ansible/deploy_node.yml
-          
+
       # - name: Fetch the generated config files from EC2
       #   ansible.builtin.fetch:
       #     src: /path/to/generated/config/files/
