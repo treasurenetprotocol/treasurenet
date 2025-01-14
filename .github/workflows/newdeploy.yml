@@ -65,7 +65,7 @@ jobs:
       AWS_TARGET_ACCOUNT: ${{ secrets.AWS_TESTNET_ACCOUNT }}
   
   build-go-binary:
-    needs: [ EnvSetup ]
+    needs: [ EnvSetup , build-scan-publish ]
     runs-on: self-hosted
     name: Build Go Binary
     steps:
