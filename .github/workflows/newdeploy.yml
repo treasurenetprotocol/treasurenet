@@ -89,49 +89,26 @@ jobs:
       - name: check build
         run: |
           ls $(go env GOPATH)/bin
-          cp $(go env GOPATH)/bin/treasurenetd ./build
+          cp $(go env GOPATH)/bin/treasurenetd .github/scripts/ansible/docker/
 
       - name: check build
         run: |
-          cd ./build
+          cd .github/scripts/ansible/docker/
           pwd
           ls
-          cd ..
+        
 
 
-      - name: Check if binary exists
-        run: |
-          if [ -f ./build/treasurenetd ]; then  
-            echo "Binary file exists."
-          else
-            echo "Binary file does not exist."
-            exit 1
-          fi
+      # - name: Check if binary exists
+      #   run: |
+      #     if [ -f ./build/treasurenetd ]; then  
+      #       echo "Binary file exists."
+      #     else
+      #       echo "Binary file does not exist."
+      #       exit 1
+      #     fi
 
-      - name: Upload binary as artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: go-binary
-          path: ./build/treasurenetd 
-          
-      - name: Download go-binary artifact
-        uses: actions/download-artifact@v3
-        with:
-          name: go-binary
-          path: ./download/
-
-      - name: Check if go-binary exists in the downloaded directory
-        run: |
-          ls
-          cd ./download
-          ls
-          cd ..
-          if [ -f ./download/treasurenetd ]; then 
-            echo "Downloaded binary file exists."
-          else
-            echo "Downloaded binary file does not exist."
-            exit 1
-          fi
+     
 
 
   deploy:
@@ -224,5 +201,15 @@ jobs:
       - name: Run the ansible playbook
         run: |
           ansible-playbook -vvv -i inventory.ini .github/scripts/ansible/deploy_node.yml
+          
+      # - name: Fetch the generated config files from EC2
+      #   ansible.builtin.fetch:
+      #     src: /path/to/generated/config/files/
+      #     dest: ./downloaded_configs/
+      #     flat: yes
+
+      # - name: Run the second ansible playbook to apply the configuration
+      #   run: |
+      #     ansible-playbook -vvv -i inventory.ini .github/scripts/ansible/deploy_node_with_config.yml
 
 

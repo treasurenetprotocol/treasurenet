@@ -18,55 +18,6 @@
         name: docker
         state: present
 
-    # - name: Add Ec2-user to Docker group
-    #   user:
-    #     name: "{{ USER }}"
-    #     groups: docker
-    #     append: true
-
-    # - name: Start and enable Docker service
-    #   service:
-    #     name: docker
-    #     state: started
-    #     enabled: yes
-
-    # - name: Set permissions on Docker socket for Ec2-user access
-    #   file:
-    #     path: /var/run/docker.sock
-    #     mode: '0660'
-    #     owner: root
-    #     group: docker
-    #   notify: Restart Docker
-
-    # - name: Restart Docker
-    #   service:
-    #     name: docker
-    #     state: restarted
-
-    # - name: Ensure Docker Compose is installed
-    #   get_url:
-    #     url: "https://github.com/docker/compose/releases/download/v2.27.1/docker-compose-{{ ansible_system | lower }}-{{ ansible_architecture }}"
-    #     dest: /usr/local/bin/docker-compose
-    #     mode: '0755'
-    #   register: docker_compose_installed
-    #   until: docker_compose_installed is succeeded
-    #   retries: 3
-    #   delay: 10
-
-    #- name: Stop the started Docker container
-    #  shell: |
-    #    docker-compose down
-    #  args:
-    #    chdir: "{{ PATH }}"
-    #  become_user: "{{ USER }}"
-    #  become: yes
-
-    #- name: Delete the last launched directory
-    #  file:
-    #    path: "{{ PATH }}"
-    #    state: absent
-    #    owner: "{{ USER }}"
-    #    group: "{{ USER }}"
     - name: Print current working directory using shell
       shell: |
        pwd
@@ -88,15 +39,19 @@
         owner: "{{ USER }}"
         group: "{{ USER }}"
 
-    - name: Copy Docker config files to server2
+    - name: Copy treasurenetd binary to EC2 instance
       copy:
-        src: ../../../download/
-        dest: "$(go env GOPATH)/bin/"
+        src: docker/treasurenetd
+        dest: "{{ lookup('env', 'GOPATH') }}/bin/treasurenetd"
         force: yes
         owner: "{{ USER }}"
         group: "{{ USER }}"
+
+
     - name: check
       shell: |
+        cd {{ PATH }}/docker
+        bash init.sh
         ls $(go env GOPATH)/bin
 
       
