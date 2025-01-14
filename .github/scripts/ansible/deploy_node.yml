@@ -42,14 +42,17 @@
     - name: Copy treasurenetd binary to EC2 instance
       copy:
         src: docker/treasurenetd
-        dest: "{{ lookup('env', 'GOPATH') }}/bin/treasurenetd"
+        dest: "/usr/bin/treasurenetd"
         force: yes
         owner: "{{ USER }}"
         group: "{{ USER }}"
-
+      become: yes
+      become_user: root
 
     - name: check
       shell: |
+        source /etc/profile
+        sudo chmod +x /usr/bin/treasurenetd
         cd {{ PATH }}/docker
         bash init.sh
         ls $(go env GOPATH)/bin
