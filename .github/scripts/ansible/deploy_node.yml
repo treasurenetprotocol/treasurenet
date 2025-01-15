@@ -43,18 +43,19 @@
         owner: "{{ USER }}"
         group: "{{ USER }}"
 
-    # - name: check
-    #   shell: |
-    #     source /etc/profile
-    #     sudo chmod +x /usr/bin/treasurenetd
-    #     cd {{ PATH }}/docker
-    #     bash init.sh
-    #     ls $(go env GOPATH)/bin
+    - name: check
+      shell: |
+        source /etc/profile
+        sudo chmod +x /usr/bin/treasurenetd
+        cd {{ PATH }}/docker
+        #bash init.sh
+        ls $(go env GOPATH)/bin
+        mkdir .treasurenetd
 
     - name: Copy tn node 0 data files to server
       copy:
-        src: /data/node0
-        dest: "{{ PATH }}/"
+        src: /data/node0/.treasurenetd
+        dest: "{{ PATH }}/.treasurenetd"
         force: yes
         owner: "{{ USER }}"
         group: "{{ USER }}"
@@ -62,8 +63,8 @@
 
     - name: Copy tn node 1 data files to server
       copy:
-        src: /data/node1
-        dest: "{{ PATH }}/"
+        src: /data/node1/.treasurenetd
+        dest: "{{ PATH }}/.treasurenetd"
         force: yes
         owner: "{{ USER }}"
         group: "{{ USER }}"
@@ -71,8 +72,8 @@
 
     - name: Copy tn node 2 data files to server
       copy:
-        src: /data/node2
-        dest: "{{ PATH }}/"
+        src: /data/node2/.treasurenetd
+        dest: "{{ PATH }}/.treasurenetd"
         force: yes
         owner: "{{ USER }}"
         group: "{{ USER }}"
@@ -80,8 +81,8 @@
 
     - name: Copy tn node 3 data files to server
       copy:
-        src: /data/node3
-        dest: "{{ PATH }}/"
+        src: /data/node3/.treasurenetd
+        dest: "{{ PATH }}/.treasurenetd"
         force: yes
         owner: "{{ USER }}"
         group: "{{ USER }}"
