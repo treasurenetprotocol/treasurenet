@@ -46,8 +46,8 @@
     - name: check
       shell: |
         source /etc/profile
-         chmod +x /usr/bin/treasurenetd
-          chmod +x /home/ubuntu/docker/docker-compose.yaml
+        chmod +x /usr/bin/treasurenetd
+        chmod +x /home/ubuntu/docker/docker-compose.yaml
         ls $(go env GOPATH)/bin
         mkdir .treasurenetd
 
@@ -87,132 +87,10 @@
         group: "{{ USER }}"
       when: node_id == "node3"  
 
-    - name: check
+    - name: docker-compose up
       shell: |
       cd {{ PATH }}/docker
-        source .env
-        aws ecr get-login-password --region ${ inputs.ecr-repo-aws-region } | docker login --username AWS --password-stdin ${ secrets.ECR_REGISTRY }
-        docker-compose up -d
-   
-
+      source .env
+      aws ecr get-login-password --region ${ inputs.ecr-repo-aws-region } | docker login --username AWS --password-stdin ${ secrets.ECR_REGISTRY }
+      docker-compose up -d
  
-
-
-   
-
-    
-     
-    
-    # - name: Check if the directory exists
-    #   stat:
-    #     path: "{{ PATH }}/prometheus/data"
-    #   register: dir_stat
-
-    
-    # - name: Create docker-compose.yml for Prometheus and Grafana
-    #   copy:
-    #     content: |
-    #       version: '3.8'
-    #       services:
-    #         prometheus:
-    #           image: prom/prometheus
-    #           container_name: prometheus
-    #           restart: unless-stopped
-    #           user: "1000:1000"
-    #           ports:
-    #             - "{{ PROMETHEUS_PORT }}:9090"
-    #           volumes:
-    #             - "{{ PATH }}/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml"
-    #             - "{{ PATH }}/prometheus/data:/prometheus"
-    #           command:
-    #             - '--config.file=/etc/prometheus/prometheus.yml'
-    #             - '--storage.tsdb.path=/prometheus'
-    #             - '--storage.tsdb.retention.time=30d' # Retain data for 30 days
-    #             - '--web.console.libraries=/usr/share/prometheus/console_libraries'
-    #             - '--web.console.templates=/usr/share/prometheus/consoles'
-    #           healthcheck:
-    #             test: ["CMD-SHELL", "wget -q --spider http://localhost:9090/-/healthy || exit 1"]
-    #             interval: 1m
-    #             timeout: 10s
-    #             retries: 3
-
-    #         grafana:
-    #           image: grafana/grafana
-    #           container_name: grafana
-    #           restart: unless-stopped
-    #           user: "1000:1000"
-    #           ports:
-    #             - "{{ GRAFANA_PORT }}:3000"
-    #           volumes:
-    #             - "{{ PATH }}/grafana/data:/var/lib/grafana"
-    #             - "{{ PATH }}/grafana/provisioning:/etc/grafana/provisioning"
-    #             - "{{ PATH }}/grafana/conf/grafana.ini:/etc/grafana/grafana.ini"
-    #           environment:
-    #             - GF_PATHS_CONFIG=/etc/grafana/grafana.ini
-    #           healthcheck:
-    #             test: ["CMD-SHELL", "wget -q --spider http://localhost:3000/api/health || exit 1"]
-    #             interval: 1m
-    #             timeout: 10s
-    #             retries: 3
-          
-    #         node_exporter:
-    #           image: prom/node-exporter
-    #           container_name: node-exporter
-    #           restart: unless-stopped
-    #           user: "1000:1000"
-    #           ports:
-    #             - "{{ NODEEXPLORTER_PORT }}:9100"
-    #           volumes:
-    #             - '/:/host:ro,rslave'
-          
-    #         loki:
-    #           image: grafana/loki
-    #           container_name: loki
-    #           restart: unless-stopped
-    #           ports:
-    #             - "{{ LOKI_PORT }}:3100"
-    #           command: -config.file=/etc/loki/local-config.yaml
-    #           volumes:
-    #             - "{{ PATH }}/loki/config.yml:/etc/loki/local-config.yaml"
-          
-    #         promtail:
-    #           image: grafana/promtail
-    #           container_name: promtail
-    #           restart: unless-stopped
-    #           command: -config.file=/etc/promtail/config.yaml
-    #           volumes:
-    #             - "/var/log:/var/log"
-    #             - "{{ PATH }}/promtail/config.yml:/etc/promtail/config.yaml"
-              
-          
-    #         nginx:
-    #           image: nginx:latest
-    #           restart: unless-stopped
-    #           container_name: nginx
-    #           volumes:
-    #             - "{{ PATH }}/nginx:/etc/nginx"
-    #           ports:
-    #             - 80:80
-    #             - 443:443
-
-    #     dest: "{{ PATH }}/docker-compose.yml"
-    #     owner: "{{ USER }}"
-    #     group: "{{ USER }}"
-
-    # - name: Start Prometheus Grafana Nginx and Node Exporter
-    #   shell: |
-    #     docker-compose down && docker-compose up -d
-    #   args:
-    #     chdir: "{{ PATH }}"
-    #   become_user: "{{ USER }}"
-    #   become: yes
-
-    # - name: Wait for Grafana to be ready
-    #   uri:
-    #     url: "http://localhost:{{ GRAFANA_PORT }}/api/health"
-    #     status_code: 200
-    #     timeout: 30
-    #   register: result
-    #   retries: 10
-    #   delay: 10
-    #   until: result.status == 200
