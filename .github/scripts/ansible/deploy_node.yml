@@ -13,10 +13,6 @@
 
 
   tasks:
-    - name: Ensure Docker is installed
-      apt:
-        name: docker
-        state: present
 
     - name: Print current working directory using shell
       shell: |
@@ -46,16 +42,15 @@
         force: yes
         owner: "{{ USER }}"
         group: "{{ USER }}"
-      become: yes
-      become_user: root
 
-    - name: check
-      shell: |
-        source /etc/profile
-        sudo chmod +x /usr/bin/treasurenetd
-        cd {{ PATH }}/docker
-        bash init.sh
-        ls $(go env GOPATH)/bin
+    # - name: check
+    #   shell: |
+    #     source /etc/profile
+    #     sudo chmod +x /usr/bin/treasurenetd
+    #     cd {{ PATH }}/docker
+    #     bash init.sh
+    #     ls $(go env GOPATH)/bin
+
     - name: Copy tn node 0 data files to server
       copy:
         src: /data/node0
