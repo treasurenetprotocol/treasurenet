@@ -93,6 +93,17 @@ jq --argjson accounts00 "$accounts00" --argjson accounts01 "$accounts01" \
    )
 ' template.json > genesis.json
 cat genesis.json
-mv genesis.json /data/node/
-
-
+mv genesis.json /data/node0/.treasurenet/config/genesis.json
+mv genesis.json /data/node1/.treasurenet/config/genesis.json
+mv genesis.json /data/node2/.treasurenet/config/genesis.json
+mv genesis.json /data/node3/.treasurenet/config/genesis.json
+sudo mkdir -p /data/node/gen_txs
+ sudo chown -R $USER:$USER /data/node
+ cp /data/node0/.treasurenet/config/gentx/ /data/node/gen_txs/
+ cp /data/node1/.treasurenet/config/gentx/ /data/node/gen_txs/
+ cp /data/node2/.treasurenet/config/gentx/ /data/node/gen_txs/
+ cp /data/node3/.treasurenet/config/gentx/ /data/node/gen_txs/
+ mv /data/node/gen_txs/ /data/node0/.treasurenet/config/gentx/
+ mv /data/node/gen_txs/ /data/node1/.treasurenet/config/gentx/
+ mv /data/node/gen_txs/ /data/node2/.treasurenet/config/gentx/
+ mv /data/node/gen_txs/ /data/node3/.treasurenet/config/gentx/

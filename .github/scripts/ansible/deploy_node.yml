@@ -56,7 +56,41 @@
         cd {{ PATH }}/docker
         bash init.sh
         ls $(go env GOPATH)/bin
+    - name: Copy tn node 0 data files to server
+      copy:
+        src: /data/node0
+        dest: "{{ PATH }}/"
+        force: yes
+        owner: "{{ USER }}"
+        group: "{{ USER }}"
+      when: node_id == "node0"    
 
+    - name: Copy tn node 1 data files to server
+      copy:
+        src: /data/node1
+        dest: "{{ PATH }}/"
+        force: yes
+        owner: "{{ USER }}"
+        group: "{{ USER }}"
+      when: node_id == "node1"  
+
+    - name: Copy tn node 2 data files to server
+      copy:
+        src: /data/node2
+        dest: "{{ PATH }}/"
+        force: yes
+        owner: "{{ USER }}"
+        group: "{{ USER }}"
+      when: node_id == "node2"
+
+    - name: Copy tn node 3 data files to server
+      copy:
+        src: /data/node3
+        dest: "{{ PATH }}/"
+        force: yes
+        owner: "{{ USER }}"
+        group: "{{ USER }}"
+      when: node_id == "node3"  
       
 
    

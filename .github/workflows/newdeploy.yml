@@ -120,81 +120,79 @@ jobs:
           bash new_genesis.sh     
 
 
-  # deploy:
-  #   needs: [ print_timestamp, build-go-binary ]
-  #   runs-on: self-hosted
+  deploy:
+    needs: [ print_timestamp, build-go-binary ]
+    runs-on: self-hosted
 
-  #   steps:
-  #     - name: Configure AWS credentials
-  #       uses: aws-actions/configure-aws-credentials@v1
-  #       with:
-  #         role-to-assume: arn:aws:iam::381492270411:role/full-ec2
-  #         aws-region: us-west-1
-  #         role-session-name: github-actions
-  #         audience: GitHub_to_AWS_via_FederatedOIDC_test
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: arn:aws:iam::381492270411:role/full-ec2
+          aws-region: us-west-1
+          role-session-name: github-actions
+          audience: GitHub_to_AWS_via_FederatedOIDC_test
 
-  #     - name: Fetch the list of ec2 public IP addresses - validators
-  #       run: |
-  #         echo "Fetching IP address for instance with role: $VALIDATOR_ROLE"
-  #         ip=$(aws ec2 describe-instances \
-  #             --region us-west-1 \
-  #             --filters "Name=tag:Role,Values=$VALIDATOR_ROLE" "Name=instance-state-name,Values=running" \
-  #             --query "Reservations[*].Instances[*].PublicIpAddress" \
-  #             --output text)
+      - name: Fetch the list of ec2 public IP addresses - validators
+        run: |
+          echo "Fetching IP address for instance with role: $VALIDATOR_ROLE"
+          ip=$(aws ec2 describe-instances \
+              --region us-west-1 \
+              --filters "Name=tag:Role,Values=$VALIDATOR_ROLE" "Name=instance-state-name,Values=running" \
+              --query "Reservations[*].Instances[*].PublicIpAddress" \
+              --output text)
       
-  #         if [ -n "$ip" ]; then
-  #             sorted_ips+=("$ip")
-  #         else
-  #             echo "No IP address found for instance with role: $VALIDATOR_ROLE"
-  #         fi
+          if [ -n "$ip" ]; then
+              sorted_ips+=("$ip")
+          else
+              echo "No IP address found for instance with role: $VALIDATOR_ROLE"
+          fi
           
-  #         # Print the sorted IPs
-  #         echo "Sorted IP addresses:"
-  #         for ip in "${sorted_ips[@]}"; do
-  #             echo "$ip"
-  #         done
+          # Print the sorted IPs
+          echo "Sorted IP addresses:"
+          for ip in "${sorted_ips[@]}"; do
+              echo "$ip"
+          done
 
-  #         # Save the sorted IPs to a file
-  #         printf "%s\n" "${sorted_ips[@]}" >> sorted_ips.txt
+          # Save the sorted IPs to a file
+          printf "%s\n" "${sorted_ips[@]}" >> sorted_ips.txt
             
       
-      # - name: Install ansible on the runner
-      #   run: |
-      #     sudo apt update
-      #     sudo apt install -y ansible
+      - name: Install ansible on the runner
+        run: |
+          sudo apt update
+          sudo apt install -y ansible
       
-      # - name: Add SSH Key
-      #   uses: webfactory/ssh-agent@v0.5.3
-      #   with:
-      #     ssh-private-key: ${{ secrets.AWS_EC2_WWW_TESTNET_SSH_KEY }}
+      - name: Add SSH Key
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.AWS_EC2_WWW_TESTNET_SSH_KEY }}
 
-      # - name: Prepare the ansible inventory file
-      #   run: |
-      #     rm -f inventory.ini && touch inventory.ini
-      #     echo "[all]" > inventory.ini
-      #     tr '\t' '\n' < sorted_ips.txt | awk '{print $0 " ansible_user=ec2-user"}' >> inventory.ini
+      - name: Prepare the ansible inventory file
+        run: |
+          rm -f inventory.ini && touch inventory.ini
+          echo "[all]" > inventory.ini
+           node_identifiers=("node0" "node1" "node2" "node3")
+          i=0
+          while IFS= read -r ip; do
+           
+            echo "$ip ansible_user=ec2-user node_id=${node_identifiers[$i]}" >> inventory.ini
+            ((i++))
+          done < sorted_ips.txt
 
-      #     # Print the inventory file
-      #     cat inventory.ini
+          # Print the inventory file
+          cat inventory.ini
 
-      # - name: Add EC2 instances to known_hosts
-      #   run: |
-      #     for ip in $(cat sorted_ips.txt); do
-      #       ssh-keyscan -H $ip >> ~/.ssh/known_hosts
-      #     done
+      - name: Add EC2 instances to known_hosts
+        run: |
+          for ip in $(cat sorted_ips.txt); do
+            ssh-keyscan -H $ip >> ~/.ssh/known_hosts
+          done
 
-      # - name: Run the ansible playbook
-      #   run: |
-      #     ansible-playbook -vvv -i inventory.ini .github/scripts/ansible/deploy_node.yml
+      - name: Run the ansible playbook
+        run: |
+          ansible-playbook -vvv -i inventory.ini .github/scripts/ansible/deploy_node.yml
 
-      # - name: Fetch the generated config files from EC2
-      #   ansible.builtin.fetch:
-      #     src: /path/to/generated/config/files/
-      #     dest: ./downloaded_configs/
-      #     flat: yes
-
-      # - name: Run the second ansible playbook to apply the configuration
-      #   run: |
-      #     ansible-playbook -vvv -i inventory.ini .github/scripts/ansible/deploy_node_with_config.yml
+      
 
 
