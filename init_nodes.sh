@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Load variables from JSON file
-JSON_FILE="variables.json"
-TEMPLATE_FILE="template.sh"
+JSON_FILE="node_config.json"
+TEMPLATE_FILE="init_node_template.sh"
 
 # Ensure jq is installed
 command -v jq > /dev/null 2>&1 || { echo >&2 "jq not installed. More info: https://stedolan.github.io/jq/download/"; exit 1; }
@@ -31,6 +31,8 @@ export DATA_PATH=$DATA_PATH
 export HOME_PATH=$HOME_PATH
 export PROJECT_NAME=$PROJECT_NAME
 export BINARY_NAME=$BINARY_NAME
+export BIN=$BINARY_NAME
+export ARGS="--home $HOME_PATH --keyring-backend test"
 export CHAIN_ID=$CHAIN_ID
 export ALLOCATION=$ALLOCATION
 export VALIDATOR_KEY=$VALIDATOR_KEY
@@ -45,14 +47,30 @@ EOF
   # Source the environment variables into the current shell session
   source $ENV_FILE
 
+  # Debugging: Print environment variables to ensure they're set correctly
+  echo "Environment Variables:"
+  echo "DATA_PATH=$DATA_PATH"
+  echo "HOME_PATH=$HOME_PATH"
+  echo "PROJECT_NAME=$PROJECT_NAME"
+  echo "BINARY_NAME=$BINARY_NAME"
+  echo "CHAIN_ID=$CHAIN_ID"
+  echo "ALLOCATION=$ALLOCATION"
+  echo "VALIDATOR_KEY=$VALIDATOR_KEY"
+  echo "ORCHESTRATOR_KEY=$ORCHESTRATOR_KEY"
+  echo "MONIKER=$MONIKER"
+  echo "KEYRING=$KEYRING"
+  echo "KEYALGO=$KEYALGO"
+  echo "DENOM=$DENOM"
+  echo "NODE_NAME=$NODE_NAME"
+
   # Read the template file and replace placeholders with actual values using envsubst
-  envsubst < $TEMPLATE_FILE > run_$NODE_NAME.sh
+  envsubst '${DATA_PATH} ${HOME_PATH} ${PROJECT_NAME} ${BINARY_NAME} ${CHAIN_ID} ${ALLOCATION} ${VALIDATOR_KEY} ${ORCHESTRATOR_KEY} ${MONIKER} ${KEYRING} ${KEYALGO} ${DENOM} ${NODE_NAME}' < $TEMPLATE_FILE > run_$NODE_NAME.sh
 
   # Make the generated script executable
   chmod +x run_$NODE_NAME.sh
 
   # Optionally, you can execute the generated script here:
-  # ./run_$NODE_NAME.sh
+   ./run_$NODE_NAME.sh
 
   # Clean up temporary environment file
   rm $ENV_FILE

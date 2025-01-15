@@ -112,7 +112,12 @@ jobs:
         run: |
           
           echo "IMAGE_NAME=${{ secrets.ECR_REGISTRY }}/${{ inputs.ecr-repo }}:${{ github.sha }}" > .env
-     
+      - name: new_genesis.json
+        run: |
+          
+          chmod +x new_genesis.sh
+          
+          bash new_genesis.sh     
 
 
   # deploy:
