@@ -89,8 +89,8 @@
 
     - name: docker-compose up
       shell: |
-      cd {{ PATH }}/docker
-      source .env
-      aws ecr get-login-password --region ${ inputs.ecr-repo-aws-region } | docker login --username AWS --password-stdin ${ secrets.ECR_REGISTRY }
-      docker-compose up -d
+          cd {{ PATH }}/docker
+          source .env
+          aws ecr get-login-password --region $inputs.ecr-repo-aws-region | docker login --username AWS --password-stdin $secrets.ECR_REGISTRY
+          docker-compose up -d
  
