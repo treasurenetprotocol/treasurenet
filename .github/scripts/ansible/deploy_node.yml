@@ -14,7 +14,7 @@
 
   tasks:
     - name: Ensure Docker is installed
-      yum:
+      apt:
         name: docker
         state: present
 
