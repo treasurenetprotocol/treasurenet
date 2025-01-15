@@ -176,16 +176,37 @@ jobs:
         run: |
           rm -f inventory.ini && touch inventory.ini
           echo "[all]" > inventory.ini
-           node_identifiers=("node0" "node1" "node2" "node3")
+
+          # Define node identifiers array
+          node_identifiers=("node0" "node1" "node2" "node3")
+
+          # Initialize index variable
           i=0
-          while IFS= read -r ip; do
-           echo "Adding IP: $ip with node_id: ${node_identifiers[$i]}"
+
+          # Read each IP address and associate it with the corresponding node identifier
+          while IFS= read -r ip || [ -n "$ip" ]; do
+            # Remove leading and trailing spaces and newlines from the IP address
+            ip=$(echo "$ip" | xargs)
+
+            # Check if the index exceeds the number of node identifiers
+            if [ $i -ge ${#node_identifiers[@]} ]; then
+              echo "Error: More IP addresses than node identifiers. Exiting."
+              exit 1
+            fi
+
+            # Debug output to see the IP and corresponding node identifier
+            echo "Adding IP: $ip with node_id: ${node_identifiers[$i]}"
+
+            # Append the IP address and node identifier to the inventory.ini file
             echo "$ip ansible_user=ec2-user node_id=${node_identifiers[$i]}" >> inventory.ini
+            
+            # Increment the index
             ((i++))
           done < sorted_ips.txt
 
-          # Print the inventory file
+          # Print the contents of the generated inventory.ini file
           cat inventory.ini
+
 
       - name: Add EC2 instances to known_hosts
         run: |
