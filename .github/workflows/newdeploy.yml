@@ -102,7 +102,16 @@ jobs:
 
       - name: init
         run: |
+          chmod +x init_nodes.sh 
+          chmod +x init_node_template.sh
+          chmod +x node_config.json
+          
           bash init_nodes.sh
+
+      - name: Set up environment variables and .env file
+        run: |
+          
+          echo "IMAGE_NAME=${{ secrets.ECR_REGISTRY }}/${{ inputs.ecr-repo }}:${{ github.sha }}" > .env
      
 
 
