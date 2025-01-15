@@ -4,12 +4,12 @@
   become: yes
 
   vars:
-    PATH: /home/ec2-user
+    PATH: /home/ubuntu
     GRAFANA_PORT: 3043
     PROMETHEUS_PORT: 3041
     NODEEXPLORTER_PORT: 3045
     LOKI_PORT: 3046
-    USER: ec2-user
+    USER: ubuntu
 
 
   tasks:
