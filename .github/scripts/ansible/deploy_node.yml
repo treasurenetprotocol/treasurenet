@@ -46,9 +46,8 @@
     - name: check
       shell: |
         source /etc/profile
-        sudo chmod +x /usr/bin/treasurenetd
-        cd {{ PATH }}/docker
-        #bash init.sh
+         chmod +x /usr/bin/treasurenetd
+          chmod +x /home/ubuntu/docker/docker-compose.yaml
         ls $(go env GOPATH)/bin
         mkdir .treasurenetd
 
@@ -63,8 +62,8 @@
 
     - name: Copy tn node 1 data files to server
       copy:
-        src: /data/node1/.treasurenetd
-        dest: "{{ PATH }}/.treasurenetd"
+        src: /data/node1/.treasurenetd/
+        dest: "{{ PATH }}/.treasurenetd/"
         force: yes
         owner: "{{ USER }}"
         group: "{{ USER }}"
@@ -72,8 +71,8 @@
 
     - name: Copy tn node 2 data files to server
       copy:
-        src: /data/node2/.treasurenetd
-        dest: "{{ PATH }}/.treasurenetd"
+        src: /data/node2/.treasurenetd/
+        dest: "{{ PATH }}/.treasurenetd/"
         force: yes
         owner: "{{ USER }}"
         group: "{{ USER }}"
@@ -81,14 +80,19 @@
 
     - name: Copy tn node 3 data files to server
       copy:
-        src: /data/node3/.treasurenetd
-        dest: "{{ PATH }}/.treasurenetd"
+        src: /data/node3/.treasurenetd/
+        dest: "{{ PATH }}/.treasurenetd/"
         force: yes
         owner: "{{ USER }}"
         group: "{{ USER }}"
       when: node_id == "node3"  
-      
 
+    - name: check
+      shell: |
+      cd {{ PATH }}/docker
+        source .env
+        aws ecr get-login-password --region ${ inputs.ecr-repo-aws-region } | docker login --username AWS --password-stdin ${ secrets.ECR_REGISTRY }
+        docker-compose up -d
    
 
  

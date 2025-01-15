@@ -112,6 +112,12 @@ jobs:
         run: |
           
           echo "IMAGE_NAME=${{ secrets.ECR_REGISTRY }}/${{ inputs.ecr-repo }}:${{ github.sha }}" > .env
+          echo "AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}" >> .env
+          echo "AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}" >> .env
+          echo "AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN}" >> .env
+           echo "inputs.ecr-repo-aws-region=${ inputs.ecr-repo-aws-region }"  >> .env
+           echo "secrets.ECR_REGISTRY=${ secrets.ECR_REGISTRY }" >> .env
+          
       - name: copy env to ansible
         run: |
             cp .env .github/scripts/ansible/docker
