@@ -187,7 +187,7 @@ jobs:
 
             rm -f inventory.ini && touch inventory.ini
             echo "[all]" > inventory.ini
-            tr '\t' '\n' < sorted_ips.txt | awk '{$1 = $1; if ($1 != "") {    node_id = "node" (NR-1) % 4;   print $0 " ansible_user=ec2-user node_id=" node_id >> "inventory.ini";} }'
+            tr '\t' '\n' < sorted_ips.txt | awk '{$1 = $1; if ($1 != "") {    node_id = "node" (NR-1) % 4;   print $0 " ansible_user=ubuntu node_id=" node_id >> "inventory.ini";} }'
             cat inventory.ini
       - name: Add EC2 instances to known_hosts
         run: |
