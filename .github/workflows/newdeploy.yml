@@ -156,6 +156,10 @@ jobs:
 
           # Save the sorted IPs to a file
           printf "%s\n" "${sorted_ips[@]}" >> sorted_ips.txt
+          echo "sorted_ips.txt:"
+          cat sorted_ips.txt
+
+
             
       
       - name: Install ansible on the runner
@@ -175,7 +179,7 @@ jobs:
            node_identifiers=("node0" "node1" "node2" "node3")
           i=0
           while IFS= read -r ip; do
-           
+           echo "Adding IP: $ip with node_id: ${node_identifiers[$i]}"
             echo "$ip ansible_user=ec2-user node_id=${node_identifiers[$i]}" >> inventory.ini
             ((i++))
           done < sorted_ips.txt
