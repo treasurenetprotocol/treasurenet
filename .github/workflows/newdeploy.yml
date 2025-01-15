@@ -174,52 +174,49 @@ jobs:
 
       - name: check  sorted_ips.txt
         run: |
-          # 清理空行
-          sed -i '/^$/d' sorted_ips.txt
+         
           cat -A sorted_ips.txt
 
 
       - name: Prepare the ansible inventory file
         run: |
-          pwd
-          sudo rm -f inventory.ini && touch inventory.ini
-          chmod +w inventory.ini
-          echo "[all]" > inventory.ini
+        
 
-          # Define node identifiers array
-          node_identifiers=("node0" "node1" "node2" "node3")
+            # Initialize inventory file
+            rm -f inventory.ini && touch inventory.ini
+            echo "[all]" > inventory.ini
 
-          # Initialize index variable
-          i=0
+            # Define node identifiers array
+            node_identifiers=("node0" "node1" "node2" "node3")
 
-          # Read sorted_ips.txt and append to inventory.ini with node identifiers
-          tr '\t' '\n' < sorted_ips.txt | while IFS= read -r ip; do
-            echo "Processing IP: $ip"  # Debug: Print the current IP being processed
-            
-            ip=$(echo "$ip" | xargs)  # Remove leading/trailing spaces
-            echo "Trimmed IP: $ip"  # Debug: Print trimmed IP
+            # Initialize index variable
+            i=0
 
-            # Check if the IP is empty after trimming
-            if [ -z "$ip" ]; then
-              echo "Error: IP is empty after trimming. Skipping."
-              continue
-            fi
+            # Iterate over IP addresses from sorted_ips.txt using a for loop
+            for ip in $(cat sorted_ips.txt); do
+              ip=$(echo "$ip" | xargs)  # Remove leading/trailing spaces
+              
+              # Check if the IP is empty after trimming
+              if [ -z "$ip" ]; then
+                echo "Error: IP is empty after trimming. Skipping."
+                continue
+              fi
 
-            # Append the IP address, ansible_user, and node identifier to inventory.ini
-            echo "$ip ansible_user=ec2-user node_id=${node_identifiers[$i]}" >> inventory.ini
-            
-            # Increment the index
-            ((i++))
+              # Append the IP address and node identifier to inventory.ini
+              echo "$ip ansible_user=ec2-user node_id=${node_identifiers[$i]}" >> inventory.ini
+              
+              # Increment the index
+              ((i++))
 
-            # Reset the index if it exceeds the length of the node_identifiers array
-            if [ $i -ge ${#node_identifiers[@]} ]; then
-              i=0
-            fi
-          done
+              # Reset the index if it exceeds the length of the node_identifiers array
+              if [ $i -ge ${#node_identifiers[@]} ]; then
+                i=0
+              fi
+            done
 
-          # Print the contents of the generated inventory.ini file
-          echo "Generated inventory.ini:"
-          cat -A inventory.ini
+            # Print the contents of the generated inventory.ini file
+            cat -A inventory.ini
+
 
 
 
