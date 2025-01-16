@@ -76,7 +76,7 @@ $BIN add-genesis-account $ARGS $VALIDATOR_KEY1 $ALLOCATION
 $BIN add-genesis-account $ARGS $ORCHESTRATOR_KEY1 $ALLOCATION
 
 # Generate transaction
-ETHEREUM_KEY=$(grep address $DATA_PATH/$PROJECT_NAME/$KEY1-eth-keys | sed -n "1"p | sed 's/.*://')
+ETHEREUM_KEY=$(grep address $DATA_PATH/.$PROJECT_NAME/$KEY1-eth-keys | sed -n "1"p | sed 's/.*://')
 echo $ETHEREUM_KEY
 
 $BIN gentx $ARGS --moniker $MONIKER --chain-id=$CHAIN_ID $KEY1 258000000000000000000aunit $ETHEREUM_KEY $ORCHESTRATOR_KEY1
