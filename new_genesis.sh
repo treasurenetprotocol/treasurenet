@@ -1,48 +1,48 @@
 
-accounts00=$(jq -c -r '.app_state.auth.accounts[0]' /data/node0/.treasurenet/config/genesis.json)
+accounts00=$(jq -c -r '.app_state.auth.accounts[0]' /data/node0/.treasurenetd/config/genesis.json)
 
-accounts01=$(jq -c -r '.app_state.auth.accounts[1]' /data/node0/.treasurenet/config/genesis.json)
+accounts01=$(jq -c -r '.app_state.auth.accounts[1]' /data/node0/.treasurenetd/config/genesis.json)
 
-accounts10=$(jq -c -r '.app_state.auth.accounts[0]' /data/node1/.treasurenet/config/genesis.json)
+accounts10=$(jq -c -r '.app_state.auth.accounts[0]' /data/node1/.treasurenetd/config/genesis.json)
 
-accounts11=$(jq -c -r '.app_state.auth.accounts[1]' /data/node1/.treasurenet/config/genesis.json)
+accounts11=$(jq -c -r '.app_state.auth.accounts[1]' /data/node1/.treasurenetd/config/genesis.json)
 
-accounts20=$(jq -c -r '.app_state.auth.accounts[0]' /data/node2/.treasurenet/config/genesis.json)
+accounts20=$(jq -c -r '.app_state.auth.accounts[0]' /data/node2/.treasurenetd/config/genesis.json)
 
-accounts21=$(jq -c -r '.app_state.auth.accounts[1]' /data/node2/.treasurenet/config/genesis.json)
+accounts21=$(jq -c -r '.app_state.auth.accounts[1]' /data/node2/.treasurenetd/config/genesis.json)
 
-accounts30=$(jq -c -r '.app_state.auth.accounts[0]' /data/node3/.treasurenet/config/genesis.json)
+accounts30=$(jq -c -r '.app_state.auth.accounts[0]' /data/node3/.treasurenetd/config/genesis.json)
 
-accounts31=$(jq -c -r '.app_state.auth.accounts[1]' /data/node3/.treasurenet/config/genesis.json)
-
-
+accounts31=$(jq -c -r '.app_state.auth.accounts[1]' /data/node3/.treasurenetd/config/genesis.json)
 
 
-balances00=$(jq -c -r '.app_state.bank.balances[0].address' /data/node0/.treasurenet/config/genesis.json)
 
-balances01=$(jq -c -r '.app_state.bank.balances[1].address' /data/node0/.treasurenet/config/genesis.json)
+
+balances00=$(jq -c -r '.app_state.bank.balances[0].address' /data/node0/.treasurenetd/config/genesis.json)
+
+balances01=$(jq -c -r '.app_state.bank.balances[1].address' /data/node0/.treasurenetd/config/genesis.json)
 #echo $balances01
-balances10=$(jq -c -r '.app_state.bank.balances[0].address' /data/node1/.treasurenet/config/genesis.json)
+balances10=$(jq -c -r '.app_state.bank.balances[0].address' /data/node1/.treasurenetd/config/genesis.json)
 
-balances11=$(jq -c -r '.app_state.bank.balances[1].address' /data/node1/.treasurenet/config/genesis.json)
+balances11=$(jq -c -r '.app_state.bank.balances[1].address' /data/node1/.treasurenetd/config/genesis.json)
 
-balances20=$(jq -c -r '.app_state.bank.balances[0].address' /data/node2/.treasurenet/config/genesis.json)
+balances20=$(jq -c -r '.app_state.bank.balances[0].address' /data/node2/.treasurenetd/config/genesis.json)
 
-balances21=$(jq -c -r '.app_state.bank.balances[1].address' /data/node2/.treasurenet/config/genesis.json)
+balances21=$(jq -c -r '.app_state.bank.balances[1].address' /data/node2/.treasurenetd/config/genesis.json)
 
-balances30=$(jq -c -r '.app_state.bank.balances[0].address' /data/node3/.treasurenet/config/genesis.json)
+balances30=$(jq -c -r '.app_state.bank.balances[0].address' /data/node3/.treasurenetd/config/genesis.json)
 
-balances31=$(jq -c -r '.app_state.bank.balances[1].address' /data/node3/.treasurenet/config/genesis.json)
+balances31=$(jq -c -r '.app_state.bank.balances[1].address' /data/node3/.treasurenetd/config/genesis.json)
 
     
     
-gen_txs00=$(jq -c -r '.app_state.genutil.gen_txs[0]' /data/node0/.treasurenet/config/genesis.json)
+gen_txs00=$(jq -c -r '.app_state.genutil.gen_txs[0]' /data/node0/.treasurenetd/config/genesis.json)
 #echo "$gen_txs00"
-gen_txs10=$(jq -c -r '.app_state.genutil.gen_txs[0]' /data/node1/.treasurenet/config/genesis.json)
+gen_txs10=$(jq -c -r '.app_state.genutil.gen_txs[0]' /data/node1/.treasurenetd/config/genesis.json)
 #echo "$gen_txs10"
-gen_txs20=$(jq -c -r '.app_state.genutil.gen_txs[0]' /data/node2/.treasurenet/config/genesis.json)
+gen_txs20=$(jq -c -r '.app_state.genutil.gen_txs[0]' /data/node2/.treasurenetd/config/genesis.json)
 
-gen_txs30=$(jq -c -r '.app_state.genutil.gen_txs[0]' /data/node3/.treasurenet/config/genesis.json)
+gen_txs30=$(jq -c -r '.app_state.genutil.gen_txs[0]' /data/node3/.treasurenetd/config/genesis.json)
 
 
 jq --argjson accounts00 "$accounts00" --argjson accounts01 "$accounts01" \
