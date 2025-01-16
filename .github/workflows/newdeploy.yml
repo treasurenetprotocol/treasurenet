@@ -368,15 +368,15 @@ jobs:
           
           bash new_genesis.sh        
            
-      # - name: Add EC2 instances to known_hosts
-      #   run: |
-      #     for ip in $(cat sorted_ips.txt); do
-      #       ssh-keyscan -H $ip >> ~/.ssh/known_hosts
-      #     done
+      - name: Add EC2 instances to known_hosts
+        run: |
+          for ip in $(cat sorted_ips.txt); do
+            ssh-keyscan -H $ip >> ~/.ssh/known_hosts
+          done
 
-      # - name: Run the ansible playbook
-      #   run: |
-      #     ansible-playbook -i inventory.ini .github/scripts/ansible/deploy_node.yml
+      - name: Run the ansible playbook
+        run: |
+          ansible-playbook -i inventory.ini .github/scripts/ansible/deploy_node.yml
 
       
 
