@@ -85,24 +85,47 @@
             regexp: '^number='
             line: "number={{ item.node_number }}"
             state: present
+          when: node_id == item.id
+
+        - name: Ensure .env file ownership and permissions
+          file:
+            path: "{{ PATH }}/docker/.env"
             owner: "{{ USER }}"
             group: "{{ USER }}"
             mode: '0644'
           when: node_id == item.id
+
       loop: "{{ nodes }}"
       loop_control:
         loop_var: item
 
+    - name: Convert ip_mapping.json to .env
+      shell: |
+        jq -r 'to_entries[] | "\(.key)_ip=\(.value.private_ip)"' ip_mapping.json >> .env
+      args:
+        chdir: "{{ PATH }}/docker"
+      when: node_id in ['node0', 'node1', 'node2', 'node3']
+
+    - name: Display .env file
+      shell: cat .env
+      args:
+        chdir: "{{ PATH }}/docker"
+
+    - name: changge hosts
+      shell: |
+        chmod +x update_hosts.sh
+        bash ./update_hosts.sh
+        cat /etc/hosts
+      args:
+        chdir: "{{ PATH }}/docker"
+
     - name: Docker-compose up
       shell: |
-        cd {{ PATH }}/docker
-        - name: Convert ip_mapping.json to .env
-        jq -r 'to_entries[] | "\(.key)_ip=\(.value.private_ip)"' ip_mapping.json >> .env
-        cat .env
         source .env
-        aws ecr get-login-password --region $inputs_ecr-repo-aws-region | docker login --username AWS --password-stdin $secrets_ECR_REGISTRY
+        aws ecr get-login-password --region $inputs_ecr_repo_aws_region | docker login --username AWS --password-stdin $secrets_ECR_REGISTRY
         docker-compose down
         docker-compose pull
         docker-compose up -d
       args:
+        chdir: "{{ PATH }}/docker"
         executable: /bin/bash
