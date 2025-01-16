@@ -254,23 +254,23 @@
       "supply": [
         {
           "denom": "aunit",
-          "amount": "20000000000000000000000"
+          "amount": "80000000000000000000000"
         },
         {
           "denom": "footoken",
-          "amount": "20000000000"
+          "amount": "80000000000"
         },
         {
           "denom": "footoken2",
-          "amount": "20000000000"
+          "amount": "80000000000"
         },
         {
           "denom": "ibc/nometadatatoken",
-          "amount": "20000000000"
+          "amount": "80000000000"
         },
         {
           "denom": "stake",
-          "amount": "20000000000"
+          "amount": "80000000000"
         }
       ],
       "denom_metadata": [
