@@ -4,8 +4,8 @@ networks:
   treasurenet-test:
 
 services:
-  treasurenetdnode0:
-    container_name: treasurenet-node
+  treasurenetdnode:
+    container_name: treasurenet-node${number}
     image: ${IMAGE_NAME}
     command: treasurenetd start --chain-id treasurenet_5005-1  --evm.tracer=json --json-rpc.api eth,txpool,net,web3,miner,debug --pruning=nothing --trace --json-rpc.address 0.0.0.0:8555 --rpc.laddr tcp://0.0.0.0:26657 --x-crisis-skip-assert-invariants
     logging:
@@ -14,7 +14,7 @@ services:
         max-size: "10m"
         max-file: "10"
     volumes:
-      -  /home/ubuntu/.treasurenetd:/root/.treasurenetd
+      -  /data/node/.treasurenet/:/root/.treasurenetd
     ports:
       - "26656:26656"
       - "26657:26657"
@@ -24,5 +24,10 @@ services:
       - "8125:8125"
       - "9090:9090"
       - "1317:1317"
+    extra_hosts:
+      - "treasurenet-node0:${node0_ip}"
+      - "treasurenet-node1:${node1_ip}"
+      - "treasurenet-node2:${node2_ip}"
+      - "treasurenet-node3:${node3_ip}"
     networks:
       - treasurenet-test

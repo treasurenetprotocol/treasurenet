@@ -26,6 +26,8 @@
       shell: |
         pwd
         ls
+        sudo rm -rf {{ PATH }}/docker/*
+        sudo rm -rf {{ PATH }}/.treasurenetd*
       register: shell_output
       ignore_errors: yes
       # Print current working directory and list files
