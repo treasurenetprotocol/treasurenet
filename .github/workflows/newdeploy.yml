@@ -108,15 +108,38 @@ jobs:
           
           bash init_nodes.sh
 
+      - name: configure aws credentials
+        uses: aws-actions/configure-aws-credentials@e3dd6a429d7300a6a4c196c26e071d42e0343502 # v4.0.2
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_MANAGEMENT_ACCOUNT }}:role/${{ needs.EnvSetup.outputs.gha-role-name }}
+          role-session-name: GitHub_to_AWS_via_FederatedOIDC
+          aws-region: ${{ needs.EnvSetup.outputs.ecr-repo-aws-region }}
+
+      - name: Assume role in target account
+        id: assume-role-target
+        run: |
+          ROLE_ARN="arn:aws:iam::${{ secrets.AWS_TARGET_ACCOUNT }}:role/iac-role"
+          CREDS=$(aws sts assume-role --role-arn $ROLE_ARN --role-session-name GitHubAction --query 'Credentials.[AccessKeyId,SecretAccessKey,SessionToken]' --output text)
+          echo "AWS_ACCESS_KEY_ID=$(echo $CREDS | cut -d ' ' -f 1)" >> $GITHUB_ENV
+          echo "AWS_SECRET_ACCESS_KEY=$(echo $CREDS | cut -d ' ' -f 2)" >> $GITHUB_ENV
+          echo "AWS_SESSION_TOKEN=$(echo $CREDS | cut -d ' ' -f 3)" >> $GITHUB_ENV
+
+      - name: Sts GetCallerIdentity
+        run: |
+          aws sts get-caller-identity
+
+      - name: Retrieve secrets from AWS Secrets Manager
+        id: retrieve-secrets
+        run: |
+          SECRET_STRING=$(aws secretsmanager get-secret-value --secret-id ${{ needs.EnvSetup.outputs.aws-secret-name }} --region ${{ needs.EnvSetup.outputs.ecr-repo-aws-region }} --query SecretString --output text)
+          echo "${SECRET_STRING}" | jq -r 'to_entries|map("\(.key)=\(.value|tostring)")|.[]' > .env
+
       - name: Set up environment variables and .env file
         run: |
           
-          echo "IMAGE_NAME=${{ secrets.ECR_REGISTRY }}/${{ inputs.ecr-repo }}:${{ github.sha }}" > .env
-          echo "AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}" >> .env
-          echo "AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}" >> .env
-          echo "AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN}" >> .env
-           echo "inputs.ecr-repo-aws-region=${{ inputs.ecr-repo-aws-region }}"  >> .env
-           echo "secrets.ECR_REGISTRY=${{ secrets.ECR_REGISTRY }}" >> .env
+          echo "IMAGE_NAME=${{ secrets.ECR_REGISTRY }}/${{ needs.EnvSetup.outputs.ecr-repo }}:${{ github.sha }}" >> .env
+          echo "inputs_ecr-repo-aws-region= ${{ needs.EnvSetup.outputs.ecr-repo-aws-region }}"  >> .env
+          echo "secrets_ECR_REGISTRY=${{ secrets.ECR_REGISTRY }}" >> .env
           
       - name: copy env to ansible
         run: |
@@ -168,42 +191,73 @@ jobs:
           printf "%s\n" "${sorted_ips[@]}" >> sorted_ips.txt
           echo "sorted_ips.txt:"
           cat sorted_ips.txt
+          
+      - name: Fetch the list of ec2 public IP addresses - validators
+        run: |
+            echo "Fetching IP address for instance with role: $VALIDATOR_ROLE"
+            ip=$(aws ec2 describe-instances \
+                --region us-west-1 \
+                --filters "Name=tag:Role,Values=$VALIDATOR_ROLE" "Name=instance-state-name,Values=running" \
+                --query "Reservations[*].Instances[*].PrivateIpAddress" \
+                --output text)
+        
+            if [ -n "$ip" ]; then
+                private_ips+=("$ip")
+            else
+                echo "No IP address found for instance with role: $VALIDATOR_ROLE"
+            fi
+            
+            # Print the sorted IPs
+            echo "Sorted IP addresses:"
+            for ip in "${private_ips[@]}"; do
+                echo "$ip"
+            done
+  
+            # Save the sorted IPs to a file
+            printf "%s\n" "${private_ips[@]}" >> private_ips.txt
+            echo "private_ips.txt:"
+            cat private_ips.txt
+
+      - name: get n ip
+        run: |
+          ip=$(aws ec2 describe-instances --query "Reservations[*].Instances[*].PrivateIpAddress" --output text)
+    
 
 
             
       
-      - name: Install ansible on the runner
-        run: |
-          sudo apt update
-          sudo apt install -y ansible
+      # - name: Install ansible on the runner
+      #   run: |
+      #     sudo apt update
+      #     sudo apt install -y ansible
       
-      - name: Add SSH Key
-        uses: webfactory/ssh-agent@v0.5.3
-        with:
-          ssh-private-key: ${{ secrets.AWS_EC2_WWW_TESTNET_SSH_KEY }}
+      # - name: Add SSH Key
+      #   uses: webfactory/ssh-agent@v0.5.3
+      #   with:
+      #     ssh-private-key: ${{ secrets.AWS_EC2_WWW_TESTNET_SSH_KEY }}
 
-      - name: check  sorted_ips.txt
-        run: |
+      # - name: check  sorted_ips.txt
+      #   run: |
          
-          cat -A sorted_ips.txt
+      #     cat -A sorted_ips.txt
 
 
-      - name: Prepare the ansible inventory file
-        run: |
+      # - name: Prepare the ansible inventory file
+      #   run: |
 
-            rm -f inventory.ini && touch inventory.ini
-            echo "[all]" > inventory.ini
-            tr '\t' '\n' < sorted_ips.txt | awk '{$1 = $1; if ($1 != "") {    node_id = "node" (NR-1) % 4;   print $0 " ansible_user=ubuntu node_id=" node_id >> "inventory.ini";} }'
-            cat inventory.ini
-      - name: Add EC2 instances to known_hosts
-        run: |
-          for ip in $(cat sorted_ips.txt); do
-            ssh-keyscan -H $ip >> ~/.ssh/known_hosts
-          done
+      #       rm -f inventory.ini && touch inventory.ini
+      #       echo "[all]" > inventory.ini
+      #       tr '\t' '\n' < sorted_ips.txt | awk '{$1 = $1; if ($1 != "") {    node_id = "node" (NR-1) % 4;   print $0 " ansible_user=ubuntu node_id=" node_id >> "inventory.ini";} }'
+      #       cat inventory.ini
+      # - name: Add EC2 instances to known_hosts
+      #   run: |
+      #     for ip in $(cat sorted_ips.txt); do
+      #       ssh-keyscan -H $ip >> ~/.ssh/known_hosts
+      #     done
 
-      - name: Run the ansible playbook
-        run: |
-          ansible-playbook -i inventory.ini .github/scripts/ansible/deploy_node.yml
+      # - name: Run the ansible playbook
+      #   run: |
+      #     ansible-playbook -i inventory.ini .github/scripts/ansible/deploy_node.yml
 
       
 
