@@ -97,6 +97,7 @@ cp -a genesis.json /data/node0/.treasurenetd/config/genesis.json
 cp -a genesis.json /data/node1/.treasurenetd/config/genesis.json
 cp -a genesis.json /data/node2/.treasurenetd/config/genesis.json
 cp -a genesis.json /data/node3/.treasurenetd/config/genesis.json
+sudo rm -rf /data/node/gen_txs/*
 sudo mkdir -p /data/node/gen_txs
  sudo chown -R $USER:$USER /data/node
  cp -a /data/node0/.treasurenetd/config/gentx/* /data/node/gen_txs/
