@@ -14,7 +14,7 @@ services:
         max-size: "10m"
         max-file: "10"
     volumes:
-      -  /data/node/.treasurenet/:/root/.treasurenetd
+      - /home/ubuntu/.treasurenetd:/root/.treasurenetd
     ports:
       - "26656:26656"
       - "26657:26657"
