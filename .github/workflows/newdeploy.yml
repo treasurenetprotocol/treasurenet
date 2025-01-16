@@ -130,7 +130,7 @@ jobs:
         run: |
           
           echo "IMAGE_NAME=${{ secrets.ECR_REGISTRY }}/${{ needs.EnvSetup.outputs.ecr-repo }}:${{ github.sha }}" >> .env
-          echo "inputs_ecr-repo-aws-region= ${{ needs.EnvSetup.outputs.ecr-repo-aws-region }}"  >> .env
+          echo "inputs_ecr-repo-aws-region=${{ needs.EnvSetup.outputs.ecr-repo-aws-region }}"  >> .env
           echo "secrets_ECR_REGISTRY=${{ secrets.ECR_REGISTRY }}" >> .env
           
       - name: copy env to ansible
@@ -184,7 +184,7 @@ jobs:
           echo "sorted_ips.txt:"
           cat sorted_ips.txt
           
-      - name: Fetch the list of ec2 public IP addresses - validators
+      - name: Fetch the list of ec2 private IP addresses - validators
         run: |
             echo "Fetching IP address for instance with role: $VALIDATOR_ROLE"
             ip=$(aws ec2 describe-instances \
@@ -210,37 +210,33 @@ jobs:
             echo "private_ips.txt:"
             cat private_ips.txt
 
-      - name: get n ip
-        run: |
-          ip=$(aws ec2 describe-instances --query "Reservations[*].Instances[*].PrivateIpAddress" --output text)
-    
 
 
             
       
-      # - name: Install ansible on the runner
-      #   run: |
-      #     sudo apt update
-      #     sudo apt install -y ansible
+      - name: Install ansible on the runner
+        run: |
+          sudo apt update
+          sudo apt install -y ansible
       
-      # - name: Add SSH Key
-      #   uses: webfactory/ssh-agent@v0.5.3
-      #   with:
-      #     ssh-private-key: ${{ secrets.AWS_EC2_WWW_TESTNET_SSH_KEY }}
+      - name: Add SSH Key
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.AWS_EC2_WWW_TESTNET_SSH_KEY }}
 
-      # - name: check  sorted_ips.txt
-      #   run: |
+      - name: check  sorted_ips.txt
+        run: |
          
-      #     cat -A sorted_ips.txt
+          cat -A sorted_ips.txt
 
 
-      # - name: Prepare the ansible inventory file
-      #   run: |
+      - name: Prepare the ansible inventory file
+        run: |
 
-      #       rm -f inventory.ini && touch inventory.ini
-      #       echo "[all]" > inventory.ini
-      #       tr '\t' '\n' < sorted_ips.txt | awk '{$1 = $1; if ($1 != "") {    node_id = "node" (NR-1) % 4;   print $0 " ansible_user=ubuntu node_id=" node_id >> "inventory.ini";} }'
-      #       cat inventory.ini
+            rm -f inventory.ini && touch inventory.ini
+            echo "[all]" > inventory.ini
+            tr '\t' '\n' < sorted_ips.txt | awk '{$1 = $1; if ($1 != "") {    node_id = "node" (NR-1) % 4;   print $0 " ansible_user=ubuntu node_id=" node_id >> "inventory.ini";} }'
+            cat inventory.ini
       # - name: Add EC2 instances to known_hosts
       #   run: |
       #     for ip in $(cat sorted_ips.txt); do
