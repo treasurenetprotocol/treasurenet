@@ -284,6 +284,7 @@ jobs:
               private_ip="${private_ip_mapping[$node]}"
               
               echo "Processing $node with private IP $private_ip"
+              ehco $node
               
              
               gentx_dir="/date/$node/.treasurenetd/config/gentx/"
@@ -323,7 +324,7 @@ jobs:
 
       - name: new_genesis.json
         run: |
-          
+          cp ip_mapping.json .github/scripts/ansible/docker/
           chmod +x new_genesis.sh
           
           bash new_genesis.sh        
