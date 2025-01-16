@@ -137,12 +137,7 @@ jobs:
         run: |
             cp .env .github/scripts/ansible/docker
 
-      - name: new_genesis.json
-        run: |
-          
-          chmod +x new_genesis.sh
-          
-          bash new_genesis.sh     
+  
 
 
   deploy:
@@ -237,6 +232,102 @@ jobs:
             echo "[all]" > inventory.ini
             tr '\t' '\n' < sorted_ips.txt | awk '{$1 = $1; if ($1 != "") {    node_id = "node" (NR-1) % 4;   print $0 " ansible_user=ubuntu node_id=" node_id >> "inventory.ini";} }'
             cat inventory.ini
+
+      - name: Generate IP Mapping JSON
+        run: |
+          
+          nodes=(node0 node1 node2 node3)
+          
+         
+          mapfile -t public_ips < sorted_ips.txt
+          mapfile -t private_ips < private_ips.txt
+          
+          
+          echo "{" > ip_mapping.json
+          
+          
+          for i in "${!nodes[@]}"; do
+            node=${nodes[$i]}
+            public_ip=${public_ips[$i]}
+            private_ip=${private_ips[$i]}
+            
+           
+            if [ "$i" -lt "$((${#nodes[@]} - 1))" ]; then
+              comma=","
+            else
+              comma=""
+            fi
+            
+            
+            echo "  \"$node\": {" >> ip_mapping.json
+            echo "    \"public_ip\": \"$public_ip\"," >> ip_mapping.json
+            echo "    \"private_ip\": \"$private_ip\"" >> ip_mapping.json
+            echo "  }$comma" >> ip_mapping.json
+          done
+          
+          
+          echo "}" >> ip_mapping.json
+          
+          
+          cat ip_mapping.json
+      
+      - name: Modify memo in gentx JSON files
+        run: |
+            
+            declare -A private_ip_mapping
+            while read -r node public_ip private_ip; do
+              private_ip_mapping["$node"]="$private_ip"
+            done < <(jq -r 'to_entries[] | "\(.key) \(.value.public_ip) \(.value.private_ip)"' ip_mapping.json)
+            
+            
+            for node in "${!private_ip_mapping[@]}"; do
+              private_ip="${private_ip_mapping[$node]}"
+              
+              echo "Processing $node with private IP $private_ip"
+              
+             
+              gentx_dir="/date/$node/.treasurenetd/config/gentx/"
+              
+             
+              if [ ! -d "$gentx_dir" ]; then
+                echo "Directory $gentx_dir does not exist. Skipping..."
+                continue
+              fi
+              
+             
+              for json_file in "$gentx_dir"gentx*.json; do
+                if [ -f "$json_file" ]; then
+                  echo "Modifying memo in $json_file"
+                  
+                 
+                  original_memo=$(jq -r '.body.memo' "$json_file")
+                  
+                 
+                  prefix=$(echo "$original_memo" | sed -E 's/@.*//')
+                  port=$(echo "$original_memo" | sed -E 's/.*:(.*)/\1/')
+                  
+                  
+                  new_memo="${prefix}@${private_ip}:${port}"
+                  
+                  echo "Original memo: $original_memo"
+                  echo "New memo: $new_memo"
+                  
+              
+                  jq --arg new_memo "$new_memo" '.body.memo = $new_memo' "$json_file" > "${json_file}.tmp" && mv "${json_file}.tmp" "$json_file"
+                  
+                 
+                  jq '.body.memo' "$json_file"
+                fi
+              done
+            done
+
+      - name: new_genesis.json
+        run: |
+          
+          chmod +x new_genesis.sh
+          
+          bash new_genesis.sh        
+           
       # - name: Add EC2 instances to known_hosts
       #   run: |
       #     for ip in $(cat sorted_ips.txt); do

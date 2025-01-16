@@ -99,11 +99,11 @@ cp -a genesis.json /data/node2/.treasurenetd/config/genesis.json
 cp -a genesis.json /data/node3/.treasurenetd/config/genesis.json
 sudo mkdir -p /data/node/gen_txs
  sudo chown -R $USER:$USER /data/node
- cp -a /data/node0/.treasurenetd/config/gentx/ /data/node/gen_txs/
- cp -a /data/node1/.treasurenetd/config/gentx/ /data/node/gen_txs/
- cp -a /data/node2/.treasurenetd/config/gentx/ /data/node/gen_txs/
- cp -a /data/node3/.treasurenetd/config/gentx/ /data/node/gen_txs/
- cp -a /data/node/gen_txs/ /data/node0/.treasurenetd/config/gentx/
- cp -a /data/node/gen_txs/ /data/node1/.treasurenetd/config/gentx/
- cp -a /data/node/gen_txs/ /data/node2/.treasurenetd/config/gentx/
- cp -a /data/node/gen_txs/ /data/node3/.treasurenetd/config/gentx/
+ cp -a /data/node0/.treasurenetd/config/gentx/* /data/node/gen_txs/
+ cp -a /data/node1/.treasurenetd/config/gentx/* /data/node/gen_txs/
+ cp -a /data/node2/.treasurenetd/config/gentx/* /data/node/gen_txs/
+ cp -a /data/node3/.treasurenetd/config/gentx/* /data/node/gen_txs/
+ cp -a /data/node/gen_txs/* /data/node0/.treasurenetd/config/gentx/
+ cp -a /data/node/gen_txs/* /data/node1/.treasurenetd/config/gentx/
+ cp -a /data/node/gen_txs/* /data/node2/.treasurenetd/config/gentx/
+ cp -a /data/node/gen_txs/* /data/node3/.treasurenetd/config/gentx/
