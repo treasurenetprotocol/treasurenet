@@ -36,13 +36,13 @@ balances31=$(jq -c -r '.app_state.bank.balances[1].address' /data/node3/.treasur
 
     
     
-gen_txs00=$(jq -c -r '.app_state.genutil.gen_txs[0]' /data/node0/.treasurenetd/config/genesis.json)
+gen_txs00=$(jq '.' /data/node0/.treasurenetd/config/gentx/gen*.json)
 #echo "$gen_txs00"
-gen_txs10=$(jq -c -r '.app_state.genutil.gen_txs[0]' /data/node1/.treasurenetd/config/genesis.json)
+gen_txs10=$(jq '.' /data/node1/.treasurenetd/config/gentx/gen*.json)
 #echo "$gen_txs10"
-gen_txs20=$(jq -c -r '.app_state.genutil.gen_txs[0]' /data/node2/.treasurenetd/config/genesis.json)
+gen_txs20=$(jq '.' /data/node2/.treasurenetd/config/gentx/gen*.json)
 
-gen_txs30=$(jq -c -r '.app_state.genutil.gen_txs[0]' /data/node3/.treasurenetd/config/genesis.json)
+gen_txs30=$(jq '.' /data/node3/.treasurenetd/config/gentx/gen*.json)
 
 
 jq --argjson accounts00 "$accounts00" --argjson accounts01 "$accounts01" \

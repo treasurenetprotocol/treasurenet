@@ -79,11 +79,11 @@
             group: "{{ USER }}"
           when: node_id == item.id
 
-        - name: Add node={{ item.node_number }} to .env file
+        - name: Add number={{ item.node_number }} to .env file
           lineinfile:
             path: "{{ PATH }}/docker/.env"
-            regexp: '^node='
-            line: "node={{ item.node_number }}"
+            regexp: '^number='
+            line: "number={{ item.node_number }}"
             state: present
             owner: "{{ USER }}"
             group: "{{ USER }}"
@@ -96,6 +96,9 @@
     - name: Docker-compose up
       shell: |
         cd {{ PATH }}/docker
+        - name: Convert ip_mapping.json to .env
+        jq -r 'to_entries[] | "\(.key)_ip=\(.value.private_ip)"' ip_mapping.json > .env
+        cat .env
         source .env
         aws ecr get-login-password --region $inputs_ecr-repo-aws-region | docker login --username AWS --password-stdin $secrets_ECR_REGISTRY
         docker-compose up -d
