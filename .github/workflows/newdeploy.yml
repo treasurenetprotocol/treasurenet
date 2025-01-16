@@ -284,7 +284,7 @@ jobs:
               private_ip="${private_ip_mapping[$node]}"
               
               echo "Processing $node with private IP $private_ip"
-              ehco $node
+              echo $node
               
              
               gentx_dir="/date/$node/.treasurenetd/config/gentx/"
