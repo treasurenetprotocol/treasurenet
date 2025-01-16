@@ -36,9 +36,9 @@ GAIA_HOME="--home $HOME_PATH"
 ARGS="--home $HOME_PATH --keyring-backend test"
 
 # Add keys for validator and orchestrator
-$BIN keys add $VALIDATOR_KEY --keyring-backend $KEYRING --algo $KEYALGO 2>> $DATA_PATH/$PROJECT_NAME/$KEY1-phrases
-$BIN keys add $ORCHESTRATOR_KEY --keyring-backend $KEYRING --algo $KEYALGO 2>> $DATA_PATH/$PROJECT_NAME/$KEY2-phrases
-$BIN eth_keys add --keyring-backend $KEYRING >> $DATA_PATH/$PROJECT_NAME/$KEY1-eth-keys
+$BIN keys add $VALIDATOR_KEY --keyring-backend $KEYRING --algo $KEYALGO 2>> $DATA_PATH/.$PROJECT_NAME/$KEY1-phrases
+$BIN keys add $ORCHESTRATOR_KEY --keyring-backend $KEYRING --algo $KEYALGO 2>> $DATA_PATH/.$PROJECT_NAME/$KEY2-phrases
+$BIN eth_keys add --keyring-backend $KEYRING >> $DATA_PATH/.$PROJECT_NAME/$KEY1-eth-keys
 
 # Initialize the node
 $BIN init $MONIKER --chain-id $CHAIN_ID
