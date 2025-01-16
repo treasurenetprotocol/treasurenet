@@ -78,7 +78,10 @@
             owner: "{{ USER }}"
             group: "{{ USER }}"
           when: node_id == item.id
-
+        loop: "{{ nodes }}"
+        loop_control:
+          loop_var: item
+          
         - name: Add number={{ item.node_number }} to .env file
           lineinfile:
             path: "{{ PATH }}/docker/.env"
@@ -86,6 +89,9 @@
             line: "number={{ item.node_number }}"
             state: present
           when: node_id == item.id
+        loop: "{{ nodes }}"
+        loop_control:
+          loop_var: item
 
         - name: Ensure .env file ownership and permissions
           file:
@@ -94,10 +100,10 @@
             group: "{{ USER }}"
             mode: '0644'
           when: node_id == item.id
+        loop: "{{ nodes }}"
+        loop_control:
+          loop_var: item
 
-      loop: "{{ nodes }}"
-      loop_control:
-        loop_var: item
 
     - name: Convert ip_mapping.json to .env
       shell: |
