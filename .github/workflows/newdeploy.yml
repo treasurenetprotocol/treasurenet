@@ -130,7 +130,7 @@ jobs:
         run: |
           
           echo "IMAGE_NAME=${{ secrets.ECR_REGISTRY }}/${{ needs.EnvSetup.outputs.ecr-repo }}:${{ github.sha }}" >> .env
-          echo "inputs_ecr-repo-aws-region=${{ needs.EnvSetup.outputs.ecr-repo-aws-region }}"  >> .env
+          echo "inputs_ecr_repo_aws_region=${{ needs.EnvSetup.outputs.ecr-repo-aws-region }}"  >> .env
           echo "secrets_ECR_REGISTRY=${{ secrets.ECR_REGISTRY }}" >> .env
           
       - name: copy env to ansible
