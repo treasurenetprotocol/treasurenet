@@ -120,19 +120,11 @@ jobs:
         run: |
           ROLE_ARN="arn:aws:iam::381492270411:role/iac-role"
           CREDS=$(aws sts assume-role --role-arn $ROLE_ARN --role-session-name GitHubAction --query 'Credentials.[AccessKeyId,SecretAccessKey,SessionToken]' --output text)
-          echo "AWS_ACCESS_KEY_ID=$(echo $CREDS | cut -d ' ' -f 1)" >> $GITHUB_ENV
-          echo "AWS_SECRET_ACCESS_KEY=$(echo $CREDS | cut -d ' ' -f 2)" >> $GITHUB_ENV
-          echo "AWS_SESSION_TOKEN=$(echo $CREDS | cut -d ' ' -f 3)" >> $GITHUB_ENV
+          echo "AWS_ACCESS_KEY_ID=$(echo $CREDS | cut -d ' ' -f 1)" > .env
+          echo "AWS_SECRET_ACCESS_KEY=$(echo $CREDS | cut -d ' ' -f 2)" >> .env
+          echo "AWS_SESSION_TOKEN=$(echo $CREDS | cut -d ' ' -f 3)" >> .env
 
-      - name: Sts GetCallerIdentity
-        run: |
-          aws sts get-caller-identity
-
-      - name: Retrieve secrets from AWS Secrets Manager
-        id: retrieve-secrets
-        run: |
-          SECRET_STRING=$(aws secretsmanager get-secret-value --secret-id ${{ needs.EnvSetup.outputs.aws-secret-name }} --region ${{ needs.EnvSetup.outputs.ecr-repo-aws-region }} --query SecretString --output text)
-          echo "${SECRET_STRING}" | jq -r 'to_entries|map("\(.key)=\(.value|tostring)")|.[]' > .env
+      
 
       - name: Set up environment variables and .env file
         run: |
