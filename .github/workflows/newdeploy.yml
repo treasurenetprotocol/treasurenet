@@ -4,7 +4,7 @@ name: Build and Push Docker Image to ECR
 on:
   push:
     branches:
-      - feature/3.0.1  
+      - 2025-01-16test 
 env:
   gha-role-name: "GitHubAction-AssumeRoleWithAction"
   dockerfile-path: "./Dockerfile"
