@@ -85,4 +85,4 @@ $BIN gentx $ARGS --moniker $MONIKER --chain-id=$CHAIN_ID $KEY1 25800000000000000
 # Collect transactions
 $BIN collect-gentxs
 
-sudo mv $HOME_PATH/* $DATA_PATH/.$PROJECT_NAME/
+#sudo mv $HOME_PATH/* $DATA_PATH/.$PROJECT_NAME/
