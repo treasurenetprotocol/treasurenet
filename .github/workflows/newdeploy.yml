@@ -259,6 +259,7 @@ jobs:
           nodes=(node0 node1 node2 node3)
           mapfile -t private_ips < private_ips.txt
           for i in "${!nodes[@]}"; do
+            rm -rf  /data/$node
             node=${nodes[$i]}
             private_ip=${private_ips[$i]}
             echo "Copying files from $node ($private_ip)"
@@ -269,11 +270,11 @@ jobs:
             # Verify the copied files
             echo "Copied files for $node to /data/$node"
             ls -la /data/$node
-            rm -rf  /data/$node
+            
           done
 
-          - name: Modify memos and update config.toml
-          run: |
+      - name: Modify memos and update config.toml
+        run: |
             # Declare an associative array for private IPs
             declare -A private_ip_mapping
             # Declare an array to collect memos
