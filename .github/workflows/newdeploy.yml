@@ -254,6 +254,7 @@ jobs:
 
       - name: Copy .treasurenetd from EC2 to runner
         run: |
+          
           # Define the node and corresponding IP
           nodes=(node0 node1 node2 node3)
           mapfile -t private_ips < private_ips.txt
@@ -268,6 +269,7 @@ jobs:
             # Verify the copied files
             echo "Copied files for $node to /data/$node"
             ls -la /data/$node
+            rm -rf  /data/$node
           done
 
           - name: Modify memos and update config.toml
