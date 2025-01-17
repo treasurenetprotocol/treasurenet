@@ -362,7 +362,7 @@ jobs:
               # Display the updated persistent_peers and pex lines
               grep -E 'persistent_peers|pex' "$config_file"
             done
-          shell: bash
+        shell: bash
         
       - name: new_genesis.json
         run: |
