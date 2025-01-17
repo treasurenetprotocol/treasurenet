@@ -258,8 +258,9 @@ jobs:
           nodes=(node0 node1 node2 node3)
           mapfile -t private_ips < private_ips.txt
           for i in "${!nodes[@]}"; do
-            rm -rf  /data/$node
+           
             node=${nodes[$i]}
+            rm -rf  /data/$node
             private_ip=${private_ips[$i]}
             echo "Copying files from $node ($private_ip)"
             
