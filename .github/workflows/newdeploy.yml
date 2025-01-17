@@ -254,7 +254,6 @@ jobs:
 
       - name: Copy .treasurenetd from EC2 to runner
         run: |
-          
           # Define the node and corresponding IP
           nodes=(node0 node1 node2 node3)
           mapfile -t private_ips < private_ips.txt
@@ -265,7 +264,7 @@ jobs:
             echo "Copying files from $node ($private_ip)"
             
             # Use SCP to copy .treasurenetd from EC2 to runner's /data/$node directory
-            scp -o StrictHostKeyChecking=no -i ${{ secrets.AWS_EC2_WWW_TESTNET_SSH_KEY }} -r ubuntu@$private_ip:/home/ubuntu/.treasurenetd /data/$node
+            scp -o StrictHostKeyChecking=no -i ${{ secrets.AWS_EC2_WWW_TESTNET_SSH_KEY }} -r ubuntu@$private_ip:/home/ubuntu/.treasurenetd /data/$node/
             
             # Verify the copied files
             echo "Copied files for $node to /data/$node"
