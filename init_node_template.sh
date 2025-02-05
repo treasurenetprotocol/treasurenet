@@ -81,13 +81,13 @@ FILE="/data/test.json"
 
 if [ ! -f "$FILE" ]; then
 
-  echo "{" > "$FILE"
-  echo "  \"$KEY1\": \"$VALIDATOR_KEY1\"," >> "$FILE"
-  echo "  \"$KEY2\": \"$ORCHESTRATOR_KEY1\"" >> "$FILE"
-  echo "}" >> "$FILE"
+  sudo echo "{" > "$FILE"
+  sudo echo "  \"$KEY1\": \"$VALIDATOR_KEY1\"," >> "$FILE"
+  sudo echo "  \"$KEY2\": \"$ORCHESTRATOR_KEY1\"" >> "$FILE"
+  sudo echo "}" >> "$FILE"
 else
  
-  jq --arg key1 "$KEY1" --arg key2 "$KEY2" --arg validator_key "$VALIDATOR_KEY1" --arg orchestrator_key "$ORCHESTRATOR_KEY1" \
+  sudo jq --arg key1 "$KEY1" --arg key2 "$KEY2" --arg validator_key "$VALIDATOR_KEY1" --arg orchestrator_key "$ORCHESTRATOR_KEY1" \
     '. + {($key1): $validator_key, ($key2): $orchestrator_key}' "$FILE" > tmp.json && mv tmp.json "$FILE"
 fi
 
