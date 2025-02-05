@@ -70,7 +70,7 @@ EOF
   chmod +x run_$NODE_NAME.sh
 
   # Optionally, you can execute the generated script here:
-   ./run_$NODE_NAME.sh
+  sudo bash ./run_$NODE_NAME.sh
 
   # Clean up temporary environment file
   rm $ENV_FILE
