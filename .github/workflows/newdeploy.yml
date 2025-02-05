@@ -108,6 +108,7 @@ jobs:
 
           sudo rm -f /data/test.json
           sudo touch /data/test.json
+          sudo echo "{}" > /data/test.json
           sudo chmod 666 /data/test.json
           bash init_nodes.sh
 
