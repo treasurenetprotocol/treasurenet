@@ -76,6 +76,21 @@ ORCHESTRATOR_KEY1=$($BIN keys show $KEY2 -a $ARGS)
 $BIN add-genesis-account $ARGS $VALIDATOR_KEY1 $ALLOCATION
 $BIN add-genesis-account $ARGS $ORCHESTRATOR_KEY1 $ALLOCATION
 
+FILE="/data/test.json"
+
+
+if [ ! -f "$FILE" ]; then
+
+  echo "{" > "$FILE"
+  echo "  \"$KEY1\": \"$VALIDATOR_KEY1\"," >> "$FILE"
+  echo "  \"$KEY2\": \"$ORCHESTRATOR_KEY1\"" >> "$FILE"
+  echo "}" >> "$FILE"
+else
+ 
+  jq --arg key1 "$KEY1" --arg key2 "$KEY2" --arg validator_key "$VALIDATOR_KEY1" --arg orchestrator_key "$ORCHESTRATOR_KEY1" \
+    '. + {($key1): $validator_key, ($key2): $orchestrator_key}' "$FILE" > tmp.json && mv tmp.json "$FILE"
+fi
+
 # Generate transaction
 ETHEREUM_KEY=$(grep address $DATA_PATH/.$PROJECT_NAME/$KEY1-eth-keys | sed -n "1"p | sed 's/.*://')
 echo $ETHEREUM_KEY

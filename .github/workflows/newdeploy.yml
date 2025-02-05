@@ -271,112 +271,112 @@ jobs:
           
           cat ip_mapping.json
       
-      - name: Modify memos and update config.toml
-        run: |            
-            # Declare an associative array
-            declare -A private_ip_mapping
-            # Declare an array to collect memos
-            memos=()
+      # - name: Modify memos and update config.toml
+      #   run: |            
+      #       # Declare an associative array
+      #       declare -A private_ip_mapping
+      #       # Declare an array to collect memos
+      #       memos=()
             
-            # Read node and private IP mappings from ip_mapping.json
-            while read -r node public_ip private_ip; do
-              private_ip_mapping["$node"]="$private_ip"
-            done < <(jq -r 'to_entries[] | "\(.key) \(.value.public_ip) \(.value.private_ip)"' ip_mapping.json)
+      #       # Read node and private IP mappings from ip_mapping.json
+      #       while read -r node public_ip private_ip; do
+      #         private_ip_mapping["$node"]="$private_ip"
+      #       done < <(jq -r 'to_entries[] | "\(.key) \(.value.public_ip) \(.value.private_ip)"' ip_mapping.json)
             
-            # Iterate over each node, modify memo in gentx files and collect new memos
-            for node in "${!private_ip_mapping[@]}"; do
-              private_ip="${private_ip_mapping[$node]}"
+      #       # Iterate over each node, modify memo in gentx files and collect new memos
+      #       for node in "${!private_ip_mapping[@]}"; do
+      #         private_ip="${private_ip_mapping[$node]}"
               
-              echo "Processing $node with private IP $private_ip"
+      #         echo "Processing $node with private IP $private_ip"
               
-              gentx_dir="/data/$node/.treasurenetd/config/gentx/"
+      #         gentx_dir="/data/$node/.treasurenetd/config/gentx/"
               
-              # Check if gentx directory exists
-              if [ ! -d "$gentx_dir" ]; then
-                echo "Directory $gentx_dir does not exist. Skipping..."
-                continue
-              fi
+      #         # Check if gentx directory exists
+      #         if [ ! -d "$gentx_dir" ]; then
+      #           echo "Directory $gentx_dir does not exist. Skipping..."
+      #           continue
+      #         fi
               
-              # Iterate over all JSON files starting with gentx in gentx directory
-              for json_file in "$gentx_dir"gentx*.json; do
-                if [ -f "$json_file" ]; then
-                  echo "Modifying memo in $json_file"
+      #         # Iterate over all JSON files starting with gentx in gentx directory
+      #         for json_file in "$gentx_dir"gentx*.json; do
+      #           if [ -f "$json_file" ]; then
+      #             echo "Modifying memo in $json_file"
                   
-                  # Extract original memo
-                  original_memo=$(jq -r '.body.memo' "$json_file")
+      #             # Extract original memo
+      #             original_memo=$(jq -r '.body.memo' "$json_file")
                   
-                  # Use regular expressions to extract the content before @ and the private IP before : after @
-                  # Assume memo format is "something@IP:port"
-                  prefix=$(echo "$original_memo" | sed -E 's/@.*//')
-                  port=$(echo "$original_memo" | sed -E 's/.*:(.*)/\1/')
+      #             # Use regular expressions to extract the content before @ and the private IP before : after @
+      #             # Assume memo format is "something@IP:port"
+      #             prefix=$(echo "$original_memo" | sed -E 's/@.*//')
+      #             port=$(echo "$original_memo" | sed -E 's/.*:(.*)/\1/')
                   
-                  # Construct new memo
-                  new_memo="${prefix}@${private_ip}:${port}"
+      #             # Construct new memo
+      #             new_memo="${prefix}@${private_ip}:${port}"
                   
-                  echo "Original memo: $original_memo"
-                  echo "New memo: $new_memo"
+      #             echo "Original memo: $original_memo"
+      #             echo "New memo: $new_memo"
                   
-                  # Modify memo field in JSON file
-                  jq --arg new_memo "$new_memo" '.body.memo = $new_memo' "$json_file" > "${json_file}.tmp" && mv "${json_file}.tmp" "$json_file"
+      #             # Modify memo field in JSON file
+      #             jq --arg new_memo "$new_memo" '.body.memo = $new_memo' "$json_file" > "${json_file}.tmp" && mv "${json_file}.tmp" "$json_file"
                   
-                  # Display the modified memo
-                  jq '.body.memo' "$json_file"
+      #             # Display the modified memo
+      #             jq '.body.memo' "$json_file"
                   
-                  # Add the new memo to the memos array
-                  memos+=("$new_memo")
-                fi
-              done
-            done
+      #             # Add the new memo to the memos array
+      #             memos+=("$new_memo")
+      #           fi
+      #         done
+      #       done
             
-            # Check if any memos were collected
-            if [ ${#memos[@]} -eq 0 ]; then
-              echo "No memos were modified. Exiting..."
-              exit 1
-            fi
+      #       # Check if any memos were collected
+      #       if [ ${#memos[@]} -eq 0 ]; then
+      #         echo "No memos were modified. Exiting..."
+      #         exit 1
+      #       fi
             
-            # Join memos array into a comma-separated string and wrap with double quotes
-            IFS=',' joined_memos=$(printf "%s," "${memos[@]}")
-            joined_memos=${joined_memos%,} # Remove the trailing comma
-            joined_memos="\"$joined_memos\""
+      #       # Join memos array into a comma-separated string and wrap with double quotes
+      #       IFS=',' joined_memos=$(printf "%s," "${memos[@]}")
+      #       joined_memos=${joined_memos%,} # Remove the trailing comma
+      #       joined_memos="\"$joined_memos\""
             
-            echo "Joined memos: $joined_memos"
+      #       echo "Joined memos: $joined_memos"
             
-            # Iterate over each node and update persistent_peers in config.toml
-            for node in "${!private_ip_mapping[@]}"; do
-              echo "Updating config.toml for $node"
-              config_file="/data/$node/.treasurenetd/config/config.toml"
+      #       # Iterate over each node and update persistent_peers in config.toml
+      #       for node in "${!private_ip_mapping[@]}"; do
+      #         echo "Updating config.toml for $node"
+      #         config_file="/data/$node/.treasurenetd/config/config.toml"
               
-              # Check if config.toml file exists
-              if [ ! -f "$config_file" ]; then
-                echo "Config file $config_file does not exist. Skipping..."
-                continue
-              fi
+      #         # Check if config.toml file exists
+      #         if [ ! -f "$config_file" ]; then
+      #           echo "Config file $config_file does not exist. Skipping..."
+      #           continue
+      #         fi
               
-              # Use sed to replace persistent_peers = "" with persistent_peers = "joined_memos"
-              sed -i "s/persistent_peers = \"\"/persistent_peers = $joined_memos/" "$config_file"
+      #         # Use sed to replace persistent_peers = "" with persistent_peers = "joined_memos"
+      #         sed -i "s/persistent_peers = \"\"/persistent_peers = $joined_memos/" "$config_file"
               
-              # Display the updated persistent_peers line
-              grep 'persistent_peers' "$config_file"
-            done
-        shell: bash
+      #         # Display the updated persistent_peers line
+      #         grep 'persistent_peers' "$config_file"
+      #       done
+      #   shell: bash
         
 
-      - name: new_genesis.json
-        run: |
-          cp ip_mapping.json .github/scripts/ansible/docker/
-          chmod +x new_genesis.sh
+      # - name: new_genesis.json
+      #   run: |
+      #     cp ip_mapping.json .github/scripts/ansible/docker/
+      #     chmod +x new_genesis.sh
           
-          bash new_genesis.sh        
+      #     bash new_genesis.sh        
            
-      - name: Add EC2 instances to known_hosts
-        run: |
-          for ip in $(cat sorted_ips.txt); do
-            ssh-keyscan -H $ip >> ~/.ssh/known_hosts
-          done
+      # - name: Add EC2 instances to known_hosts
+      #   run: |
+      #     for ip in $(cat sorted_ips.txt); do
+      #       ssh-keyscan -H $ip >> ~/.ssh/known_hosts
+      #     done
 
-      - name: Run the ansible playbook
-        run: |
-          ansible-playbook -i inventory.ini .github/scripts/ansible/deploy_node.yml
+      # - name: Run the ansible playbook
+      #   run: |
+      #     ansible-playbook -i inventory.ini .github/scripts/ansible/deploy_node.yml
 
       
 
