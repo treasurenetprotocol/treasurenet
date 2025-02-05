@@ -77,12 +77,12 @@ $BIN add-genesis-account $ARGS $VALIDATOR_KEY1 $ALLOCATION
 $BIN add-genesis-account $ARGS $ORCHESTRATOR_KEY1 $ALLOCATION
 
 FILE="/data/test.json"
-sudo rm -f $FILE
+# sudo rm -f $FILE
 
 if [ ! -f "$FILE" ]; then
 
-sudo touch $FILE
-sudo chmod 666 /data/test.json
+# sudo touch $FILE
+# sudo chmod 666 /data/test.json
 
 else
  
