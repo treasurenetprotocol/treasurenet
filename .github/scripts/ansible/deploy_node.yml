@@ -101,6 +101,28 @@
       when: node_id == item.id
       # Add number to .env file
 
+    - name: Add persistent_peers for node={{ item.node_number }} to .env file
+      lineinfile:
+        path: "{{ PATH }}/docker/.env"
+        regexp: '^PERSISTENT_PEERS_OPTION'
+        line: "--p2p.persistent_peers"  # When number == 1, keep it empty
+        state: present
+      loop: "{{ nodes }}"
+      loop_control:
+        loop_var: item
+      when: node_id == item.id and item.node_number == 1
+
+    - name: Add persistent_peers for node={{ item.node_number }} to .env file
+      lineinfile:
+        path: "{{ PATH }}/docker/.env"
+        regexp: '^PERSISTENT_PEERS_OPTION'
+        line: "--p2p.persistent_peers node{{ item.node_number - 1 }}_address@node{{ item.node_number - 1 }}_ip:26656"
+        state: present
+      loop: "{{ nodes }}"
+      loop_control:
+        loop_var: item
+      when: node_id == item.id and item.node_number != 1
+
     - name: Ensure .env file ownership and permissions
       file:
         path: "{{ PATH }}/docker/.env"

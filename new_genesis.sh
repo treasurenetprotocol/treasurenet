@@ -95,14 +95,14 @@
 
 
 
-sudo rm -rf /data/node/gen_txs/*
-sudo mkdir -p /data/node/gen_txs
-sudo chown -R $USER:$USER /data/node
+# sudo rm -rf /data/node/gen_txs/*
+# sudo mkdir -p /data/node/gen_txs
+# sudo chown -R $USER:$USER /data/node
 
-cp -a /data/node1/.treasurenetd/config/gentx/* /data/node/gen_txs/
-cp -a /data/node2/.treasurenetd/config/gentx/* /data/node/gen_txs/
-cp -a /data/node3/.treasurenetd/config/gentx/* /data/node/gen_txs/
-cp -a /data/node4/.treasurenetd/config/gentx/* /data/node/gen_txs/
+# cp -a /data/node1/.treasurenetd/config/gentx/* /data/node/gen_txs/
+cp -a /data/node2/.treasurenetd/config/gentx/* /data/node1/.treasurenetd/config/gentx/
+cp -a /data/node3/.treasurenetd/config/gentx/* /data/node1/.treasurenetd/config/gentx/
+cp -a /data/node4/.treasurenetd/config/gentx/* /data/node1/.treasurenetd/config/gentx/
 
 export HOME=/data/node1
 
@@ -150,7 +150,7 @@ cp -a genesis.json /data/node4/.treasurenetd/config/genesis.json
 
 export HOME=/home/ubuntu
 
-cp -a /data/node/gen_txs/* /data/node2/.treasurenetd/config/gentx/
-cp -a /data/node/gen_txs/* /data/node3/.treasurenetd/config/gentx/
-cp -a /data/node/gen_txs/* /data/node4/.treasurenetd/config/gentx/
+cp -a /data/node1/.treasurenetd/config/gentx/* /data/node2/.treasurenetd/config/gentx/
+cp -a /data/node1/.treasurenetd/config/gentx/* /data/node3/.treasurenetd/config/gentx/
+cp -a /data/node1/.treasurenetd/config/gentx/* /data/node4/.treasurenetd/config/gentx/
 
