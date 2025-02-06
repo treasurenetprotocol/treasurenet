@@ -226,7 +226,7 @@ jobs:
         run: |
           rm -f inventory.ini && touch inventory.ini
           echo "[all]" > inventory.ini
-          counter=1
+          counter=0
 
           # Read node_ids from the file
           mapfile -t node_ids < node_ids.txt
