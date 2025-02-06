@@ -146,7 +146,7 @@
       lineinfile:
         path: "{{ PATH }}/docker/.env"
         regexp: '^PERSISTENT_PEERS_OPTION'
-        line: "PERSISTENT_PEERS_OPTION=--p2p.persistent_peers={{ lookup('file', PATH + '/docker/.env') | regex_search('^node' + (item.node_number - 1)|string + '_address=(.*)', '\\1') }}@{{ lookup('file', PATH + '/docker/.env') | regex_search('^node' + (item.node_number - 1)|string + '_ip=(.*)', '\\1') }}:26656"
+        line: "PERSISTENT_PEERS_OPTION=--p2p.persistent_peers={{ lookup('file', '/home/ubuntu/docker/.env') | regex_search('^node' + (item.node_number - 1)|string + '_address=(.*)', '\\1') }}@{{ lookup('file',  '/home/ubuntu/docker/.env') | regex_search('^node' + (item.node_number - 1)|string + '_ip=(.*)', '\\1') }}:26656"
         state: present
       loop: "{{ nodes }}"
       loop_control:
