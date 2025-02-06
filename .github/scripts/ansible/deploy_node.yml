@@ -101,29 +101,7 @@
       when: node_id == item.id
       # Add number to .env file
 
-    - name: Add persistent_peers for node={{ item.node_number }} to .env file (number == 1)
-      lineinfile:
-        path: "{{ PATH }}/docker/.env"
-        regexp: '^PERSISTENT_PEERS_OPTION'
-        line: "PERSISTENT_PEERS_OPTION="
-        state: present
-      loop: "{{ nodes }}"
-      loop_control:
-        loop_var: item
-      when: node_id == item.id and item.node_number == 1
-      # Add empty PERSISTENT_PEERS_OPTION for node number 1
 
-    - name: Add persistent_peers for node={{ item.node_number }} to .env file (other than 1)
-      lineinfile:
-        path: "{{ PATH }}/docker/.env"
-        regexp: '^PERSISTENT_PEERS_OPTION'
-        line: "PERSISTENT_PEERS_OPTION=--p2p.persistent_peers={{ lookup('env', 'node' + (item.node_number - 1)|string + '_address') }}@{{ lookup('env', 'node' + (item.node_number - 1)|string + '_ip') }}:26656"
-        state: present
-      loop: "{{ nodes }}"
-      loop_control:
-        loop_var: item
-      when: node_id == item.id and item.node_number != 1
-      # Add persistent_peers for other node numbers with dynamic address and IP
 
 
     - name: Ensure .env file ownership and permissions
@@ -151,7 +129,28 @@
       args:
         chdir: "{{ PATH }}/docker"
       # Display .env file
-
+    - name: Add persistent_peers for node={{ item.node_number }} to .env file (number == 1)
+      lineinfile:
+        path: "{{ PATH }}/docker/.env"
+        regexp: '^PERSISTENT_PEERS_OPTION'
+        line: "PERSISTENT_PEERS_OPTION="
+        state: present
+      loop: "{{ nodes }}"
+      loop_control:
+        loop_var: item
+      when: node_id == item.id and item.node_number == 1
+      # Add empty PERSISTENT_PEERS_OPTION for node number 1
+    - name: Add persistent_peers for node={{ item.node_number }} to .env file (other than 1)
+      lineinfile:
+        path: "{{ PATH }}/docker/.env"
+        regexp: '^PERSISTENT_PEERS_OPTION'
+        line: "PERSISTENT_PEERS_OPTION=--p2p.persistent_peers={{ lookup('file', '{{ PATH }}/docker/.env') | regex_search('^node' + (item.node_number - 1)|string + '_address=(.*)', '\\1') }}@{{ lookup('file', '{{ PATH }}/docker/.env') | regex_search('^node' + (item.node_number - 1)|string + '_ip=(.*)', '\\1') }}:26656"
+        state: present
+      loop: "{{ nodes }}"
+      loop_control:
+        loop_var: item
+      when: node_id == item.id and item.node_number != 1
+      # Add persistent_peers for node number other than 1 with dynamic address and IP from .env
     - name: Change hosts
       shell: |
         chmod +x update_hosts.sh
