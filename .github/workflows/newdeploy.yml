@@ -358,9 +358,13 @@ jobs:
             
       - name: Add EC2 instances to known_hosts
         run: |
-            for ip in $(cat sorted_ips.txt); do
-              ssh-keyscan -H $ip >> ~/.ssh/known_hosts
-            done
+              for ip in $(cat sorted_ips.txt); do
+              echo "Scanning IP: $ip"
+                for ip_inner in $(cat sorted_ips.txt); do
+                  ssh-keyscan -H $ip_inner >> ~/.ssh/known_hosts
+                done
+              done
+
 
       - name: Run the ansible playbook
         run: |
