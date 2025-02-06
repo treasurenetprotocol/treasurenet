@@ -163,6 +163,7 @@ jobs:
           # Initialize empty arrays for IPs
           public_ips=()
           private_ips=()
+          node_ids=()
 
           # Fetch IP addresses for instances with names "node1", "node2", ..., "node4"
           for i in {1..4}; do
@@ -183,6 +184,13 @@ jobs:
                 --query "Reservations[*].Instances[*].PrivateIpAddress" \
                 --output text)
 
+            # Fetch the node_id from the instance tag
+            node_id=$(aws ec2 describe-instances \
+                --region us-west-1 \
+                --filters "Name=tag:Name,Values=$node_name" \
+                --query "Reservations[*].Instances[*].Tags[?Key=='Name'].Value" \
+                --output text)
+
             if [ -n "$public_ip" ]; then
                 public_ips+=("$public_ip")
             else
@@ -194,11 +202,9 @@ jobs:
             else
                 echo "No private IP found for $node_name"
             fi
-          done
 
-          # Print the collected IPs
-          echo "Public IPs: ${public_ips[@]}"
-          echo "Private IPs: ${private_ips[@]}"
+            node_ids+=("$node_id")  # Store node_id (which is the instance's Name tag)
+          done
 
           # Save IPs to files
           printf "%s\n" "${public_ips[@]}" > sorted_ips.txt
@@ -219,30 +225,30 @@ jobs:
           rm -f inventory.ini && touch inventory.ini
           echo "[all]" > inventory.ini
           paste sorted_ips.txt private_ips.txt | while IFS=$' \t' read -r public_ip private_ip; do
-            node_id="node$((i - 1))"
+            # Use node_id obtained from the EC2 instance tag Name
+            node_id="${node_ids[$(( $(wc -l < inventory.ini) ))]}"
             echo "$public_ip ansible_user=ubuntu node_id=$node_id" >> inventory.ini
           done
           cat inventory.ini
 
       - name: Generate IP Mapping JSON
         run: |
-          nodes=("node1" "node2" "node3" "node4")
           mapfile -t public_ips < sorted_ips.txt
           mapfile -t private_ips < private_ips.txt
 
           echo "{" > ip_mapping.json
-          for i in "${!nodes[@]}"; do
-            node=${nodes[$i]}
+          for i in "${!public_ips[@]}"; do
             public_ip=${public_ips[$i]}
             private_ip=${private_ips[$i]}
+            node_id="${node_ids[$i]}"
 
-            if [ "$i" -lt "$((${#nodes[@]} - 1))" ]; then
+            if [ "$i" -lt "$((${#public_ips[@]} - 1))" ]; then
               comma=","
             else
               comma=""
             fi
 
-            echo "  \"$node\": {" >> ip_mapping.json
+            echo "  \"$node_id\": {" >> ip_mapping.json
             echo "    \"public_ip\": \"$public_ip\"," >> ip_mapping.json
             echo "    \"private_ip\": \"$private_ip\"" >> ip_mapping.json
             echo "  }$comma" >> ip_mapping.json
@@ -250,6 +256,7 @@ jobs:
 
           echo "}" >> ip_mapping.json
           cat ip_mapping.json
+
 
         # - name: Modify memos and update config.toml
         #   run: |            
@@ -349,15 +356,15 @@ jobs:
             
           bash new_genesis.sh        
             
-        # - name: Add EC2 instances to known_hosts
-        #   run: |
-        #     for ip in $(cat sorted_ips.txt); do
-        #       ssh-keyscan -H $ip >> ~/.ssh/known_hosts
-        #     done
+      - name: Add EC2 instances to known_hosts
+        run: |
+            for ip in $(cat sorted_ips.txt); do
+              ssh-keyscan -H $ip >> ~/.ssh/known_hosts
+            done
 
-        # - name: Run the ansible playbook
-        #   run: |
-        #     ansible-playbook -i inventory.ini .github/scripts/ansible/deploy_node.yml
+      - name: Run the ansible playbook
+        run: |
+             ansible-playbook -i inventory.ini .github/scripts/ansible/deploy_node.yml
 
       
 

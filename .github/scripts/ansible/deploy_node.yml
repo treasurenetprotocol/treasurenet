@@ -11,14 +11,14 @@
     LOKI_PORT: 3046
     USER: ubuntu
     nodes:
-      - id: "node0"
-        node_number: 0
       - id: "node1"
         node_number: 1
       - id: "node2"
         node_number: 2
       - id: "node3"
         node_number: 3
+      - id: "node4"
+        node_number: 4
 
   tasks:
 
@@ -118,7 +118,7 @@
         jq -r 'to_entries[] | "\(.key)_ip=\(.value.private_ip)"' ip_mapping.json >> .env
       args:
         chdir: "{{ PATH }}/docker"
-      when: node_id in ['node0', 'node1', 'node2', 'node3']
+      when: node_id in ['node1', 'node2', 'node3', 'node4']
       # Convert ip_mapping.json to .env
 
     - name: Display .env file

@@ -106,16 +106,15 @@ cp -a /data/node4/.treasurenetd/config/gentx/* /data/node/gen_txs/
 
 export HOME=/data/node1
 
-# 读取 JSON 文件并提取除 validator1 和 orchestrator1 外的地址
+
 json_file="/data/test.json"
 
-# 使用 jq 逐一提取每个地址并执行命令
 for key in $(jq -r 'keys_unsorted[]' "$json_file"); do
   if [[ "$key" != "validator1" && "$key" != "orchestrator1" ]]; then
     ACCOUNT=$(jq -r ".${key}" "$json_file")
     echo "Adding genesis account for $key with address $ACCOUNT"
     
-    # 执行命令
+    
     treasurenetd add-genesis-account --trace --keyring-backend test $ACCOUNT 10000000000000000000000aunit,10000000000stake,10000000000footoken,10000000000footoken2,10000000000ibc/nometadatatoken
   fi
 done
@@ -126,14 +125,31 @@ cd /data/node1/.treasurenetd/config/
 mv config.toml config.toml1
 cp /data/node2/.treasurenetd/config/config.toml ./
 
-cp -a genesis.json /data/node1/.treasurenetd/config/genesis.json
+
+
+nodes=("node1" "node2" "node3")
+
+
+for node in "${nodes[@]}"; do
+ 
+  export HOME="/data/$node"
+  
+  
+  node_id=$(treasurenetd tendermint show-node-id)
+
+  
+  echo "${node}_address=$node_id" >> /data/actions-runner/_work/treasurenet/treasurenet/.github/scripts/ansible/docker/.env
+
+done
+cat /data/actions-runner/_work/treasurenet/treasurenet/.github/scripts/ansible/docker/.env
+echo "Node IDs appended to .env file."
+
 cp -a genesis.json /data/node2/.treasurenetd/config/genesis.json
 cp -a genesis.json /data/node3/.treasurenetd/config/genesis.json
 cp -a genesis.json /data/node4/.treasurenetd/config/genesis.json
 
 export HOME=/home/ubuntu
 
-cp -a /data/node/gen_txs/* /data/node1/.treasurenetd/config/gentx/
 cp -a /data/node/gen_txs/* /data/node2/.treasurenetd/config/gentx/
 cp -a /data/node/gen_txs/* /data/node3/.treasurenetd/config/gentx/
 cp -a /data/node/gen_txs/* /data/node4/.treasurenetd/config/gentx/
