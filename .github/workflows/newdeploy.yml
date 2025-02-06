@@ -145,219 +145,219 @@ jobs:
   
 
 
-deploy:
-  needs: [ print_timestamp, build-go-binary ]
-  runs-on: self-hosted
+  deploy:
+    needs: [ print_timestamp, build-go-binary ]
+    runs-on: self-hosted
 
-  steps:
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v1
-      with:
-        role-to-assume: arn:aws:iam::381492270411:role/full-ec2
-        aws-region: us-west-1
-        role-session-name: github-actions
-        audience: GitHub_to_AWS_via_FederatedOIDC_test
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: arn:aws:iam::381492270411:role/full-ec2
+          aws-region: us-west-1
+          role-session-name: github-actions
+          audience: GitHub_to_AWS_via_FederatedOIDC_test
 
-    - name: Fetch EC2 IP addresses (Public and Private)
-      run: |
-        # Initialize empty arrays for IPs
-        public_ips=()
-        private_ips=()
+      - name: Fetch EC2 IP addresses (Public and Private)
+        run: |
+          # Initialize empty arrays for IPs
+          public_ips=()
+          private_ips=()
 
-        # Fetch IP addresses for instances with names "node1", "node2", ..., "node4"
-        for i in {1..4}; do
-          node_name="node$i"
-          echo "Fetching IP address for instance with Name: $node_name"
+          # Fetch IP addresses for instances with names "node1", "node2", ..., "node4"
+          for i in {1..4}; do
+            node_name="node$i"
+            echo "Fetching IP address for instance with Name: $node_name"
 
-          # Fetch the public IP address
-          public_ip=$(aws ec2 describe-instances \
-              --region us-west-1 \
-              --filters "Name=tag:Name,Values=$node_name" "Name=instance-state-name,Values=running" \
-              --query "Reservations[*].Instances[*].PublicIpAddress" \
-              --output text)
+            # Fetch the public IP address
+            public_ip=$(aws ec2 describe-instances \
+                --region us-west-1 \
+                --filters "Name=tag:Name,Values=$node_name" "Name=instance-state-name,Values=running" \
+                --query "Reservations[*].Instances[*].PublicIpAddress" \
+                --output text)
 
-          # Fetch the private IP address
-          private_ip=$(aws ec2 describe-instances \
-              --region us-west-1 \
-              --filters "Name=tag:Name,Values=$node_name" "Name=instance-state-name,Values=running" \
-              --query "Reservations[*].Instances[*].PrivateIpAddress" \
-              --output text)
+            # Fetch the private IP address
+            private_ip=$(aws ec2 describe-instances \
+                --region us-west-1 \
+                --filters "Name=tag:Name,Values=$node_name" "Name=instance-state-name,Values=running" \
+                --query "Reservations[*].Instances[*].PrivateIpAddress" \
+                --output text)
 
-          if [ -n "$public_ip" ]; then
-              public_ips+=("$public_ip")
-          else
-              echo "No public IP found for $node_name"
-          fi
+            if [ -n "$public_ip" ]; then
+                public_ips+=("$public_ip")
+            else
+                echo "No public IP found for $node_name"
+            fi
 
-          if [ -n "$private_ip" ]; then
-              private_ips+=("$private_ip")
-          else
-              echo "No private IP found for $node_name"
-          fi
-        done
+            if [ -n "$private_ip" ]; then
+                private_ips+=("$private_ip")
+            else
+                echo "No private IP found for $node_name"
+            fi
+          done
 
-        # Print the collected IPs
-        echo "Public IPs: ${public_ips[@]}"
-        echo "Private IPs: ${private_ips[@]}"
+          # Print the collected IPs
+          echo "Public IPs: ${public_ips[@]}"
+          echo "Private IPs: ${private_ips[@]}"
 
-        # Save IPs to files
-        printf "%s\n" "${public_ips[@]}" > sorted_ips.txt
-        printf "%s\n" "${private_ips[@]}" > private_ips.txt
+          # Save IPs to files
+          printf "%s\n" "${public_ips[@]}" > sorted_ips.txt
+          printf "%s\n" "${private_ips[@]}" > private_ips.txt
 
-    - name: Install ansible on the runner
-      run: |
-        sudo apt update
-        sudo apt install -y ansible
+      - name: Install ansible on the runner
+        run: |
+          sudo apt update
+          sudo apt install -y ansible
 
-    - name: Add SSH Key
-      uses: webfactory/ssh-agent@v0.5.3
-      with:
-        ssh-private-key: ${{ secrets.AWS_EC2_WWW_TESTNET_SSH_KEY }}
+      - name: Add SSH Key
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.AWS_EC2_WWW_TESTNET_SSH_KEY }}
 
-    - name: Prepare the ansible inventory file
-      run: |
-        rm -f inventory.ini && touch inventory.ini
-        echo "[all]" > inventory.ini
-        paste sorted_ips.txt private_ips.txt | while IFS=$' \t' read -r public_ip private_ip; do
-          node_id="node$((i - 1))"
-          echo "$public_ip ansible_user=ubuntu node_id=$node_id" >> inventory.ini
-        done
-        cat inventory.ini
+      - name: Prepare the ansible inventory file
+        run: |
+          rm -f inventory.ini && touch inventory.ini
+          echo "[all]" > inventory.ini
+          paste sorted_ips.txt private_ips.txt | while IFS=$' \t' read -r public_ip private_ip; do
+            node_id="node$((i - 1))"
+            echo "$public_ip ansible_user=ubuntu node_id=$node_id" >> inventory.ini
+          done
+          cat inventory.ini
 
-    - name: Generate IP Mapping JSON
-      run: |
-        nodes=("node1" "node2" "node3" "node4")
-        mapfile -t public_ips < sorted_ips.txt
-        mapfile -t private_ips < private_ips.txt
+      - name: Generate IP Mapping JSON
+        run: |
+          nodes=("node1" "node2" "node3" "node4")
+          mapfile -t public_ips < sorted_ips.txt
+          mapfile -t private_ips < private_ips.txt
 
-        echo "{" > ip_mapping.json
-        for i in "${!nodes[@]}"; do
-          node=${nodes[$i]}
-          public_ip=${public_ips[$i]}
-          private_ip=${private_ips[$i]}
+          echo "{" > ip_mapping.json
+          for i in "${!nodes[@]}"; do
+            node=${nodes[$i]}
+            public_ip=${public_ips[$i]}
+            private_ip=${private_ips[$i]}
 
-          if [ "$i" -lt "$((${#nodes[@]} - 1))" ]; then
-            comma=","
-          else
-            comma=""
-          fi
+            if [ "$i" -lt "$((${#nodes[@]} - 1))" ]; then
+              comma=","
+            else
+              comma=""
+            fi
 
-          echo "  \"$node\": {" >> ip_mapping.json
-          echo "    \"public_ip\": \"$public_ip\"," >> ip_mapping.json
-          echo "    \"private_ip\": \"$private_ip\"" >> ip_mapping.json
-          echo "  }$comma" >> ip_mapping.json
-        done
+            echo "  \"$node\": {" >> ip_mapping.json
+            echo "    \"public_ip\": \"$public_ip\"," >> ip_mapping.json
+            echo "    \"private_ip\": \"$private_ip\"" >> ip_mapping.json
+            echo "  }$comma" >> ip_mapping.json
+          done
 
-        echo "}" >> ip_mapping.json
-        cat ip_mapping.json
+          echo "}" >> ip_mapping.json
+          cat ip_mapping.json
 
-      # - name: Modify memos and update config.toml
-      #   run: |            
-      #       # Declare an associative array
-      #       declare -A private_ip_mapping
-      #       # Declare an array to collect memos
-      #       memos=()
-            
-      #       # Read node and private IP mappings from ip_mapping.json
-      #       while read -r node public_ip private_ip; do
-      #         private_ip_mapping["$node"]="$private_ip"
-      #       done < <(jq -r 'to_entries[] | "\(.key) \(.value.public_ip) \(.value.private_ip)"' ip_mapping.json)
-            
-      #       # Iterate over each node, modify memo in gentx files and collect new memos
-      #       for node in "${!private_ip_mapping[@]}"; do
-      #         private_ip="${private_ip_mapping[$node]}"
+        # - name: Modify memos and update config.toml
+        #   run: |            
+        #       # Declare an associative array
+        #       declare -A private_ip_mapping
+        #       # Declare an array to collect memos
+        #       memos=()
               
-      #         echo "Processing $node with private IP $private_ip"
+        #       # Read node and private IP mappings from ip_mapping.json
+        #       while read -r node public_ip private_ip; do
+        #         private_ip_mapping["$node"]="$private_ip"
+        #       done < <(jq -r 'to_entries[] | "\(.key) \(.value.public_ip) \(.value.private_ip)"' ip_mapping.json)
               
-      #         gentx_dir="/data/$node/.treasurenetd/config/gentx/"
+        #       # Iterate over each node, modify memo in gentx files and collect new memos
+        #       for node in "${!private_ip_mapping[@]}"; do
+        #         private_ip="${private_ip_mapping[$node]}"
+                
+        #         echo "Processing $node with private IP $private_ip"
+                
+        #         gentx_dir="/data/$node/.treasurenetd/config/gentx/"
+                
+        #         # Check if gentx directory exists
+        #         if [ ! -d "$gentx_dir" ]; then
+        #           echo "Directory $gentx_dir does not exist. Skipping..."
+        #           continue
+        #         fi
+                
+        #         # Iterate over all JSON files starting with gentx in gentx directory
+        #         for json_file in "$gentx_dir"gentx*.json; do
+        #           if [ -f "$json_file" ]; then
+        #             echo "Modifying memo in $json_file"
+                    
+        #             # Extract original memo
+        #             original_memo=$(jq -r '.body.memo' "$json_file")
+                    
+        #             # Use regular expressions to extract the content before @ and the private IP before : after @
+        #             # Assume memo format is "something@IP:port"
+        #             prefix=$(echo "$original_memo" | sed -E 's/@.*//')
+        #             port=$(echo "$original_memo" | sed -E 's/.*:(.*)/\1/')
+                    
+        #             # Construct new memo
+        #             new_memo="${prefix}@${private_ip}:${port}"
+                    
+        #             echo "Original memo: $original_memo"
+        #             echo "New memo: $new_memo"
+                    
+        #             # Modify memo field in JSON file
+        #             jq --arg new_memo "$new_memo" '.body.memo = $new_memo' "$json_file" > "${json_file}.tmp" && mv "${json_file}.tmp" "$json_file"
+                    
+        #             # Display the modified memo
+        #             jq '.body.memo' "$json_file"
+                    
+        #             # Add the new memo to the memos array
+        #             memos+=("$new_memo")
+        #           fi
+        #         done
+        #       done
               
-      #         # Check if gentx directory exists
-      #         if [ ! -d "$gentx_dir" ]; then
-      #           echo "Directory $gentx_dir does not exist. Skipping..."
-      #           continue
-      #         fi
+        #       # Check if any memos were collected
+        #       if [ ${#memos[@]} -eq 0 ]; then
+        #         echo "No memos were modified. Exiting..."
+        #         exit 1
+        #       fi
               
-      #         # Iterate over all JSON files starting with gentx in gentx directory
-      #         for json_file in "$gentx_dir"gentx*.json; do
-      #           if [ -f "$json_file" ]; then
-      #             echo "Modifying memo in $json_file"
-                  
-      #             # Extract original memo
-      #             original_memo=$(jq -r '.body.memo' "$json_file")
-                  
-      #             # Use regular expressions to extract the content before @ and the private IP before : after @
-      #             # Assume memo format is "something@IP:port"
-      #             prefix=$(echo "$original_memo" | sed -E 's/@.*//')
-      #             port=$(echo "$original_memo" | sed -E 's/.*:(.*)/\1/')
-                  
-      #             # Construct new memo
-      #             new_memo="${prefix}@${private_ip}:${port}"
-                  
-      #             echo "Original memo: $original_memo"
-      #             echo "New memo: $new_memo"
-                  
-      #             # Modify memo field in JSON file
-      #             jq --arg new_memo "$new_memo" '.body.memo = $new_memo' "$json_file" > "${json_file}.tmp" && mv "${json_file}.tmp" "$json_file"
-                  
-      #             # Display the modified memo
-      #             jq '.body.memo' "$json_file"
-                  
-      #             # Add the new memo to the memos array
-      #             memos+=("$new_memo")
-      #           fi
-      #         done
-      #       done
-            
-      #       # Check if any memos were collected
-      #       if [ ${#memos[@]} -eq 0 ]; then
-      #         echo "No memos were modified. Exiting..."
-      #         exit 1
-      #       fi
-            
-      #       # Join memos array into a comma-separated string and wrap with double quotes
-      #       IFS=',' joined_memos=$(printf "%s," "${memos[@]}")
-      #       joined_memos=${joined_memos%,} # Remove the trailing comma
-      #       joined_memos="\"$joined_memos\""
-            
-      #       echo "Joined memos: $joined_memos"
-            
-      #       # Iterate over each node and update persistent_peers in config.toml
-      #       for node in "${!private_ip_mapping[@]}"; do
-      #         echo "Updating config.toml for $node"
-      #         config_file="/data/$node/.treasurenetd/config/config.toml"
+        #       # Join memos array into a comma-separated string and wrap with double quotes
+        #       IFS=',' joined_memos=$(printf "%s," "${memos[@]}")
+        #       joined_memos=${joined_memos%,} # Remove the trailing comma
+        #       joined_memos="\"$joined_memos\""
               
-      #         # Check if config.toml file exists
-      #         if [ ! -f "$config_file" ]; then
-      #           echo "Config file $config_file does not exist. Skipping..."
-      #           continue
-      #         fi
+        #       echo "Joined memos: $joined_memos"
               
-      #         # Use sed to replace persistent_peers = "" with persistent_peers = "joined_memos"
-      #         sed -i "s/persistent_peers = \"\"/persistent_peers = $joined_memos/" "$config_file"
-              
-      #         # Display the updated persistent_peers line
-      #         grep 'persistent_peers' "$config_file"
-      #       done
-      #   shell: bash
-        
-
-    - name: new_genesis.json
-      run: |
-        cp ip_mapping.json .github/scripts/ansible/docker/
+        #       # Iterate over each node and update persistent_peers in config.toml
+        #       for node in "${!private_ip_mapping[@]}"; do
+        #         echo "Updating config.toml for $node"
+        #         config_file="/data/$node/.treasurenetd/config/config.toml"
+                
+        #         # Check if config.toml file exists
+        #         if [ ! -f "$config_file" ]; then
+        #           echo "Config file $config_file does not exist. Skipping..."
+        #           continue
+        #         fi
+                
+        #         # Use sed to replace persistent_peers = "" with persistent_peers = "joined_memos"
+        #         sed -i "s/persistent_peers = \"\"/persistent_peers = $joined_memos/" "$config_file"
+                
+        #         # Display the updated persistent_peers line
+        #         grep 'persistent_peers' "$config_file"
+        #       done
+        #   shell: bash
           
-        chmod +x new_genesis.sh
-          
-        bash new_genesis.sh        
-           
-      # - name: Add EC2 instances to known_hosts
-      #   run: |
-      #     for ip in $(cat sorted_ips.txt); do
-      #       ssh-keyscan -H $ip >> ~/.ssh/known_hosts
-      #     done
 
-      # - name: Run the ansible playbook
-      #   run: |
-      #     ansible-playbook -i inventory.ini .github/scripts/ansible/deploy_node.yml
+      - name: new_genesis.json
+        run: |
+          cp ip_mapping.json .github/scripts/ansible/docker/
+            
+          chmod +x new_genesis.sh
+            
+          bash new_genesis.sh        
+            
+        # - name: Add EC2 instances to known_hosts
+        #   run: |
+        #     for ip in $(cat sorted_ips.txt); do
+        #       ssh-keyscan -H $ip >> ~/.ssh/known_hosts
+        #     done
+
+        # - name: Run the ansible playbook
+        #   run: |
+        #     ansible-playbook -i inventory.ini .github/scripts/ansible/deploy_node.yml
 
       
 
