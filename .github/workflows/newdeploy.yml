@@ -224,19 +224,48 @@ jobs:
 
       - name: Prepare the ansible inventory file
         run: |
-          rm -f inventory.ini && touch inventory.ini
-          echo "[all]" > inventory.ini
-          counter=0
+            rm -f inventory.ini && touch inventory.ini
+            echo "[all]" > inventory.ini
+            counter=0
 
-          # Read node_ids from the file
-          mapfile -t node_ids < node_ids.txt
+            # Check if node_ids.txt exists and is not empty
+            if [[ ! -s node_ids.txt ]]; then
+              echo "node_ids.txt is missing or empty"
+              exit 1
+            fi
 
-          paste sorted_ips.txt private_ips.txt | while IFS=$' \t' read -r public_ip private_ip; do
-            node_id="${node_ids[$counter]}"
-            echo "$public_ip ansible_user=ubuntu node_id=$node_id" >> inventory.ini
-            ((counter++))  # Increment the counter after each iteration
-          done
-          cat inventory.ini
+            # Read node_ids from the file
+            mapfile -t node_ids < node_ids.txt
+            mapfile -t public_ips < sorted_ips.txt
+            mapfile -t private_ips < private_ips.txt
+            echo "Number of node_ids: ${#node_ids[@]}"
+
+            # Check if sorted_ips.txt and private_ips.txt are not empty
+            if [[ ! -s sorted_ips.txt ]] || [[ ! -s private_ips.txt ]]; then
+              echo "sorted_ips.txt or private_ips.txt is missing or empty"
+              exit 1
+            fi
+
+            echo "Number of sorted_ips: $(wc -l < sorted_ips.txt)"
+            echo "Number of private_ips: $(wc -l < private_ips.txt)"
+
+            # Read sorted_ips.txt and private_ips.txt
+            paste sorted_ips.txt private_ips.txt | while IFS=$' \t' read -r public_ip private_ip; do
+              echo "public_ip: $public_ip, private_ip: $private_ip"
+              
+              # Ensure counter does not exceed node_ids length
+              if [ $counter -ge ${#node_ids[@]} ]; then
+                echo "Counter exceeds node_ids array length. Exiting."
+                exit 1
+              fi
+              
+              node_id="${node_ids[$counter]}"
+              echo "$public_ip ansible_user=ubuntu node_id=$node_id" >> inventory.ini
+              ((counter++))  # Increment the counter after each iteration
+            done
+
+            cat inventory.ini
+
 
 
       - name: Generate IP Mapping JSON
