@@ -143,7 +143,7 @@
       # Add empty PERSISTENT_PEERS_OPTION for node number 1
 
     - name: Get node address from .env
-      shell: "grep -oP '^node{{ item.node_number - 1 }}_address=\K.*' {{ PATH }}/docker/.env"
+      shell: "grep -oP '^node{{ (item.node_number - 1) }}_address=\K.*' {{ PATH }}/docker/.env"
       register: node_address
       loop: "{{ nodes }}"
       loop_control:
@@ -151,7 +151,7 @@
       when: node_id == item.id and item.node_number != 1
 
     - name: Get node IP from .env
-      shell: "grep -oP '^node{{ item.node_number - 1 }}_ip=\K.*' {{ PATH }}/docker/.env"
+      shell: "grep -oP '^node{{ (item.node_number - 1) }}_ip=\K.*' {{ PATH }}/docker/.env"
       register: node_ip
       loop: "{{ nodes }}"
       loop_control:
