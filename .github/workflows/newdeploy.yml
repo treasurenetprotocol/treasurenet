@@ -108,8 +108,9 @@ jobs:
 
           sudo rm -f /data/test.json
           sudo touch /data/test.json
-          sudo echo "{}" > /data/test.json
+
           sudo chmod 666 /data/test.json
+          sudo echo "{}" > /data/test.json
           bash init_nodes.sh
 
       - name: configure aws credentials
@@ -144,137 +145,112 @@ jobs:
   
 
 
-  deploy:
-    needs: [ print_timestamp, build-go-binary ]
-    runs-on: self-hosted
+deploy:
+  needs: [ print_timestamp, build-go-binary ]
+  runs-on: self-hosted
 
-    steps:
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          role-to-assume: arn:aws:iam::381492270411:role/full-ec2
-          aws-region: us-west-1
-          role-session-name: github-actions
-          audience: GitHub_to_AWS_via_FederatedOIDC_test
+  steps:
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        role-to-assume: arn:aws:iam::381492270411:role/full-ec2
+        aws-region: us-west-1
+        role-session-name: github-actions
+        audience: GitHub_to_AWS_via_FederatedOIDC_test
 
-      - name: Fetch the list of ec2 public IP addresses - validators
-        run: |
-          echo "Fetching IP address for instance with role: $VALIDATOR_ROLE"
-          ip=$(aws ec2 describe-instances \
+    - name: Fetch EC2 IP addresses (Public and Private)
+      run: |
+        # Initialize empty arrays for IPs
+        public_ips=()
+        private_ips=()
+
+        # Fetch IP addresses for instances with names "node1", "node2", ..., "node4"
+        for i in {1..4}; do
+          node_name="node$i"
+          echo "Fetching IP address for instance with Name: $node_name"
+
+          # Fetch the public IP address
+          public_ip=$(aws ec2 describe-instances \
               --region us-west-1 \
-              --filters "Name=tag:Role,Values=$VALIDATOR_ROLE" "Name=instance-state-name,Values=running" \
+              --filters "Name=tag:Name,Values=$node_name" "Name=instance-state-name,Values=running" \
               --query "Reservations[*].Instances[*].PublicIpAddress" \
               --output text)
-      
-          if [ -n "$ip" ]; then
-              sorted_ips+=("$ip")
+
+          # Fetch the private IP address
+          private_ip=$(aws ec2 describe-instances \
+              --region us-west-1 \
+              --filters "Name=tag:Name,Values=$node_name" "Name=instance-state-name,Values=running" \
+              --query "Reservations[*].Instances[*].PrivateIpAddress" \
+              --output text)
+
+          if [ -n "$public_ip" ]; then
+              public_ips+=("$public_ip")
           else
-              echo "No IP address found for instance with role: $VALIDATOR_ROLE"
+              echo "No public IP found for $node_name"
           fi
-          
-          # Print the sorted IPs
-          echo "Sorted IP addresses:"
-          for ip in "${sorted_ips[@]}"; do
-              echo "$ip"
-          done
 
-          # Save the sorted IPs to a file
-          printf "%s\n" "${sorted_ips[@]}" >> sorted_ips.txt
-          echo "sorted_ips.txt:"
-          cat sorted_ips.txt
-          
-      - name: Fetch the list of ec2 private IP addresses - validators
-        run: |
-            echo "Fetching IP address for instance with role: $VALIDATOR_ROLE"
-            ip=$(aws ec2 describe-instances \
-                --region us-west-1 \
-                --filters "Name=tag:Role,Values=$VALIDATOR_ROLE" "Name=instance-state-name,Values=running" \
-                --query "Reservations[*].Instances[*].PrivateIpAddress" \
-                --output text)
-        
-            if [ -n "$ip" ]; then
-                private_ips+=("$ip")
-            else
-                echo "No IP address found for instance with role: $VALIDATOR_ROLE"
-            fi
-            
-            # Print the sorted IPs
-            echo "Sorted IP addresses:"
-            for ip in "${private_ips[@]}"; do
-                echo "$ip"
-            done
-  
-            # Save the sorted IPs to a file
-            printf "%s\n" "${private_ips[@]}" >> private_ips.txt
-            echo "private_ips.txt:"
-            cat private_ips.txt
+          if [ -n "$private_ip" ]; then
+              private_ips+=("$private_ip")
+          else
+              echo "No private IP found for $node_name"
+          fi
+        done
 
+        # Print the collected IPs
+        echo "Public IPs: ${public_ips[@]}"
+        echo "Private IPs: ${private_ips[@]}"
 
+        # Save IPs to files
+        printf "%s\n" "${public_ips[@]}" > sorted_ips.txt
+        printf "%s\n" "${private_ips[@]}" > private_ips.txt
 
-            
-      
-      - name: Install ansible on the runner
-        run: |
-          sudo apt update
-          sudo apt install -y ansible
-      
-      - name: Add SSH Key
-        uses: webfactory/ssh-agent@v0.5.3
-        with:
-          ssh-private-key: ${{ secrets.AWS_EC2_WWW_TESTNET_SSH_KEY }}
+    - name: Install ansible on the runner
+      run: |
+        sudo apt update
+        sudo apt install -y ansible
 
-      - name: check  sorted_ips.txt
-        run: |
-         
-          cat -A sorted_ips.txt
+    - name: Add SSH Key
+      uses: webfactory/ssh-agent@v0.5.3
+      with:
+        ssh-private-key: ${{ secrets.AWS_EC2_WWW_TESTNET_SSH_KEY }}
 
+    - name: Prepare the ansible inventory file
+      run: |
+        rm -f inventory.ini && touch inventory.ini
+        echo "[all]" > inventory.ini
+        paste sorted_ips.txt private_ips.txt | while IFS=$' \t' read -r public_ip private_ip; do
+          node_id="node$((i - 1))"
+          echo "$public_ip ansible_user=ubuntu node_id=$node_id" >> inventory.ini
+        done
+        cat inventory.ini
 
-      - name: Prepare the ansible inventory file
-        run: |
+    - name: Generate IP Mapping JSON
+      run: |
+        nodes=("node1" "node2" "node3" "node4")
+        mapfile -t public_ips < sorted_ips.txt
+        mapfile -t private_ips < private_ips.txt
 
-            rm -f inventory.ini && touch inventory.ini
-            echo "[all]" > inventory.ini
-            tr '\t' '\n' < sorted_ips.txt | awk '{$1 = $1; if ($1 != "") {    node_id = "node" (NR-1) % 4;   print $0 " ansible_user=ubuntu node_id=" node_id >> "inventory.ini";} }'
-            cat inventory.ini
+        echo "{" > ip_mapping.json
+        for i in "${!nodes[@]}"; do
+          node=${nodes[$i]}
+          public_ip=${public_ips[$i]}
+          private_ip=${private_ips[$i]}
 
-      - name: Generate IP Mapping JSON
-        run: |
-          
-          nodes=(node0 node1 node2 node3)
-          
-         
-          mapfile -t public_ips < sorted_ips.txt
-          mapfile -t private_ips < private_ips.txt
-          
-          
-          echo "{" > ip_mapping.json
-          
-          
-          for i in "${!nodes[@]}"; do
-            node=${nodes[$i]}
-            public_ip=${public_ips[$i]}
-            private_ip=${private_ips[$i]}
-            
-           
-            if [ "$i" -lt "$((${#nodes[@]} - 1))" ]; then
-              comma=","
-            else
-              comma=""
-            fi
-            
-            
-            echo "  \"$node\": {" >> ip_mapping.json
-            echo "    \"public_ip\": \"$public_ip\"," >> ip_mapping.json
-            echo "    \"private_ip\": \"$private_ip\"" >> ip_mapping.json
-            echo "  }$comma" >> ip_mapping.json
-          done
-          
-          
-          echo "}" >> ip_mapping.json
-          
-          
-          cat ip_mapping.json
-      
+          if [ "$i" -lt "$((${#nodes[@]} - 1))" ]; then
+            comma=","
+          else
+            comma=""
+          fi
+
+          echo "  \"$node\": {" >> ip_mapping.json
+          echo "    \"public_ip\": \"$public_ip\"," >> ip_mapping.json
+          echo "    \"private_ip\": \"$private_ip\"" >> ip_mapping.json
+          echo "  }$comma" >> ip_mapping.json
+        done
+
+        echo "}" >> ip_mapping.json
+        cat ip_mapping.json
+
       # - name: Modify memos and update config.toml
       #   run: |            
       #       # Declare an associative array
@@ -365,12 +341,13 @@ jobs:
       #   shell: bash
         
 
-      # - name: new_genesis.json
-      #   run: |
-      #     cp ip_mapping.json .github/scripts/ansible/docker/
-      #     chmod +x new_genesis.sh
+    - name: new_genesis.json
+      run: |
+        cp ip_mapping.json .github/scripts/ansible/docker/
           
-      #     bash new_genesis.sh        
+        chmod +x new_genesis.sh
+          
+        bash new_genesis.sh        
            
       # - name: Add EC2 instances to known_hosts
       #   run: |
