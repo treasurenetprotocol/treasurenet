@@ -158,11 +158,23 @@
         loop_var: item
       when: node_id == item.id and item.node_number != 1
 
+    - name: Debug node_address
+      debug:
+        msg: |
+          node_address.results: {{ node_address.results | to_nice_json }}
+          current item.id: {{ item.id }}
+
+    - name: Debug node_ip
+      debug:
+        msg: |
+          node_ip.results: {{ node_ip.results | to_nice_json }}
+          current item.id: {{ item.id }}
+
     - name: Add persistent_peers for node={{ item.node_number }} to .env file (other than 1)
       lineinfile:
         path: "{{ PATH }}/docker/.env"
         regexp: '^PERSISTENT_PEERS_OPTION'
-        line: "PERSISTENT_PEERS_OPTION=--p2p.persistent_peers={{ node_address.results[item.node_number - 2].stdout }}@{{ node_ip.results[item.node_number - 2].stdout }}:26656"
+        line: "PERSISTENT_PEERS_OPTION=--p2p.persistent_peers={{ (node_address.results | selectattr('item.id', 'equalto', item.id) | first).stdout }}@{{ (node_ip.results | selectattr('item.id', 'equalto', item.id) | first).stdout }}:26656"
         state: present
       loop: "{{ nodes }}"
       loop_control:
