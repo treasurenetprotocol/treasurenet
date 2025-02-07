@@ -162,7 +162,7 @@
       lineinfile:
         path: "{{ PATH }}/docker/.env"
         regexp: '^PERSISTENT_PEERS_OPTION'
-        line: "PERSISTENT_PEERS_OPTION=--p2p.persistent_peers={{ node_address.stdout }}@{{ node_ip.stdout }}:26656"
+        line: "PERSISTENT_PEERS_OPTION=--p2p.persistent_peers={{ node_address.results[item.node_number - 2].stdout }}@{{ node_ip.results[item.node_number - 2].stdout }}:26656"
         state: present
       loop: "{{ nodes }}"
       loop_control:
