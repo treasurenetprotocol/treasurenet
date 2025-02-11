@@ -10,4 +10,4 @@ sudo mv /home/ubuntu/.treasurenetd  /data/seednode/.treasurenetd
 
 cd /data/node1/.treasurenetd/config/
 
-cp -a genesis.json /data/node2/.treasurenetd/config/genesis.json
+cp -a genesis.json /data/seednode/.treasurenetd/config/genesis.json
