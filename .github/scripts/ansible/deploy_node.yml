@@ -199,12 +199,7 @@
           sed -i 's/container_name: treasurenet-node${number}/container_name: treasurenet-seednode/' {{ PATH }}/docker/docker-compose.yaml
 
           # Update command to seed node configuration
-          sed -i '/command: >/ {
-            n
-            c\      treasurenetd start --chain-id treasurenet_5005-1 --p2p.seed_mode=true --p2p.pex=true ${PERSISTENT_PEERS_OPTION}\
-            n
-            d
-          }' {{ PATH }}/docker/docker-compose.yaml
+          sed -i '/command:/,/^\s*$/s|treasurenetd start --chain-id treasurenet_5005-1 --evm.tracer=json --json-rpc.api eth,txpool,net,web3,miner,debug --pruning=nothing --trace --json-rpc.address 0.0.0.0:8555 --rpc.laddr tcp://0.0.0.0:26657 --x-crisis-skip-assert-invariants|treasurenetd start --chain-id treasurenet_5005-1 --p2p.seed_mode=true --p2p.pex=true |' {{ PATH }}/docker/docker-compose.yaml
         fi
       loop: "{{ nodes }}"
       loop_control:
