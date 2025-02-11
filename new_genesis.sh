@@ -127,7 +127,7 @@ cp /data/node2/.treasurenetd/config/config.toml ./
 
 
 
-nodes=("node1" "node2" "node3")
+nodes=("node1" "node2" "node3" "node4")
 
 
 for node in "${nodes[@]}"; do

@@ -19,6 +19,8 @@
         node_number: 3
       - id: "node4"
         node_number: 4
+      - id: "seednode"
+        node_number: 5
 
   tasks:
 
@@ -27,7 +29,7 @@
         pwd
         ls
         sudo rm -rf {{ PATH }}/docker/*
-        sudo rm -rf {{ PATH }}/.treasurenetd*
+        sudo rm -rf {{ PATH }}/.treasurenetd
       register: shell_output
       ignore_errors: yes
       # Print current working directory and list files
@@ -121,7 +123,8 @@
         jq -r 'to_entries[] | "\(.key)_ip=\(.value.private_ip)"' ip_mapping.json >> .env
       args:
         chdir: "{{ PATH }}/docker"
-      when: node_id in ['node1', 'node2', 'node3', 'node4']
+      when: node_id in ['node1', 'node2', 'node3', 'node4', 'seednode']
+
       # Convert ip_mapping.json to .env
 
     - name: Display .env file
@@ -188,6 +191,22 @@
       loop_control:
         loop_var: item
       when: node_id == item.id and item.node_number != 1
+
+    - name: Modify docker-compose.yaml for seed node (node_number == 5)
+      shell: |
+        if [ "{{ item.node_number }}" -eq 5 ]; then
+          # Update container_name to "treasurenet-seednode"
+          sed -i 's/container_name: treasurenet-node${number}/container_name: treasurenet-seednode/' {{ PATH }}/docker/docker-compose.yaml
+
+          # Update command to seed node configuration
+          sed -i 's|command: >.*|command: >\n      treasurenetd start --chain-id treasurenet_5005-1 --p2p.seed_mode=true --p2p.pex=true\n      ${PERSISTENT_PEERS_OPTION}|' {{ PATH }}/docker/docker-compose.yaml
+        fi
+      loop: "{{ nodes }}"
+      loop_control:
+        loop_var: item
+      when: node_id == item.id and item.node_number == 5
+      # Modify docker-compose.yaml for seed node (node_number == 5)
+
 
 
 
