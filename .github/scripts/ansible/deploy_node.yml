@@ -103,16 +103,17 @@
 
     - name: Copy nginx data files to server
       copy:
-        src: "/data/nginx1/{{ item.id }}/*"
+        src: "{{ item }}"
         dest: "/data/nginx/"
         force: yes
         owner: "{{ USER }}"
         group: "{{ USER }}"
+      with_fileglob:
+        - "/data/nginx1/{{ item.id }}/*"
       loop: "{{ nodes }}"
       loop_control:
         loop_var: item
-      when: node_id == item.id and item.node_number !=6
-      # Copy tn nodes' data files to server
+      when: node_id == item.id and item.node_number != 6
 
     - name: Add number={{ item.node_number }} to .env file
       lineinfile:
