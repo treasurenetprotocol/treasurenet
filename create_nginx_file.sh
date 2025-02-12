@@ -29,7 +29,7 @@
 echo "Print current directory: $PWD" # Print current directory
 
 # mkdir
-for dir in node{0..3} seednode; do
+for dir in node{0..3} seednode0; do
     sudo mkdir -p "/data/nginx1/$dir"
     sudo rm -rf "/data/nginx1/$dir"/*
     sudo cp -a nginx_backup/* "/data/nginx1/$dir"
