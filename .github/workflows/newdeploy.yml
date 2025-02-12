@@ -172,13 +172,14 @@ jobs:
 
       - name: Fetch EC2 IP addresses (Public and Private)
         run: |
+        
               # Initialize empty arrays for IPs
               public_ips=()
               private_ips=()
               node_ids=()
 
               # Fetch IP addresses for instances with names "node1", "node2", ..., "node4" and "seednode"
-              for node_name in node1 node2 node3 node4 seednode blockscout; do
+              for node_name in node0 node1 node2 node3 seednode0 blockscout; do
                 echo "Fetching IP address for instance with Name: $node_name"
 
                 # Fetch the public IP address
