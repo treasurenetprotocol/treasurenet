@@ -103,13 +103,13 @@
 
     - name: Copy nginx data files to server
       copy:
-        src: "{{ item }}"
+        src: "{{ file_path }}"
         dest: "/data/nginx/"
         force: yes
         owner: "{{ USER }}"
         group: "{{ USER }}"
-      with_fileglob:
-        - "/data/nginx1/{{ item.id }}/*"
+      vars:
+        file_path: "{{ lookup('fileglob', '/data/nginx1/' + item.id + '/*') }}"
       loop: "{{ nodes }}"
       loop_control:
         loop_var: item
