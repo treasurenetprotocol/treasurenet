@@ -178,7 +178,7 @@ jobs:
               node_ids=()
 
               # Fetch IP addresses for instances with names "node1", "node2", ..., "node4" and "seednode"
-              for node_name in node1 node2 node3 node4 seednode; do
+              for node_name in node1 node2 node3 node4 seednode blockscout; do
                 echo "Fetching IP address for instance with Name: $node_name"
 
                 # Fetch the public IP address
