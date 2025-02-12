@@ -26,10 +26,5 @@ services:
       - "8125:8125"
       - "9090:9090"
       - "1317:1317"
-    extra_hosts:
-      - "treasurenet-node1:${node1_ip}"
-      - "treasurenet-node2:${node2_ip}"
-      - "treasurenet-node3:${node3_ip}"
-      - "treasurenet-node4:${node4_ip}"
     networks:
       - treasurenet-test
