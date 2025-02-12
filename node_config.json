@@ -1,5 +1,20 @@
 [
   {
+    "DATA_PATH": "/data/node0",
+    "HOME_PATH": "/home/ubuntu/.treasurenetd",
+    "PROJECT_NAME": "treasurenetd",
+    "BINARY_NAME": "treasurenetd",
+    "CHAIN_ID": "treasurenet_5005-1",
+    "ALLOCATION": "10000000000000000000000aunit,10000000000stake,10000000000footoken,10000000000footoken2,10000000000ibc/nometadatatoken",
+    "VALIDATOR_KEY": "validator0",
+    "ORCHESTRATOR_KEY": "orchestrator0",
+    "MONIKER": "node0",
+    "KEYRING": "test",
+    "KEYALGO": "eth_secp256k1",
+    "DENOM": "aunit",
+    "NODE_NAME": "node0"
+  },
+  {
     "DATA_PATH": "/data/node1",
     "HOME_PATH": "/home/ubuntu/.treasurenetd",
     "PROJECT_NAME": "treasurenetd",
@@ -43,20 +58,5 @@
     "KEYALGO": "eth_secp256k1",
     "DENOM": "aunit",
     "NODE_NAME": "node3"
-  },
-  {
-    "DATA_PATH": "/data/node4",
-    "HOME_PATH": "/home/ubuntu/.treasurenetd",
-    "PROJECT_NAME": "treasurenetd",
-    "BINARY_NAME": "treasurenetd",
-    "CHAIN_ID": "treasurenet_5005-1",
-    "ALLOCATION": "10000000000000000000000aunit,10000000000stake,10000000000footoken,10000000000footoken2,10000000000ibc/nometadatatoken",
-    "VALIDATOR_KEY": "validator4",
-    "ORCHESTRATOR_KEY": "orchestrator4",
-    "MONIKER": "node4",
-    "KEYRING": "test",
-    "KEYALGO": "eth_secp256k1",
-    "DENOM": "aunit",
-    "NODE_NAME": "node4"
   }
 ]
