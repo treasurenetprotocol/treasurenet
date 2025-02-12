@@ -98,7 +98,7 @@
       loop: "{{ nodes }}"
       loop_control:
         loop_var: item
-      when: node_id == item.id
+      when: node_id == item.id and item.node_number != 6
       # Copy tn nodes' data files to server
 
     - name: Copy nginx data files to server
@@ -124,7 +124,7 @@
       loop: "{{ nodes }}"
       loop_control:
         loop_var: item
-      when: node_id == item.id
+      when: node_id == item.id 
       # Add number to .env file
 
 
@@ -139,7 +139,7 @@
       loop: "{{ nodes }}"
       loop_control:
         loop_var: item
-      when: node_id == item.id
+      when: node_id == item.id 
       # Ensure .env file ownership and permissions
 
     - name: Convert ip_mapping.json to .env
