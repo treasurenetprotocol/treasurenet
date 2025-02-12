@@ -198,10 +198,11 @@ jobs:
 
                 # Fetch the node_id from the instance tag
                 node_id=$(aws ec2 describe-instances \
-                    --region us-west-1 \
-                    --filters "Name=tag:Name,Values=$node_name" \
-                    --query "Reservations[*].Instances[*].Tags[?Key=='Name'].Value" \
-                    --output text)
+                --region us-west-1 \
+                --filters "Name=tag:Name,Values=$node_name" "Name=instance-state-name,Values=running" \
+                --query "Reservations[0].Instances[0].Tags[?Key=='Name'].Value" \
+                --output text)
+
 
                 if [ -n "$public_ip" ]; then
                     public_ips+=("$public_ip")
