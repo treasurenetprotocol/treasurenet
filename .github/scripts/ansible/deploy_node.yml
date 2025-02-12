@@ -102,18 +102,16 @@
       # Copy tn nodes' data files to server
 
     - name: Copy nginx data files to server
-      copy:
-        src: "{{ file_path }}"
+      synchronize:
+        src: "/data/nginx1/{{ item.id }}/"
         dest: "/data/nginx/"
-        force: yes
-        owner: "{{ USER }}"
-        group: "{{ USER }}"
-      vars:
-        file_path: "{{ lookup('fileglob', '/data/nginx1/' + item.id + '/*') }}"
+        rsync_opts:
+          - "--chown={{ USER }}:{{ USER }}"
       loop: "{{ nodes }}"
       loop_control:
         loop_var: item
       when: node_id == item.id and item.node_number != 6
+
 
     - name: Add number={{ item.node_number }} to .env file
       lineinfile:
