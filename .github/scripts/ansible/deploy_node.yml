@@ -48,6 +48,14 @@
         mode: '0755'
       # Create directory for docker configuration
 
+    - name: Create nginx directory 
+      file:
+        path: "/data/nginx"
+        state: directory
+        owner: "{{ USER }}"
+        group: "{{ USER }}"
+        mode: '0755'
+
     - name: Copy Docker config files to server
       copy:
         src: docker/
@@ -82,6 +90,19 @@
       copy:
         src: "/data/{{ item.id }}/.treasurenetd/"
         dest: "{{ PATH }}/.treasurenetd/"
+        force: yes
+        owner: "{{ USER }}"
+        group: "{{ USER }}"
+      loop: "{{ nodes }}"
+      loop_control:
+        loop_var: item
+      when: node_id == item.id
+      # Copy tn nodes' data files to server
+
+    - name: Copy nginx data files to server
+      copy:
+        src: "/data/nginx/{{ item.id }}/*"
+        dest: "/data/nginx/"
         force: yes
         owner: "{{ USER }}"
         group: "{{ USER }}"
@@ -229,6 +250,22 @@
         docker-compose down
         docker-compose pull
         docker-compose up -d
+      args:
+        chdir: "{{ PATH }}/docker"
+        executable: /bin/bash
+      # Docker-compose up
+
+
+    - name: Docker-compose nginx up
+      shell: |
+        source .env
+        export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
+        export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
+        export AWS_SESSION_TOKEN=$AWS_SESSION_TOKEN
+        aws ecr get-login-password --region $inputs_ecr_repo_aws_region | docker login --username AWS --password-stdin $secrets_ECR_REGISTRY
+        docker-compose -f nginx.yaml down
+        docker-compose -f nginx.yaml pull
+        docker-compose -f nginx.yaml up -d
       args:
         chdir: "{{ PATH }}/docker"
         executable: /bin/bash

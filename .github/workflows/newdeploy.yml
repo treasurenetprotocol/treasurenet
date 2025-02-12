@@ -129,6 +129,7 @@ jobs:
           echo "AWS_SECRET_ACCESS_KEY=$(echo $CREDS | cut -d ' ' -f 2)" >> .env
           echo "AWS_SESSION_TOKEN=$(echo $CREDS | cut -d ' ' -f 3)" >> .env
 
+
       
 
       - name: Set up environment variables and .env file
@@ -137,6 +138,17 @@ jobs:
           echo "IMAGE_NAME=${{ secrets.ECR_REGISTRY }}/${{ needs.EnvSetup.outputs.ecr-repo }}:${{ github.sha }}" >> .env
           echo "inputs_ecr_repo_aws_region=${{ needs.EnvSetup.outputs.ecr-repo-aws-region }}"  >> .env
           echo "secrets_ECR_REGISTRY=${{ secrets.ECR_REGISTRY }}" >> .env
+
+      - name: Set nginx file
+        run: |
+          cd ./nginx_backup/certs
+            echo "${{ secrets.CLOUDFLARE_CERTS_KEY }}" >> cloudflare.key
+            echo "${{ secrets.CLOUDFLARE_CERTS_PEM }}" >> cloudflare.pem
+
+      - name: cp and mkdir  nginx file
+        run: |
+          chmod +x create_nginx_file.sh
+          bash create_nginx_file.sh
           
       - name: copy env to ansible
         run: |
