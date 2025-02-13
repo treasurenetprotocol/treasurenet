@@ -4,7 +4,7 @@ name: Build and Push Docker Image to ECR
 on:
   push:
     branches:
-      - 2025-01-16test 
+      - feature/3.1.0 
 env:
   gha-role-name: "GitHubAction-AssumeRoleWithAction"
   dockerfile-path: "./Dockerfile"
@@ -85,7 +85,7 @@ jobs:
           go mod tidy
           make install
 
-      - name: copy build
+      - name: copy build1
         run: |
           ls $(go env GOPATH)/bin
           cp $(go env GOPATH)/bin/treasurenetd .github/scripts/ansible/docker/
