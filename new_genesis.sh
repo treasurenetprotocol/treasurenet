@@ -110,7 +110,7 @@
 # export HOME=/data/node1
 
 
-# json_file="/data/test.json"
+# json_file="/data/account.json"
 
 # for key in $(jq -r 'keys_unsorted[]' "$json_file"); do
 #   if [[ "$key" != "validator1" && "$key" != "orchestrator1" ]]; then
@@ -170,7 +170,7 @@ done
 export HOME=/data/node0
 
 # JSON 文件路径
-json_file="/data/test.json"
+json_file="/data/account.json"
 
 # 遍历 JSON 文件中的键并添加 genesis 账户
 for key in $(jq -r 'keys_unsorted[]' "$json_file"); do

@@ -106,11 +106,11 @@ jobs:
           chmod +x init_node_template.sh
           chmod +x node_config.json
 
-          sudo rm -f /data/test.json
-          sudo touch /data/test.json
+          sudo rm -f /data/account.json
+          sudo touch /data/account.json
 
-          sudo chmod 666 /data/test.json
-          sudo echo "{}" > /data/test.json
+          sudo chmod 666 /data/account.json
+          sudo echo "{}" > /data/account.json
           bash init_nodes.sh
 
       - name: configure aws credentials

@@ -76,7 +76,7 @@ ORCHESTRATOR_KEY1=$($BIN keys show $KEY2 -a $ARGS)
 $BIN add-genesis-account $ARGS $VALIDATOR_KEY1 $ALLOCATION
 $BIN add-genesis-account $ARGS $ORCHESTRATOR_KEY1 $ALLOCATION
 
-FILE="/data/test.json"
+FILE="/data/account.json"
 
 sudo jq --arg key1 "$KEY1" --arg key2 "$KEY2" --arg validator_key "$VALIDATOR_KEY1" --arg orchestrator_key "$ORCHESTRATOR_KEY1" \
     '. + {($key1): $validator_key, ($key2): $orchestrator_key}' "$FILE" > tmp.json && sudo mv tmp.json "$FILE"
