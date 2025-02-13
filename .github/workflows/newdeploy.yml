@@ -318,7 +318,7 @@ jobs:
               done
 
 
-      - name: Run the ansible playbook1
+      - name: Run the ansible playbook
         run: |
              ansible-playbook -i inventory.ini  .github/scripts/ansible/deploy_node.yml
 
