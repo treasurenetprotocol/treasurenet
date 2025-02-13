@@ -174,7 +174,7 @@ json_file="/data/test.json"
 
 # 遍历 JSON 文件中的键并添加 genesis 账户
 for key in $(jq -r 'keys_unsorted[]' "$json_file"); do
-  if [[ "$key" != "validator1" && "$key" != "orchestrator1" ]]; then
+  if [[ "$key" != "validator0" && "$key" != "orchestrator0" ]]; then
     ACCOUNT=$(jq -r ".${key}" "$json_file")
     echo "Adding genesis account for $key with address $ACCOUNT"
     

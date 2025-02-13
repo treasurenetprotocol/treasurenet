@@ -36,10 +36,6 @@
       ignore_errors: yes
       # Print current working directory and list files
 
-    - name: Display shell output
-      debug:
-        var: shell_output.stdout_lines
-      # Display shell output
 
     - name: Create directory for docker configuration
       file:
@@ -82,7 +78,6 @@
         source /etc/profile
         chmod +x /usr/bin/treasurenetd
         chmod +x {{ PATH }}/docker/docker-compose.yaml
-        ls $(go env GOPATH)/bin
         mkdir -p "{{ PATH }}/.treasurenetd"
       args:
         executable: /bin/bash
@@ -215,11 +210,11 @@
       loop: "{{ nodes }}"
       loop_control:
         loop_var: item
-      when: node_id == item.id and item.node_number != 0 and item.node_number != 5
+      when: node_id == item.id and item.node_number != 0 and item.node_number != 5 
 
-    - name: Modify docker-compose.yaml for seed node (node_number == 5)
+    - name: Modify docker-compose.yaml for seed node (node_number == 4)
       shell: |
-        if [ "{{ item.node_number }}" -eq 5 ]; then
+        if [ "{{ item.node_number }}" -eq 4]; then
           # Update container_name to "treasurenet-seednode"
           sed -i 's/container_name: treasurenet-node${number}/container_name: treasurenet-seednode/' {{ PATH }}/docker/docker-compose.yaml
 
@@ -229,7 +224,7 @@
       loop: "{{ nodes }}"
       loop_control:
         loop_var: item
-      when: node_id == item.id and item.node_number == 5
+      when: node_id == item.id and item.node_number == 4
       # Modify docker-compose.yaml for seed node (node_number == 5)
 
 
