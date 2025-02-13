@@ -225,8 +225,8 @@
       loop_control:
         loop_var: item
       when: node_id == item.id and item.node_number == 4
-      
-      # Modify docker-compose.yaml for seed node (node_number == 5)
+
+      # Modify docker-compose.yaml for seed node (node_number == 4)
 
 
 
