@@ -19,7 +19,7 @@
         node_number: 2
       - id: "node3"
         node_number: 3
-      - id: "seednode"
+      - id: "seednode0"
         node_number: 4
       - id: "blockscout"
         node_number: 5
@@ -140,7 +140,7 @@
         jq -r 'to_entries[] | "\(.key)_ip=\(.value.private_ip)"' ip_mapping.json >> .env
       args:
         chdir: "{{ PATH }}/docker"
-      when: node_id in ['node0','node1', 'node2', 'node3',  'seednode' , "blockscout"]
+      when: node_id in ['node0','node1', 'node2', 'node3',  'seednode0' , "blockscout"]
 
       # Convert ip_mapping.json to .env
 
@@ -214,17 +214,18 @@
 
     - name: Modify docker-compose.yaml for seed node (node_number == 4)
       shell: |
-        if [ "{{ item.node_number }}" -eq 4]; then
-          # Update container_name to "treasurenet-seednode"
-          sed -i 's/container_name: treasurenet-node${number}/container_name: treasurenet-seednode/' {{ PATH }}/docker/docker-compose.yaml
+      
+          # Update container_name to "treasurenet-seednode0"
+          sed -i 's/container_name: treasurenet-node${number}/container_name: treasurenet-seednode0/' {{ PATH }}/docker/docker-compose.yaml
 
           # Update command to seed node configuration
           sed -i '/command:/,/^\s*$/s|treasurenetd start --chain-id treasurenet_5005-1 --evm.tracer=json --json-rpc.api eth,txpool,net,web3,miner,debug --pruning=nothing --trace --json-rpc.address 0.0.0.0:8555 --rpc.laddr tcp://0.0.0.0:26657 --x-crisis-skip-assert-invariants|treasurenetd start --chain-id treasurenet_5005-1 --p2p.seed_mode=true --p2p.pex=true |' {{ PATH }}/docker/docker-compose.yaml
-        fi
+        
       loop: "{{ nodes }}"
       loop_control:
         loop_var: item
       when: node_id == item.id and item.node_number == 4
+      
       # Modify docker-compose.yaml for seed node (node_number == 5)
 
 
