@@ -85,7 +85,7 @@ jobs:
           go mod tidy
           make install
 
-      - name: copy build1
+      - name: copy build
         run: |
           ls $(go env GOPATH)/bin
           cp $(go env GOPATH)/bin/treasurenetd .github/scripts/ansible/docker/
@@ -169,6 +169,9 @@ jobs:
           aws-region: us-west-1
           role-session-name: github-actions
           audience: GitHub_to_AWS_via_FederatedOIDC_test
+
+      - name: aws 
+        run: aws sts get-caller-identity
 
       - name: Fetch EC2 IP addresses (Public and Private)
         run: |
