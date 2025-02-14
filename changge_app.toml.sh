@@ -26,8 +26,8 @@ sed -E '
 }' "$input_file" > "$output_file"
 
 
-mv $output_file$ $input_file
-mv $input_file /data/node1/.treasurenetd/config/$input_file
-mv $input_file /data/node2/.treasurenetd/config/$input_file
-mv $input_file /data/node3/.treasurenetd/config/$input_file
-mv $input_file /data/seednode0/.treasurenetd/config/$input_file
+mv ./$output_file ./$input_file
+mv ./$input_file /data/node1/.treasurenetd/config/$input_file
+mv ./$input_file /data/node2/.treasurenetd/config/$input_file
+mv ./$input_file /data/node3/.treasurenetd/config/$input_file
+mv ./$input_file /data/seednode0/.treasurenetd/config/$input_file
