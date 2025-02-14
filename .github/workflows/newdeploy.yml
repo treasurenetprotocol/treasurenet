@@ -310,6 +310,19 @@ jobs:
           chmod +x init_seednode.sh
             
           bash init_seednode.sh     
+
+      - name: bash changge_app.toml.sh
+        run: |
+          chmod +x changge_app.toml.sh
+            
+          bash changge_app.toml.sh
+
+
+      - name: bash changge_config.toml.sh
+        run: |
+            chmod +x changge_config.toml.sh 
+              
+            bash changge_config.toml.sh 
             
       - name: Add EC2 instances to known_hosts
         run: |
