@@ -186,10 +186,6 @@ done
 cd /data/node0/.treasurenetd/config/gentx
 treasurenetd collect-gentxs
 
-# 备份并替换 config.toml 文件
-cd /data/node0/.treasurenetd/config/
-mv config.toml config.toml1
-cp /data/node1/.treasurenetd/config/config.toml ./
 
 # 记录节点 ID 到 .env 文件
 for node in "${nodes[@]}"; do
