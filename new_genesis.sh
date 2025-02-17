@@ -163,7 +163,8 @@ nodes=("node0" "node1" "node2" "node3")
 
 # 循环执行 cp 命令
 for node in "${nodes[@]}"; do
-  cp -a "/data/${node}/.treasurenetd/config/gentx/*" /data/node0/.treasurenetd/config/gentx/
+  cp -auv "/data/${node}/.treasurenetd/config/gentx/"*.json \
+    /data/node0/.treasurenetd/config/gentx/
 done
 
 # 设置 HOME 环境变量
@@ -186,6 +187,10 @@ done
 cd /data/node0/.treasurenetd/config/gentx
 treasurenetd collect-gentxs
 
+# 备份并替换 config.toml 文件
+cd /data/node0/.treasurenetd/config/
+mv config.toml config.toml1
+cp /data/node1/.treasurenetd/config/config.toml ./
 
 # 记录节点 ID 到 .env 文件
 for node in "${nodes[@]}"; do
@@ -200,6 +205,7 @@ echo "Node IDs appended to .env file."
 
 # 复制 genesis.json 文件到其他节点
 for node in "${nodes[@]}"; do
+  cd /data/node0/.treasurenetd/config/
   cp -a genesis.json "/data/${node}/.treasurenetd/config/genesis.json"
 done
 
@@ -208,5 +214,7 @@ export HOME=/home/ubuntu
 
 # 复制 gentx 文件到其他节点
 for node in "${nodes[@]}"; do
-  cp -a /data/node0/.treasurenetd/config/gentx/* "/data/${node}/.treasurenetd/config/gentx/"
+ cd /data/node0/.treasurenetd/config/
+  cp -auv "/data/node0/.treasurenetd/config/gentx/"*.json \
+    /data/${node}/.treasurenetd/config/gentx/
 done
