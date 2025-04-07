@@ -1,181 +1,22 @@
 
-# accounts00=$(jq -c -r '.app_state.auth.accounts[0]' /data/node0/.treasurenetd/config/genesis.json)
-
-# accounts01=$(jq -c -r '.app_state.auth.accounts[1]' /data/node0/.treasurenetd/config/genesis.json)
-
-# accounts10=$(jq -c -r '.app_state.auth.accounts[0]' /data/node1/.treasurenetd/config/genesis.json)
-
-# accounts11=$(jq -c -r '.app_state.auth.accounts[1]' /data/node1/.treasurenetd/config/genesis.json)
-
-# accounts20=$(jq -c -r '.app_state.auth.accounts[0]' /data/node2/.treasurenetd/config/genesis.json)
-
-# accounts21=$(jq -c -r '.app_state.auth.accounts[1]' /data/node2/.treasurenetd/config/genesis.json)
-
-# accounts30=$(jq -c -r '.app_state.auth.accounts[0]' /data/node3/.treasurenetd/config/genesis.json)
-
-# accounts31=$(jq -c -r '.app_state.auth.accounts[1]' /data/node3/.treasurenetd/config/genesis.json)
-
-
-
-
-# balances00=$(jq -c -r '.app_state.bank.balances[0].address' /data/node0/.treasurenetd/config/genesis.json)
-
-# balances01=$(jq -c -r '.app_state.bank.balances[1].address' /data/node0/.treasurenetd/config/genesis.json)
-# #echo $balances01
-# balances10=$(jq -c -r '.app_state.bank.balances[0].address' /data/node1/.treasurenetd/config/genesis.json)
-
-# balances11=$(jq -c -r '.app_state.bank.balances[1].address' /data/node1/.treasurenetd/config/genesis.json)
-
-# balances20=$(jq -c -r '.app_state.bank.balances[0].address' /data/node2/.treasurenetd/config/genesis.json)
-
-# balances21=$(jq -c -r '.app_state.bank.balances[1].address' /data/node2/.treasurenetd/config/genesis.json)
-
-# balances30=$(jq -c -r '.app_state.bank.balances[0].address' /data/node3/.treasurenetd/config/genesis.json)
-
-# balances31=$(jq -c -r '.app_state.bank.balances[1].address' /data/node3/.treasurenetd/config/genesis.json)
-
-    
-    
-# gen_txs00=$(jq '.' /data/node0/.treasurenetd/config/gentx/gen*.json)
-# #echo "$gen_txs00"
-# gen_txs10=$(jq '.' /data/node1/.treasurenetd/config/gentx/gen*.json)
-# #echo "$gen_txs10"
-# gen_txs20=$(jq '.' /data/node2/.treasurenetd/config/gentx/gen*.json)
-
-# gen_txs30=$(jq '.' /data/node3/.treasurenetd/config/gentx/gen*.json)
-
-
-# jq --argjson accounts00 "$accounts00" --argjson accounts01 "$accounts01" \
-#    --argjson accounts10 "$accounts10" --argjson accounts11 "$accounts11" \
-#    --argjson accounts20 "$accounts20" --argjson accounts21 "$accounts21" \
-#    --argjson accounts30 "$accounts30" --argjson accounts31 "$accounts31" \
-#    --arg balances00 "$balances00" --arg balances01 "$balances01" \
-#    --arg balances10 "$balances10" --arg balances11 "$balances11" \
-#    --arg balances20 "$balances20" --arg balances21 "$balances21" \
-#    --arg balances30 "$balances30" --arg balances31 "$balances31" \
-#    --argjson gen_txs00 "$gen_txs00" --argjson gen_txs10 "$gen_txs10" \
-#    --argjson gen_txs20 "$gen_txs20" --argjson gen_txs30 "$gen_txs30" \
-#    '
-#    (
-#      .app_state.auth.accounts |= map(
-#        if . == "accounts00" then $accounts00 
-#        elif . == "accounts01" then $accounts01
-#        elif . == "accounts10" then $accounts10
-#        elif . == "accounts11" then $accounts11
-#        elif . == "accounts20" then $accounts20
-#        elif . == "accounts21" then $accounts21
-#        elif . == "accounts30" then $accounts30
-#        elif . == "accounts31" then $accounts31
-#        else . end
-#      )
-#    ) |
-#    (
-#      .app_state.bank.balances |= map(
-#        if .address == "balances00" then .address = $balances00
-#        elif .address == "balances01" then .address = $balances01
-#        elif .address == "balances10" then .address = $balances10
-#        elif .address == "balances11" then .address = $balances11
-#        elif .address == "balances20" then .address = $balances20
-#        elif .address == "balances21" then .address = $balances21
-#        elif .address == "balances30" then .address = $balances30
-#        elif .address == "balances31" then .address = $balances31
-#        else . end
-#      )
-#    ) |
-#    (
-#      .app_state.genutil.gen_txs |= map(
-#        if . == "gen_txs00" then $gen_txs00 
-#        elif . == "gen_txs10" then $gen_txs10
-#        elif . == "gen_txs20" then $gen_txs20
-#        elif . == "gen_txs30" then $gen_txs30
-#        else . end
-#      )
-#    )
-# ' template.json > genesis.json
-
-
-
-# sudo rm -rf /data/node/gen_txs/*
-# sudo mkdir -p /data/node/gen_txs
-# sudo chown -R $USER:$USER /data/node
-
-# cp -a /data/node1/.treasurenetd/config/gentx/* /data/node/gen_txs/
-
-
-
-# cp -a /data/node2/.treasurenetd/config/gentx/* /data/node1/.treasurenetd/config/gentx/
-# cp -a /data/node3/.treasurenetd/config/gentx/* /data/node1/.treasurenetd/config/gentx/
-# cp -a /data/node4/.treasurenetd/config/gentx/* /data/node1/.treasurenetd/config/gentx/
-
-# export HOME=/data/node1
-
-
-# json_file="/data/account.json"
-
-# for key in $(jq -r 'keys_unsorted[]' "$json_file"); do
-#   if [[ "$key" != "validator1" && "$key" != "orchestrator1" ]]; then
-#     ACCOUNT=$(jq -r ".${key}" "$json_file")
-#     echo "Adding genesis account for $key with address $ACCOUNT"
-    
-    
-#     treasurenetd add-genesis-account --trace --keyring-backend test $ACCOUNT 10000000000000000000000aunit,10000000000stake,10000000000footoken,10000000000footoken2,10000000000ibc/nometadatatoken
-#   fi
-# done
-# cd /data/node1/.treasurenetd/config/gentx
-# treasurenetd collect-gentxs
-
-# cd /data/node1/.treasurenetd/config/
-# mv config.toml config.toml1
-# cp /data/node2/.treasurenetd/config/config.toml ./
-
-
-
-# nodes=("node1" "node2" "node3" "node4")
-
-
-# for node in "${nodes[@]}"; do
- 
-#   export HOME="/data/$node"
-  
-  
-#   node_id=$(treasurenetd tendermint show-node-id)
-
-  
-#   echo "${node}_address=$node_id" >> /data/actions-runner/_work/treasurenet/treasurenet/.github/scripts/ansible/docker/.env
-
-# done
-# cat /data/actions-runner/_work/treasurenet/treasurenet/.github/scripts/ansible/docker/.env
-# echo "Node IDs appended to .env file."
-
-# cp -a genesis.json /data/node2/.treasurenetd/config/genesis.json
-# cp -a genesis.json /data/node3/.treasurenetd/config/genesis.json
-# cp -a genesis.json /data/node4/.treasurenetd/config/genesis.json
-
-# export HOME=/home/ubuntu
-
-# cp -a /data/node1/.treasurenetd/config/gentx/* /data/node2/.treasurenetd/config/gentx/
-# cp -a /data/node1/.treasurenetd/config/gentx/* /data/node3/.treasurenetd/config/gentx/
-# cp -a /data/node1/.treasurenetd/config/gentx/* /data/node4/.treasurenetd/config/gentx/
-
-
 # 定义节点列表
-nodes=("node0" "node1" "node2" "node3" "node")
+nodes=("genesis-validator-1" "genesis-validator-2" "genesis-validator-3" "genesis-validator-4" "genesis-validator-5" "genesis-validator-6" "rpc-1" "rpc-2")
 
 # 循环执行 cp 命令
 for node in "${nodes[@]}"; do
   cp -auv "/data/${node}/.treasurenetd/config/gentx/"*.json \
-    /data/node0/.treasurenetd/config/gentx/
+    /data/genesis-validator-1/.treasurenetd/config/gentx/
 done
 
 # 设置 HOME 环境变量
-export HOME=/data/node0
+export HOME=/data/genesis-validator-1
 
 # JSON 文件路径
 json_file="/data/account.json"
 
 # 遍历 JSON 文件中的键并添加 genesis 账户
 for key in $(jq -r 'keys_unsorted[]' "$json_file"); do
-  if [[ "$key" != "validator0" && "$key" != "orchestrator0" ]]; then
+  if [[ "$key" != "validator1" && "$key" != "orchestrator1" ]]; then
     ACCOUNT=$(jq -r ".${key}" "$json_file")
     echo "Adding genesis account for $key with address $ACCOUNT"
     
@@ -184,11 +25,11 @@ for key in $(jq -r 'keys_unsorted[]' "$json_file"); do
 done
 
 # 进入 gentx 目录并收集 gentx 文件
-cd /data/node0/.treasurenetd/config/gentx
+cd /data/genesis-validator-1/.treasurenetd/config/gentx
 treasurenetd collect-gentxs
 
 # 备份并替换 config.toml 文件
-cd /data/node0/.treasurenetd/config/
+cd /data/genesis-validator-1/.treasurenetd/config/
 mv config.toml config.toml1
 cp /data/node1/.treasurenetd/config/config.toml ./
 
@@ -205,7 +46,7 @@ echo "Node IDs appended to .env file."
 
 # 复制 genesis.json 文件到其他节点
 for node in "${nodes[@]}"; do
-  cd /data/node0/.treasurenetd/config/
+  cd /data/genesis-validator-1/.treasurenetd/config/
   cp -a genesis.json "/data/${node}/.treasurenetd/config/genesis.json"
 done
 
@@ -214,7 +55,7 @@ export HOME=/home/ubuntu
 
 # 复制 gentx 文件到其他节点
 for node in "${nodes[@]}"; do
- cd /data/node0/.treasurenetd/config/
-  cp -auv "/data/node0/.treasurenetd/config/gentx/"*.json \
+ cd /data/genesis-validator-1/.treasurenetd/config/
+  cp -auv "/data/genesis-validator-1/.treasurenetd/config/gentx/"*.json \
     /data/${node}/.treasurenetd/config/gentx/
 done

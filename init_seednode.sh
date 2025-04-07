@@ -1,13 +1,27 @@
 sudo rm -rf /home/ubuntu/.treasurenetd
 
-treasurenetd init seednode0 --chain-id "treasurenet_5005-1"
+treasurenetd init bootnode-1 --chain-id "treasurenet_5005-1"
 
-sudo mkdir -p /data/seednode0/.treasurenetd
+sudo mkdir -p /data/bootnode-1/.treasurenetd
 
-sudo rm -rf /data/seednode0/.treasurenetd
+sudo rm -rf /data/bootnode-1/.treasurenetd
 
-sudo mv /home/ubuntu/.treasurenetd  /data/seednode0/.treasurenetd
+sudo mv /home/ubuntu/.treasurenetd  /data/bootnode-1/.treasurenetd
 
-cd /data/node0/.treasurenetd/config/
+cd /data/genesis-validator-1/.treasurenetd/config/
 
-cp -a genesis.json /data/seednode0/.treasurenetd/config/genesis.json
+cp -a genesis.json /data/bootnode-1/.treasurenetd/config/genesis.json
+
+sudo rm -rf /home/ubuntu/.treasurenetd
+
+treasurenetd init bootnode-2 --chain-id "treasurenet_5005-1"
+
+sudo mkdir -p /data/bootnode-2/.treasurenetd
+
+sudo rm -rf /data/bootnode-2/.treasurenetd
+
+sudo mv /home/ubuntu/.treasurenetd  /data/bootnode-2/.treasurenetd
+
+cd /data/genesis-validator-1/.treasurenetd/config/
+
+cp -a genesis.json /data/bootnode-2/.treasurenetd/config/genesis.json
