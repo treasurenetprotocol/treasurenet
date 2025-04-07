@@ -163,4 +163,4 @@ jobs:
         run: |
          
             aws s3 cp ./build/arm64/treasurenetd s3://${{ env.BUCKET_NAME }}/${{ needs.EnvSetup.outputs.repo-name }}/${{ env.DATE }}/${{ needs.EnvSetup.outputs.repo-name }}
-            aws s3 cp ./*.tar.gz s3://${{ env.BUCKET_NAME }}/${{ needs.EnvSetup.outputs.repo-name }}/${{ env.DATE }}/node
+            aws s3 cp ./*.tar.gz s3://${{ env.BUCKET_NAME }}/${{ needs.EnvSetup.outputs.repo-name }}/${{ env.DATE }}/node/
