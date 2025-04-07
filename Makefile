@@ -123,9 +123,10 @@ BUILD_TARGETS := build install
 
 define ARCH_BUILD_TEMPLATE
 build-$(1):
-	@echo "Building for $(1) architecture..."
+	@mkdir -p $(BUILDDIR)/$(1)  # 先创建目录
+	@echo "Building for $(1)..."
 	GOOS=linux GOARCH=$(1) GOARM=7 LEDGER_ENABLED=$(LEDGER_ENABLED) \
-	go build $(BUILD_FLAGS) -o $(BUILDDIR)/$(1)/$(TREASURENET_BINARY) ./...
+	go build $(BUILD_FLAGS) -o $(BUILDDIR)/$(1)/$(TREASURENET_BINARY) ./cmd/treasurenetd
 endef
 
 $(foreach arch,$(SUPPORTED_ARCHS),$(eval $(call ARCH_BUILD_TEMPLATE,$(arch))))
