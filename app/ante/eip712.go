@@ -15,7 +15,7 @@ import (
 
 	ethcrypto "github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/crypto/secp256k1"
-	"github.com/cosmos/cosmos-sdk/crypto/keys/secp256k1"
+	
 	"github.com/treasurenetprotocol/treasurenet/crypto/ethsecp256k1"
 	"github.com/treasurenetprotocol/treasurenet/ethereum/eip712"
 	treasurenet "github.com/treasurenetprotocol/treasurenet/types"
@@ -236,11 +236,9 @@ func VerifySignature(
 			feePayerSig[ethcrypto.RecoveryIDOffset] -= 27
 		}
 
-	
-		pubKeyBytes, err := crypto.Ecrecover(signHash, sig)
-		 feePayerPubkey := &secp256k1.PubKey{Key: pubKeyBytes}  // 转换为SDK公钥对象
+		feePayerPubkey, err := ethcrypto.Ecrecover(sigHash, feePayerSig)
 		if err != nil {
-			return sdkerrors.Wrap(err, "failed to recover delegated fee payer from sig")
+			return sdkerrors.Wrap(err, "Ecrecover failed")
 		}
 
 		ecPubKey, err := ethcrypto.UnmarshalPubkey(feePayerPubkey)
@@ -264,9 +262,14 @@ func VerifySignature(
 
 		// VerifySignature of ethsecp256k1 accepts 64 byte signature [R||S]
 		// WARNING! Under NO CIRCUMSTANCES try to use pubKey.VerifySignature there
-		
-		if !crypto.VerifySignature(pubKey.Bytes(), signHash, feePayerSig[:len(feePayerSig)-1]) {
-			return sdkerrors.Wrap(sdkerrors.ErrorInvalidSigner, "unable to verify signer signature of EIP712 typed data")
+		sigBytes := ethcrypto.FromECDSA(feePayerSig) // 转换为标准ECDSA签名
+		valid := ethcrypto.VerifySignature(
+			pubKey.Bytes(),
+			sigHash,
+			sigBytes[:64] // 取R||S部分(64字节)
+		)
+		if !valid {
+			return sdkerrors.Wrap(sdkerrors.ErrorInvalidSigner, "secp256k1 signature invalid")
 		}
 
 		return nil
