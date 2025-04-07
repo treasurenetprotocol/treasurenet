@@ -14,7 +14,7 @@ import (
 	authsigning "github.com/cosmos/cosmos-sdk/x/auth/signing"
 
 	ethcrypto "github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/crypto/secp256k1"
+	//"github.com/ethereum/go-ethereum/crypto/secp256k1"
 	
 	"github.com/treasurenetprotocol/treasurenet/crypto/ethsecp256k1"
 	"github.com/treasurenetprotocol/treasurenet/ethereum/eip712"
@@ -262,12 +262,18 @@ func VerifySignature(
 
 		// VerifySignature of ethsecp256k1 accepts 64 byte signature [R||S]
 		// WARNING! Under NO CIRCUMSTANCES try to use pubKey.VerifySignature there
-		sigBytes := ethcrypto.FromECDSA(feePayerSig) // 转换为标准ECDSA签名
-		valid := ethcrypto.VerifySignature(
-			pubKey.Bytes(),
-			sigHash,
-			sigBytes[:64] // 取R||S部分(64字节)
-		)
+			if len(feePayerSig) != ethcrypto.SignatureLength {
+					return sdkerrors.Wrapf(sdkerrors.ErrInvalidRequest, 
+						"invalid signature length: got %d, want %d", 
+						len(feePayerSig), 
+						ethcrypto.SignatureLength)
+				}
+				
+				// 直接取前64字节(R||S)，跳过恢复标识符
+				valid := ethcrypto.VerifySignature(
+					pubKey.Bytes(),
+					sigHash,
+					feePayerSig[:64])
 		if !valid {
 			return sdkerrors.Wrap(sdkerrors.ErrorInvalidSigner, "secp256k1 signature invalid")
 		}
