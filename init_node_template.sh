@@ -7,7 +7,7 @@ sudo rm -rf $DATA_PATH/.*
 sudo rm -rf $HOME_PATH/*  # 清理默认目录
 
 # Ensure necessary directories exist
-sudo mkdir -p $DATA_PATH/$PROJECT_NAME
+
 sudo mkdir -p $DATA_PATH/.$PROJECT_NAME
 sudo chown -R $USER:$USER $DATA_PATH
 

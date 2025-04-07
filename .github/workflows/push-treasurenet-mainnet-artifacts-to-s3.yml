@@ -12,6 +12,7 @@ env:
   s3-aws-region: "us-west-1"
   BUCKET_NAME: treasurenet-node-binary-us-west-1
 
+
 permissions:
   id-token: write
   contents: write
@@ -86,9 +87,6 @@ jobs:
             role-session-name: GitHub_to_AWS_via_FederatedOIDC
             aws-region: ${{ env.s3-aws-region }}
 
-      - name: Upload Archive file to AWS S3
-        run: |
-            aws s3 cp ./build/arm64/treasurenetd s3://${{ env.BUCKET_NAME }}/${{ needs.EnvSetup.outputs.repo-name }}/${{ env.DATE }}/${{ needs.EnvSetup.outputs.repo-name }}
 
             
       - name: init
@@ -136,6 +134,33 @@ jobs:
 
       - name: bash change_config.toml.sh
         run: |
-            chmod +x change_config.toml.sh s
+            chmod +x change_config.toml.sh 
               
             bash change_config.toml.sh 
+
+      - name: TAR node 
+        run: |
+        
+          # 定义需要打包的节点类型和编号
+          NODES="genesis-validator rpc bootnode"
+          COUNTS="1 2 3 4 5 6"  # 根据实际节点数量调整
+          
+          # 自动批量打包
+          for node_type in $NODES; do
+            max=6  # 默认验证节点数量
+            if [ "$node_type" = "rpc" ]; then max=2; fi
+            if [ "$node_type" = "bootnode" ]; then max=2; fi
+            
+            for i in $(seq 1 $max); do
+              tar -zcvf ./${node_type}-${i}.tar.gz -C /data/${node_type}-${i} .
+
+            done
+          done
+
+            
+
+      - name: Upload Archive file to AWS S3
+        run: |
+         
+            aws s3 cp ./build/arm64/treasurenetd s3://${{ env.BUCKET_NAME }}/${{ needs.EnvSetup.outputs.repo-name }}/${{ env.DATE }}/${{ needs.EnvSetup.outputs.repo-name }}
+            aws s3 cp ./*.tar.gz s3://${{ env.BUCKET_NAME }}/${{ needs.EnvSetup.outputs.repo-name }}/${{ env.DATE }}/node
