@@ -68,17 +68,22 @@ jobs:
           echo "Building Go binary..."
           go env -w GO111MODULE=on
           go mod tidy
-          make install
+          # 清理历史构建
+            make clean
+            # 编译全部支持的架构 (amd64/arm/arm64)
+            make build-multiarch
+            make install
+
 
       - name: copy build
         run: |
           ls $(go env GOPATH)/bin
-          cp $(go env GOPATH)/bin/treasurenetd .github/scripts/ansible/docker/
-          sudo cp $(go env GOPATH)/bin/treasurenetd /usr/bin
+          cp $(go env GOPATH)/bin/treasurenetd-arm64 .github/scripts/ansible/docker/
+          sudo cp $(go env GOPATH)/bin/treasurenetd-amd64 /usr/bin
 
       - name: Check if binary exists
         run: |
-          if [ -f .github/scripts/ansible/docker/treasurenetd ]; then  
+          if [ -f .github/scripts/ansible/docker/treasurenetd-arm64 ]; then  
             echo "Binary file exists."
           else
             echo "Binary file does not exist."
@@ -89,18 +94,18 @@ jobs:
             aws configure set aws_access_key_id ${{ secrets.AWS_S3_OWNER_ACCESS_KEY_ID }}
             aws configure set aws_secret_access_key ${{ secrets.AWS_S3_OWNER_SECRET_ACCESS_KEY }}
             aws configure set region ${{ env.s3-aws-region }}
-            aws s3 cp .github/scripts/ansible/docker/treasurenetd s3://${{ env.BUCKET_NAME }}/${{ needs.EnvSetup.outputs.repo-name }}/${{ env.DATE }}/${{ needs.EnvSetup.outputs.repo-name }}_${{ env.TIME }}.tar.gz
+            aws s3 cp .github/scripts/ansible/docker/treasurenetd-arm64 s3://${{ env.BUCKET_NAME }}/${{ needs.EnvSetup.outputs.repo-name }}/${{ env.DATE }}/${{ needs.EnvSetup.outputs.repo-name }}_${{ env.TIME }}.tar.gz
             
-      - name: init
-        run: |
-          chmod +x init_nodes.sh 
-          chmod +x init_node_template.sh
-          chmod +x node_config.json
+    #   - name: init
+    #     run: |
+    #       chmod +x init_nodes.sh 
+    #       chmod +x init_node_template.sh
+    #       chmod +x node_config.json
 
-          sudo rm -f /data/account.json
-          sudo touch /data/account.json
+    #       sudo rm -f /data/account.json
+    #       sudo touch /data/account.json
 
-          sudo chmod 666 /data/account.json
-          sudo echo "{}" > /data/account.json
-          bash init_nodes.sh
+    #       sudo chmod 666 /data/account.json
+    #       sudo echo "{}" > /data/account.json
+    #       bash init_nodes.sh
 

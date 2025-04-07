@@ -6,11 +6,14 @@ PACKAGES_SIMTEST=$(shell go list ./... | grep '/simulation')
 VERSION ?= $(shell echo $(shell git describe --tags `git rev-list --tags="v*" --max-count=1`) | sed 's/^v//')
 TMVERSION := $(shell go list -m github.com/tendermint/tendermint | sed 's:.* ::')
 COMMIT := $(shell git log -1 --format='%H')
+INSTALL_DIR ?= $(shell go env GOPATH)/bin
 LEDGER_ENABLED ?= true
 BINDIR ?= $(GOPATH)/bin
 TREASURENET_BINARY = treasurenetd
 TREASURENET_DIR = treasurenet
 BUILDDIR ?= $(CURDIR)/build
+SUPPORTED_ARCHS = amd64 arm arm64
+BUILD_ARCH = $(shell uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/')
 SIMAPP = ./app
 HTTPS_GIT := https://github.com/treasurenetprotocol/treasurenet.git
 PROJECT_NAME = $(shell git remote get-url origin | xargs basename -s .git)
@@ -110,22 +113,53 @@ endif
 ###                                  Build                                  ###
 ###############################################################################
 
+# BUILD_TARGETS := build install
+
+# build: BUILD_ARGS=-o $(BUILDDIR)/
+# build-linux:
+# 	GOOS=linux GOARCH=amd64 LEDGER_ENABLED=false $(MAKE) build
+
 BUILD_TARGETS := build install
 
-build: BUILD_ARGS=-o $(BUILDDIR)/
-build-linux:
-	GOOS=linux GOARCH=amd64 LEDGER_ENABLED=false $(MAKE) build
+define ARCH_BUILD_TEMPLATE
+build-$(1):
+	@echo "Building for $(1) architecture..."
+	GOOS=linux GOARCH=$(1) GOARM=7 LEDGER_ENABLED=$(LEDGER_ENABLED) \
+	go build $(BUILD_FLAGS) -o $(BUILDDIR)/$(1)/$(TREASURENET_BINARY) ./...
+endef
 
-$(BUILD_TARGETS): go.sum $(BUILDDIR)/
-	go $@ $(BUILD_FLAGS) $(BUILD_ARGS) ./...
+$(foreach arch,$(SUPPORTED_ARCHS),$(eval $(call ARCH_BUILD_TEMPLATE,$(arch))))
+
+build: build-$(BUILD_ARCH)
+
+build-multiarch: $(addprefix build-,$(SUPPORTED_ARCHS))
+	@echo "Multi-architecture build completed in $(BUILDDIR)/"
+	
+
+install: | $(BUILDDIR)
+	@echo "Installing to GoPATH: $(INSTALL_DIR)"
+	@mkdir -p $(INSTALL_DIR)
+	@for arch in $(SUPPORTED_ARCHS); do \
+		bin_path="$(BUILDDIR)/$${arch}/$(TREASURENET_BINARY)"; \
+		if [ -f "$${bin_path}" ]; then \
+			install -m 755 "$${bin_path}" "$(INSTALL_DIR)/$(TREASURENET_BINARY)-$${arch}"; \
+			echo "✔ Installed $${arch} => $(INSTALL_DIR)/$(TREASURENET_BINARY)-$${arch}"; \
+		else \
+			echo "⚠ $${arch} binary missing at $${bin_path}"; \
+		fi \
+	done
 
 $(BUILDDIR)/:
 	mkdir -p $(BUILDDIR)/
 
 docker-build:
 	# TODO replace with kaniko
-	docker build -t ${DOCKER_IMAGE}:${DOCKER_TAG} .
-	docker tag ${DOCKER_IMAGE}:${DOCKER_TAG} ${DOCKER_IMAGE}:latest
+	#docker build -t ${DOCKER_IMAGE}:${DOCKER_TAG} .
+	#docker tag ${DOCKER_IMAGE}:${DOCKER_TAG} ${DOCKER_IMAGE}:latest
+		@$(foreach arch,$(SUPPORTED_ARCHS), \
+		docker buildx build --platform linux/$(arch) -t ${DOCKER_IMAGE}:${DOCKER_TAG}-$(arch) . ; \
+	)
+	docker tag ${DOCKER_IMAGE}:${DOCKER_TAG}-$(BUILD_ARCH) ${DOCKER_IMAGE}:latest
 	# docker tag ${DOCKER_IMAGE}:${DOCKER_TAG} ${DOCKER_IMAGE}:${COMMIT_HASH}
 	# update old container
 	docker rm treasurenetd || true
@@ -140,11 +174,17 @@ $(MOCKS_DIR):
 
 distclean: clean tools-clean
 
+# clean:
+# 	rm -rf \
+#     $(BUILDDIR)/ \
+#     artifacts/ \
+#     tmp-swagger-gen/
 clean:
 	rm -rf \
-    $(BUILDDIR)/ \
-    artifacts/ \
-    tmp-swagger-gen/
+		$(BUILDDIR)/ \
+		artifacts/ \
+		tmp-swagger-gen/ \
+		$(foreach arch,$(SUPPORTED_ARCHS),$(INSTALL_DIR)/$(TREASURENET_BINARY)-$(arch))
 
 all: build
 
@@ -443,3 +483,17 @@ localnet-show-logstream:
 	docker-compose logs --tail=1000 -f
 
 .PHONY: build-docker-local-treasurenet localnet-start localnet-stop
+verify-arch:
+	@for arch in $(SUPPORTED_ARCHS); do \
+		if [ -f "$(BUILDDIR)/$${arch}/$(TREASURENET_BINARY)" ]; then \
+			echo "Verifying $${arch} binary:"; \
+			file "$(BUILDDIR)/$${arch}/$(TREASURENET_BINARY)" | grep -E 'ARM|x86'; \
+		fi \
+	done
+
+test-arm:
+	@if [ ! -f "$(BUILDDIR)/arm/$(TREASURENET_BINARY)" ]; then \
+		echo "ARM binary not found, building first..."; \
+		$(MAKE) build-arm; \
+	fi
+	qemu-arm -L /usr/arm-linux-gnueabihf $(BUILDDIR)/arm/$(TREASURENET_BINARY) version
