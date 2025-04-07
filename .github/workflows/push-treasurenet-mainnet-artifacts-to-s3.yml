@@ -1,0 +1,106 @@
+name: push-treasurenet-mainnet-artifacts-to-s3
+
+on:
+  push:
+    branches:
+      - 'feature/3.1.0'
+
+env:
+  gha-role-name: "GitHubAction-AssumeRoleWithAction"
+  node-version: "8"
+  build-command: "build:mainnet"
+  s3-aws-region: "us-west-1"
+  BUCKET_NAME: treasurenet-node-binary-us-west-1
+
+permissions:
+  id-token: write
+  contents: write
+  pull-requests: write
+  actions: write
+
+jobs:
+  print_timestamp:
+    uses: treasurenetprotocol/reusable-workflows/.github/workflows/reusable-timestamp.yml@main
+
+  EnvSetup:
+    needs: [ print_timestamp ]
+    name: Setup Environment
+    runs-on: self-hosted
+    outputs:
+      repo-name: ${{ steps.extract-repo-name.outputs.repo-name }}
+      node-version: ${{ steps.set-aws-info.outputs.node-version }}
+      build-command: ${{ steps.set-aws-info.outputs.build-command }}
+      s3-aws-region: ${{ steps.set-aws-info.outputs.s3-aws-region }}
+    steps:
+      - name: Extract repo name
+        id: extract-repo-name
+        run: |
+          REPO_NAME="${{ github.repository }}"
+          SHORT_NAME=${REPO_NAME##*/}
+          echo "repo-name=$SHORT_NAME" >> $GITHUB_OUTPUT
+      - name: set-aws-info
+        id: set-aws-info
+        run: |
+          echo "node-version=${{ env.node-version }}" >> $GITHUB_OUTPUT
+          echo "build-command=${{ env.build-command }}" >> $GITHUB_OUTPUT
+          echo "s3-aws-region=${{ env.s3-aws-region }}" >> $GITHUB_OUTPUT
+
+  build-go-binary:
+    needs: [ EnvSetup ]
+    runs-on: self-hosted
+    name: Build Go Binary
+    steps:
+      - name: Set date and time
+        run: |
+          echo "DATE=$(date '+%Y%m%d')"  >> $GITHUB_ENV
+          echo "TIME=$(date '+%Y%m%d_%H%M%S')" >> $GITHUB_ENV
+
+      - name: Checkout code
+        uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4.1.4
+
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: '1.18'
+
+      - name: Build Go binary
+        run: |
+          echo "Building Go binary..."
+          go env -w GO111MODULE=on
+          go mod tidy
+          make install
+
+      - name: copy build
+        run: |
+          ls $(go env GOPATH)/bin
+          cp $(go env GOPATH)/bin/treasurenetd .github/scripts/ansible/docker/
+          sudo cp $(go env GOPATH)/bin/treasurenetd /usr/bin
+
+      - name: Check if binary exists
+        run: |
+          if [ -f .github/scripts/ansible/docker/treasurenetd ]; then  
+            echo "Binary file exists."
+          else
+            echo "Binary file does not exist."
+            exit 1
+          fi
+          - name: Upload Archive file to AWS S3
+          run: |
+            aws configure set aws_access_key_id ${{ secrets.AWS_S3_OWNER_ACCESS_KEY_ID }}
+            aws configure set aws_secret_access_key ${{ secrets.AWS_S3_OWNER_SECRET_ACCESS_KEY }}
+            aws configure set region ${{ env.s3-aws-region }}
+            aws s3 cp .github/scripts/ansible/docker/treasurenetd s3://${{ env.BUCKET_NAME }}/${{ needs.EnvSetup.outputs.repo-name }}/${{ env.DATE }}/${{ needs.EnvSetup.outputs.repo-name }}_${{ env.TIME }}.tar.gz
+            
+      - name: init
+        run: |
+          chmod +x init_nodes.sh 
+          chmod +x init_node_template.sh
+          chmod +x node_config.json
+
+          sudo rm -f /data/account.json
+          sudo touch /data/account.json
+
+          sudo chmod 666 /data/account.json
+          sudo echo "{}" > /data/account.json
+          bash init_nodes.sh
+

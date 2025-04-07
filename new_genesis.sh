@@ -159,7 +159,7 @@
 
 
 # 定义节点列表
-nodes=("node0" "node1" "node2" "node3")
+nodes=("node0" "node1" "node2" "node3" "node")
 
 # 循环执行 cp 命令
 for node in "${nodes[@]}"; do

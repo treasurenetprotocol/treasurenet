@@ -34,7 +34,7 @@ $BIN config chain-id $CHAIN_ID
 
 # Define home directory for current user
 GAIA_HOME="--home $HOME_PATH"
-ARGS="--home $HOME_PATH --keyring-backend test"
+ARGS="--home $HOME_PATH --keyring-backend file"
 
 # Add keys for validator and orchestrator
 $BIN keys add $VALIDATOR_KEY --keyring-backend $KEYRING --algo $KEYALGO 2>> $DATA_PATH/.$PROJECT_NAME/$KEY1-phrases
