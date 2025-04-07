@@ -12,7 +12,7 @@ BINDIR ?= $(GOPATH)/bin
 TREASURENET_BINARY = treasurenetd
 TREASURENET_DIR = treasurenet
 BUILDDIR ?= $(CURDIR)/build
-SUPPORTED_ARCHS = amd64 arm arm64
+SUPPORTED_ARCHS = amd64 arm64
 BUILD_ARCH = $(shell uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/')
 SIMAPP = ./app
 HTTPS_GIT := https://github.com/treasurenetprotocol/treasurenet.git
@@ -123,9 +123,9 @@ BUILD_TARGETS := build install
 
 define ARCH_BUILD_TEMPLATE
 build-$(1):
-	@mkdir -p $(BUILDDIR)/$(1)  # 先创建目录
+	@mkdir -p $(BUILDDIR)/$(1)
 	@echo "Building for $(1)..."
-	GOOS=linux GOARCH=$(1) GOARM=7 LEDGER_ENABLED=$(LEDGER_ENABLED) \
+	GOOS=linux GOARCH=$(1) LEDGER_ENABLED=$(LEDGER_ENABLED) \
 	go build $(BUILD_FLAGS) -o $(BUILDDIR)/$(1)/$(TREASURENET_BINARY) ./cmd/treasurenetd
 endef
 
@@ -157,8 +157,9 @@ docker-build:
 	# TODO replace with kaniko
 	#docker build -t ${DOCKER_IMAGE}:${DOCKER_TAG} .
 	#docker tag ${DOCKER_IMAGE}:${DOCKER_TAG} ${DOCKER_IMAGE}:latest
-		@$(foreach arch,$(SUPPORTED_ARCHS), \
-		docker buildx build --platform linux/$(arch) -t ${DOCKER_IMAGE}:${DOCKER_TAG}-$(arch) . ; \
+		@$(foreach arch,amd64 arm64, \
+	docker buildx build --platform linux/$(arch) -t ${DOCKER_IMAGE}:${DOCKER_TAG}-$(arch) . ; \
+		
 	)
 	docker tag ${DOCKER_IMAGE}:${DOCKER_TAG}-$(BUILD_ARCH) ${DOCKER_IMAGE}:latest
 	# docker tag ${DOCKER_IMAGE}:${DOCKER_TAG} ${DOCKER_IMAGE}:${COMMIT_HASH}
