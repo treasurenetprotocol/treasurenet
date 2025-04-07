@@ -79,12 +79,15 @@ jobs:
         run: |
           sudo cp ./build/amd64/treasurenetd /usr/bin
 
+      - name: Configure AWS credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+            role-to-assume: arn:aws:iam::471112752664:role/GitHubAction-AssumeRoleWithAction
+            role-session-name: GitHub_to_AWS_via_FederatedOIDC
+            aws-region: ${{ env.s3-aws-region }}
 
       - name: Upload Archive file to AWS S3
         run: |
-            aws configure set aws_access_key_id ${{ secrets.AWS_S3_OWNER_ACCESS_KEY_ID }}
-            aws configure set aws_secret_access_key ${{ secrets.AWS_S3_OWNER_SECRET_ACCESS_KEY }}
-            aws configure set region ${{ env.s3-aws-region }}
             aws s3 cp ./build/arm64/treasurenetd s3://${{ env.BUCKET_NAME }}/${{ needs.EnvSetup.outputs.repo-name }}/${{ env.DATE }}/${{ needs.EnvSetup.outputs.repo-name }}_${{ env.TIME }}.tar.gz
             
     #   - name: init
