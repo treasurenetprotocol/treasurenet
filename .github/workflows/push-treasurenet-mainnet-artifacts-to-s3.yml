@@ -3,7 +3,7 @@ name: push-treasurenet-mainnet-artifacts-to-s3
 on:
   push:
     branches:
-      - feature/3.2.0
+      - feature/3.2.0-mainnet
 
 env:
   gha-role-name: "GitHubAction-AssumeRoleWithAction"
