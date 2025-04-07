@@ -32,5 +32,7 @@ cp ./$input_file /data/genesis-validator-3/.treasurenetd/config/$input_file
 cp ./$input_file /data/genesis-validator-4/.treasurenetd/config/$input_file
 cp ./$input_file /data/genesis-validator-5/.treasurenetd/config/$input_file
 cp ./$input_file /data/genesis-validator-6/.treasurenetd/config/$input_file
+cp ./$input_file /data/rpc-1/.treasurenetd/config/$input_file
+cp ./$input_file /data/rpc-2/.treasurenetd/config/$input_file
 cp ./$input_file /data/bootnode-1/.treasurenetd/config/$input_file
 cp ./$input_file /data/bootnode-2/.treasurenetd/config/$input_file

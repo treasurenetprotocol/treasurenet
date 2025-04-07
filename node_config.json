@@ -9,7 +9,7 @@
     "VALIDATOR_KEY": "validator1",
     "ORCHESTRATOR_KEY": "orchestrator1",
     "MONIKER": "genesis-validator-1",
-    "KEYRING": "file",
+    "KEYRING": "test",
     "KEYALGO": "eth_secp256k1",
     "DENOM": "aunit",
     "NODE_NAME": "genesis-validator-1"
@@ -24,7 +24,7 @@
     "VALIDATOR_KEY": "validator2",
     "ORCHESTRATOR_KEY": "orchestrator2",
     "MONIKER": "genesis-validator-2",
-    "KEYRING": "file",
+    "KEYRING": "test",
     "KEYALGO": "eth_secp256k1",
     "DENOM": "aunit",
     "NODE_NAME": "genesis-validator-2"
@@ -39,7 +39,7 @@
     "VALIDATOR_KEY": "validator3",
     "ORCHESTRATOR_KEY": "orchestrator3",
     "MONIKER": "genesis-validator-3",
-    "KEYRING": "file",
+    "KEYRING": "test",
     "KEYALGO": "eth_secp256k1",
     "DENOM": "aunit",
     "NODE_NAME": "genesis-validator-3"
@@ -54,7 +54,7 @@
     "VALIDATOR_KEY": "validator4",
     "ORCHESTRATOR_KEY": "orchestrator4",
     "MONIKER": "genesis-validator-4",
-    "KEYRING": "file",
+    "KEYRING": "test",
     "KEYALGO": "eth_secp256k1",
     "DENOM": "aunit",
     "NODE_NAME": "genesis-validator-4"
@@ -69,7 +69,7 @@
     "VALIDATOR_KEY": "validator5",
     "ORCHESTRATOR_KEY": "orchestrator5",
     "MONIKER": "genesis-validator-5",
-    "KEYRING": "file",
+    "KEYRING": "test",
     "KEYALGO": "eth_secp256k1",
     "DENOM": "aunit",
     "NODE_NAME": "genesis-validator-5"
@@ -84,7 +84,7 @@
     "VALIDATOR_KEY": "validator6",
     "ORCHESTRATOR_KEY": "orchestrator6",
     "MONIKER": "genesis-validator-6",
-    "KEYRING": "file",
+    "KEYRING": "test",
     "KEYALGO": "eth_secp256k1",
     "DENOM": "aunit",
     "NODE_NAME": "genesis-validator-6"
@@ -99,7 +99,7 @@
     "VALIDATOR_KEY": "validator-rpc-1",
     "ORCHESTRATOR_KEY": "orchestrator-rpc-1",
     "MONIKER": "rpc-1",
-    "KEYRING": "file",
+    "KEYRING": "test",
     "KEYALGO": "eth_secp256k1",
     "DENOM": "aunit",
     "NODE_NAME": "rpc-1"
@@ -114,7 +114,7 @@
     "VALIDATOR_KEY": "validator-rpc-2",
     "ORCHESTRATOR_KEY": "orchestrator-rpc-2",
     "MONIKER": "rpc-2",
-    "KEYRING": "file",
+    "KEYRING": "test",
     "KEYALGO": "eth_secp256k1",
     "DENOM": "aunit",
     "NODE_NAME": "rpc-2"
