@@ -41,8 +41,11 @@ cp /data/node1/.treasurenetd/config/config.toml ./
 for node in "${nodes[@]}"; do
   export HOME="/data/$node"
   node_id=$(treasurenetd tendermint show-node-id)
-  echo "${node}_address=$node_id" >> /data/actions-runner/_work/treasurenet/treasurenet/.github/scripts/ansible/docker/.env
+  # 将节点名称中的连字符 "-" 替换为下划线 "_"
+  node_name=$(echo "$node" | tr '-' '_')
+  echo "${node_name}_address=$node_id" >> /data/actions-runner/_work/treasurenet/treasurenet/.github/scripts/ansible/docker/.env
 done
+
 
 # 输出 .env 文件内容
 cat /data/actions-runner/_work/treasurenet/treasurenet/.github/scripts/ansible/docker/.env
