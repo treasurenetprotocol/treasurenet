@@ -173,5 +173,5 @@ jobs:
             aws s3 cp ./rpc-2.tar.gz s3://${{ env.BUCKET_NAME }}/${{ needs.EnvSetup.outputs.repo-name }}/${{ env.DATE }}/node/
             aws s3 cp ./bootnode-1.tar.gz s3://${{ env.BUCKET_NAME }}/${{ needs.EnvSetup.outputs.repo-name }}/${{ env.DATE }}/node/
             aws s3 cp ./bootnode-2.tar.gz s3://${{ env.BUCKET_NAME }}/${{ needs.EnvSetup.outputs.repo-name }}/${{ env.DATE }}/node/
-             aws s3 cp .github/scripts/ansible/docker/.env s3://${{ env.BUCKET_NAME }}/${{ needs.EnvSetup.outputs.repo-name }}/${{ env.DATE }}/node/.env 
+            aws s3 cp .github/scripts/ansible/docker/.env s3://${{ env.BUCKET_NAME }}/${{ needs.EnvSetup.outputs.repo-name }}/${{ env.DATE }}/node/.env 
             

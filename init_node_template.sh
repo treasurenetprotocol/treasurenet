@@ -37,9 +37,9 @@ GAIA_HOME="--home $HOME_PATH"
 ARGS="--home $HOME_PATH --keyring-backend test"
 
 # Add keys for validator and orchestrator
-$BIN keys add $VALIDATOR_KEY --keyring-backend $KEYRING --algo $KEYALGO 2>> $DATA_PATH/.$PROJECT_NAME/$KEY1-phrases
-$BIN keys add $ORCHESTRATOR_KEY --keyring-backend $KEYRING --algo $KEYALGO 2>> $DATA_PATH/.$PROJECT_NAME/$KEY2-phrases
-$BIN eth_keys add --keyring-backend $KEYRING >> $DATA_PATH/.$PROJECT_NAME/$KEY1-eth-keys
+printf "your_password\nyour_password\n" | $BIN keys add $VALIDATOR_KEY --keyring-backend $KEYRING --algo $KEYALGO 2>> $DATA_PATH/.$PROJECT_NAME/$KEY1-phrases
+printf "your_password\n" | $BIN keys add $ORCHESTRATOR_KEY --keyring-backend $KEYRING --algo $KEYALGO 2>> $DATA_PATH/.$PROJECT_NAME/$KEY2-phrases
+printf "your_password\n" | $BIN eth_keys add --keyring-backend $KEYRING >> $DATA_PATH/.$PROJECT_NAME/$KEY1-eth-keys
 
 # Initialize the node
 $BIN init $MONIKER --chain-id $CHAIN_ID
@@ -71,10 +71,10 @@ jq '.app_state.bech32ibc.nativeHRP = "treasurenet"' /tmp/treasurenet-bech32ibc-g
 mv /tmp/gov-genesis.json $HOME_PATH/config/genesis.json
 
 # Add accounts to genesis
-VALIDATOR_KEY1=$($BIN keys show $KEY1 -a $ARGS)
-ORCHESTRATOR_KEY1=$($BIN keys show $KEY2 -a $ARGS)
-$BIN add-genesis-account $ARGS $VALIDATOR_KEY1 $ALLOCATION
-$BIN add-genesis-account $ARGS $ORCHESTRATOR_KEY1 $ALLOCATION
+VALIDATOR_KEY1=$(printf "your_password\n" | $BIN keys show $KEY1 -a $ARGS)
+ORCHESTRATOR_KEY1=$(printf "your_password\n" | $BIN keys show $KEY2 -a $ARGS)
+ $BIN add-genesis-account $ARGS $VALIDATOR_KEY1 $ALLOCATION
+ $BIN add-genesis-account $ARGS $ORCHESTRATOR_KEY1 $ALLOCATION
 
 FILE="/data/account.json"
 
@@ -86,7 +86,7 @@ sudo jq --arg key1 "$KEY1" --arg key2 "$KEY2" --arg validator_key "$VALIDATOR_KE
 ETHEREUM_KEY=$(grep address $DATA_PATH/.$PROJECT_NAME/$KEY1-eth-keys | sed -n "1"p | sed 's/.*://')
 echo $ETHEREUM_KEY
 
-$BIN gentx $ARGS --moniker $MONIKER --chain-id=$CHAIN_ID $KEY1 258000000000000000000aunit $ETHEREUM_KEY $ORCHESTRATOR_KEY1
+printf "your_password\n" | $BIN gentx $ARGS --moniker $MONIKER --chain-id=$CHAIN_ID $KEY1 258000000000000000000aunit $ETHEREUM_KEY $ORCHESTRATOR_KEY1
 
 # Collect transactions
 $BIN collect-gentxs
