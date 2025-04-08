@@ -17,12 +17,16 @@ json_file="/data/account.json"
 # 遍历 JSON 文件中的键并添加 genesis 账户
 for key in $(jq -r 'keys_unsorted[]' "$json_file"); do
   if [[ "$key" != "validator1" && "$key" != "orchestrator1" ]]; then
-    ACCOUNT=$(jq -r ".${key}" "$json_file")
+    ACCOUNT=$(jq -r ".${key}" "$json_file" 2>/dev/null)
+    if [[ -z "$ACCOUNT" ]]; then
+      echo "Error: Account for $key is empty or not found in JSON file."
+      continue
+    fi
     echo "Adding genesis account for $key with address $ACCOUNT"
-    
-    printf "your_password\n" | treasurenetd add-genesis-account --trace --keyring-backend file $ACCOUNT 10000000000000000000000aunit,10000000000stake,10000000000footoken,10000000000footoken2,10000000000ibc/nometadatatoken
+    printf "your_password\n" | treasurenetd add-genesis-account --trace --keyring-backend file "$ACCOUNT" 10000000000000000000000aunit,10000000000stake,10000000000footoken,10000000000footoken2,10000000000ibc/nometadatatoken
   fi
 done
+
 
 # 进入 gentx 目录并收集 gentx 文件
 cd /data/genesis-validator-1/.treasurenetd/config/gentx
