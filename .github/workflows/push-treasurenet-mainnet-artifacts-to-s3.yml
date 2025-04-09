@@ -143,12 +143,7 @@ jobs:
               
             bash change_config.toml.sh 
 
-      - name: Get the private IP address of the running ec2
-        run: | 
-          aws ec2 describe-instances \
-          --filters Name=instance-state-name,Values=running \
-          --query "Reservations[*].Instances[*].{Name: Tags[?Key=='Name']|[0].Value, PrivateIpAddress: PrivateIpAddress}" \
-          --output json > running-ec2.json
+
 
 
       - name: TAR node 
@@ -187,5 +182,5 @@ jobs:
             aws s3 cp ./bootnode-1.tar.gz s3://${{ env.BUCKET_NAME }}/${{ needs.EnvSetup.outputs.repo-name }}/${{ env.DATE }}/node/
             aws s3 cp ./bootnode-2.tar.gz s3://${{ env.BUCKET_NAME }}/${{ needs.EnvSetup.outputs.repo-name }}/${{ env.DATE }}/node/
             aws s3 cp .github/scripts/ansible/docker/.env s3://${{ env.BUCKET_NAME }}/${{ needs.EnvSetup.outputs.repo-name }}/${{ env.DATE }}/node/.env 
-            aws s3 cp ./running-ec2.json s3://${{ env.BUCKET_NAME }}/${{ needs.EnvSetup.outputs.repo-name }}/${{ env.DATE }}/running-ec2.json
+           
             
