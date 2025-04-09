@@ -90,6 +90,8 @@ jobs:
 
             
       - name: init
+        env:
+          KEYRING_SECRET: ${{ secrets.keyring_secret }}
         run: |
           chmod +x init_nodes.sh 
           chmod +x init_node_template.sh
@@ -100,6 +102,7 @@ jobs:
 
           sudo chmod 666 /data/account.json
           sudo echo "{}" > /data/account.json
+          
           bash init_nodes.sh
 
       - name: Set nginx file
@@ -114,6 +117,8 @@ jobs:
           bash create_nginx_file.sh
 
       - name: new_genesis.json
+        env:
+          KEYRING_SECRET: ${{ secrets.keyring_secret }}
         run: |   
           chmod +x new_genesis.sh
 

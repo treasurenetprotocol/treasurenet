@@ -42,6 +42,7 @@ export KEYRING=$KEYRING
 export KEYALGO=$KEYALGO
 export DENOM=$DENOM
 export NODE_NAME=$NODE_NAME
+export KEYRING_SECRET=$KEYRING_SECRET
 EOF
 
   # Source the environment variables into the current shell session
@@ -62,9 +63,10 @@ EOF
   echo "KEYALGO=$KEYALGO"
   echo "DENOM=$DENOM"
   echo "NODE_NAME=$NODE_NAME"
+  echo "KEYRING_SECRET=$KEYRING_SECRET"
 
   # Read the template file and replace placeholders with actual values using envsubst
-  envsubst '${DATA_PATH} ${HOME_PATH} ${PROJECT_NAME} ${BINARY_NAME} ${CHAIN_ID} ${ALLOCATION} ${VALIDATOR_KEY} ${ORCHESTRATOR_KEY} ${MONIKER} ${KEYRING} ${KEYALGO} ${DENOM} ${NODE_NAME}' < $TEMPLATE_FILE > run_$NODE_NAME.sh
+  envsubst '${DATA_PATH} ${HOME_PATH} ${PROJECT_NAME} ${BINARY_NAME} ${CHAIN_ID} ${ALLOCATION} ${VALIDATOR_KEY} ${ORCHESTRATOR_KEY} ${MONIKER} ${KEYRING} ${KEYALGO} ${DENOM} ${NODE_NAME} ${KEYRING_SECRET}' < $TEMPLATE_FILE > run_$NODE_NAME.sh
 
   # Make the generated script executable
   chmod +x run_$NODE_NAME.sh
