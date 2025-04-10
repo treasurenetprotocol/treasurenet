@@ -34,7 +34,7 @@ for node in "${nodes[@]}"; do
   export HOME="/data/$node"
   node_id=$(treasurenetd tendermint show-node-id)
     node_name=$(echo "$node" | tr '-' '_')
-  echo "${node}_address=$node_id" >> /data/actions-runner/_work/treasurenet/treasurenet/.github/scripts/ansible/docker/.env
+  echo "${node_name}_address=$node_id" >> /data/actions-runner/_work/treasurenet/treasurenet/.github/scripts/ansible/docker/.env
 done
 
 # 恢复 HOME 环境变量

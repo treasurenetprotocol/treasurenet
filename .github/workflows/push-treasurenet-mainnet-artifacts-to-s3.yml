@@ -170,17 +170,17 @@ jobs:
       - name: Upload Archive file to AWS S3
         run: |
          
-            aws s3 cp ./build/arm64/treasurenetd s3://${{ env.BUCKET_NAME }}/${{ needs.EnvSetup.outputs.repo-name }}/${{ env.DATE }}/treasurenetd
-            aws s3 cp ./genesis-validator-1.tar.gz s3://${{ env.BUCKET_NAME }}/${{ needs.EnvSetup.outputs.repo-name }}/${{ env.DATE }}/node/
-            aws s3 cp ./genesis-validator-2.tar.gz s3://${{ env.BUCKET_NAME }}/${{ needs.EnvSetup.outputs.repo-name }}/${{ env.DATE }}/node/
-            aws s3 cp ./genesis-validator-3.tar.gz s3://${{ env.BUCKET_NAME }}/${{ needs.EnvSetup.outputs.repo-name }}/${{ env.DATE }}/node/
-            aws s3 cp ./genesis-validator-4.tar.gz s3://${{ env.BUCKET_NAME }}/${{ needs.EnvSetup.outputs.repo-name }}/${{ env.DATE }}/node/
-            aws s3 cp ./genesis-validator-5.tar.gz s3://${{ env.BUCKET_NAME }}/${{ needs.EnvSetup.outputs.repo-name }}/${{ env.DATE }}/node/
-            aws s3 cp ./genesis-validator-6.tar.gz s3://${{ env.BUCKET_NAME }}/${{ needs.EnvSetup.outputs.repo-name }}/${{ env.DATE }}/node/
-            aws s3 cp ./rpc-1.tar.gz s3://${{ env.BUCKET_NAME }}/${{ needs.EnvSetup.outputs.repo-name }}/${{ env.DATE }}/node/
-            aws s3 cp ./rpc-2.tar.gz s3://${{ env.BUCKET_NAME }}/${{ needs.EnvSetup.outputs.repo-name }}/${{ env.DATE }}/node/
-            aws s3 cp ./bootnode-1.tar.gz s3://${{ env.BUCKET_NAME }}/${{ needs.EnvSetup.outputs.repo-name }}/${{ env.DATE }}/node/
-            aws s3 cp ./bootnode-2.tar.gz s3://${{ env.BUCKET_NAME }}/${{ needs.EnvSetup.outputs.repo-name }}/${{ env.DATE }}/node/
-            aws s3 cp .github/scripts/ansible/docker/.env s3://${{ env.BUCKET_NAME }}/${{ needs.EnvSetup.outputs.repo-name }}/${{ env.DATE }}/node/.env 
+            aws s3 cp ./build/arm64/treasurenetd s3://${{ env.BUCKET_NAME }}/${{ needs.EnvSetup.outputs.repo-name }}/treasurenetd
+            aws s3 cp ./genesis-validator-1.tar.gz s3://${{ env.BUCKET_NAME }}/${{ needs.EnvSetup.outputs.repo-name }}/node/
+            aws s3 cp ./genesis-validator-2.tar.gz s3://${{ env.BUCKET_NAME }}/${{ needs.EnvSetup.outputs.repo-name }}/node/
+            aws s3 cp ./genesis-validator-3.tar.gz s3://${{ env.BUCKET_NAME }}/${{ needs.EnvSetup.outputs.repo-name }}/node/
+            aws s3 cp ./genesis-validator-4.tar.gz s3://${{ env.BUCKET_NAME }}/${{ needs.EnvSetup.outputs.repo-name }}/node/
+            aws s3 cp ./genesis-validator-5.tar.gz s3://${{ env.BUCKET_NAME }}/${{ needs.EnvSetup.outputs.repo-name }}/node/
+            aws s3 cp ./genesis-validator-6.tar.gz s3://${{ env.BUCKET_NAME }}/${{ needs.EnvSetup.outputs.repo-name }}/node/
+            aws s3 cp ./rpc-1.tar.gz s3://${{ env.BUCKET_NAME }}/${{ needs.EnvSetup.outputs.repo-name }}/node/
+            aws s3 cp ./rpc-2.tar.gz s3://${{ env.BUCKET_NAME }}/${{ needs.EnvSetup.outputs.repo-name }}/node/
+            aws s3 cp ./bootnode-1.tar.gz s3://${{ env.BUCKET_NAME }}/${{ needs.EnvSetup.outputs.repo-name }}/node/
+            aws s3 cp ./bootnode-2.tar.gz s3://${{ env.BUCKET_NAME }}/${{ needs.EnvSetup.outputs.repo-name }}/node/
+            aws s3 cp .github/scripts/ansible/docker/.env s3://${{ env.BUCKET_NAME }}/${{ needs.EnvSetup.outputs.repo-name }}/node/.env 
            
             
