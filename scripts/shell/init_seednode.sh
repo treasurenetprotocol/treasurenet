@@ -24,4 +24,4 @@ sudo mv /home/ubuntu/.treasurenetd /data/seednode0/.treasurenetd
 cd /data/node0/.treasurenetd/config/ || { echo "Failed to change directory: /data/node0/.treasurenetd/config/ not found"; exit 1; }
 
 # Copy genesis file to seed node (preserving all attributes)
-cp -a genesis.json /data/seednode0/.treasurenetd/config/genesis.json
+sudo cp -a genesis.json /data/seednode0/.treasurenetd/config/genesis.json
