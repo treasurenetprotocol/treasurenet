@@ -1,68 +1,99 @@
+#!/bin/bash
 
-# 定义节点列表
-nodes=("genesis-validator-1" "genesis-validator-2" "genesis-validator-3" "genesis-validator-4" "genesis-validator-5" "genesis-validator-6" "rpc-1" "rpc-2")
+#############################################################################
+# Treasurenet Network Initialization Script
+#
+# Purpose: Configures the genesis setup for a Treasurenet blockchain network by:
+# 1. Collecting genesis transactions (gentx) from all nodes
+# 2. Adding genesis accounts from a JSON file
+# 3. Creating the final genesis file
+# 4. Distributing configuration to all nodes
+#
+# Targets:
+# - Genesis validators 1-6
+# - RPC nodes 1-2
+#############################################################################
 
-# 循环执行 cp 命令
+# Define all network nodes
+nodes=(
+    "genesis-validator-1" "genesis-validator-2" "genesis-validator-3"
+    "genesis-validator-4" "genesis-validator-5" "genesis-validator-6"
+    "rpc-1" "rpc-2"
+)
+
+# Phase 1: Collect genesis transactions from all nodes
+echo "Collecting genesis transactions from all nodes..."
 for node in "${nodes[@]}"; do
-  cp -auv "/data/${node}/.treasurenetd/config/gentx/"*.json \
-    /data/genesis-validator-1/.treasurenetd/config/gentx/
+    echo "Copying gentx from $node..."
+    cp -auv "/data/${node}/.treasurenetd/config/gentx/"*.json \
+        /data/genesis-validator-1/.treasurenetd/config/gentx/
 done
 
-# 设置 HOME 环境变量
+# Phase 2: Set up genesis accounts
 export HOME=/data/genesis-validator-1
-
-# JSON 文件路径
 json_file="/data/account.json"
 
-# 遍历 JSON 文件中的键并添加 genesis 账户
+echo "Adding genesis accounts from $json_file..."
 for key in $(jq -r 'keys_unsorted[]' "$json_file"); do
-  if [[ "$key" != "validator1" && "$key" != "orchestrator1" ]]; then
-    ACCOUNT=$(jq -r ".${key}" "$json_file" 2>/dev/null)
-    if [[ -z "$ACCOUNT" ]]; then
-      echo "Error: Account for $key is empty or not found in JSON file."
-      continue
+    # Skip validator1 and orchestrator1 accounts
+    if [[ "$key" != "validator1" && "$key" != "orchestrator1" ]]; then
+        ACCOUNT=$(jq -r ".${key}" "$json_file" 2>/dev/null)
+        
+        # Validate account address
+        if [[ -z "$ACCOUNT" ]]; then
+            echo "Warning: Skipping invalid account for $key"
+            continue
+        fi
+
+        echo "Adding account: $key ($ACCOUNT)"
+        printf "$KEYRING_SECRET\n" | treasurenetd add-genesis-account \
+            --trace \
+            --keyring-backend file \
+            "$ACCOUNT" \
+            10000000000000000000000aunit,10000000000stake,10000000000footoken,10000000000footoken2,10000000000ibc/nometadatatoken
     fi
-    echo "Adding genesis account for $key with address $ACCOUNT"
-    printf  "$KEYRING_SECRET\n" | treasurenetd add-genesis-account --trace --keyring-backend file "$ACCOUNT" 10000000000000000000000aunit,10000000000stake,10000000000footoken,10000000000footoken2,10000000000ibc/nometadatatoken
-  fi
 done
 
-
-# 进入 gentx 目录并收集 gentx 文件
+# Phase 3: Finalize genesis file
+echo "Creating final genesis file..."
 cd /data/genesis-validator-1/.treasurenetd/config/gentx
 treasurenetd collect-gentxs
 
-# 备份并替换 config.toml 文件
+# Phase 4: Update node configuration
+echo "Updating node configurations..."
 cd /data/genesis-validator-1/.treasurenetd/config/
-mv config.toml config.toml1
-cp /data/node1/.treasurenetd/config/config.toml ./
+mv config.toml config.toml1  # Backup original config
+cp /data/node1/.treasurenetd/config/config.toml ./  # Use standard config
 
-# 记录节点 ID 到 .env 文件
+# Phase 5: Record node IDs for network configuration
+echo "Recording node IDs..."
 for node in "${nodes[@]}"; do
-  export HOME="/data/$node"
-  node_id=$(treasurenetd tendermint show-node-id)
-  # 将节点名称中的连字符 "-" 替换为下划线 "_"
-  node_name=$(echo "$node" | tr '-' '_')
-  echo "${node_name}_address=$node_id" >> /data/actions-runner/_work/treasurenet/treasurenet/.github/scripts/ansible/docker/.env
+    export HOME="/data/$node"
+    node_id=$(treasurenetd tendermint show-node-id)
+    node_name=$(echo "$node" | tr '-' '_')  # Convert to env-friendly name
+    echo "${node_name}_address=$node_id" >> /data/actions-runner/_work/treasurenet/treasurenet/.github/scripts/ansible/docker/.env
 done
 
-
-# 输出 .env 文件内容
+# Verify recorded node IDs
+echo "Node IDs recorded:"
 cat /data/actions-runner/_work/treasurenet/treasurenet/.github/scripts/ansible/docker/.env
-echo "Node IDs appended to .env file."
 
-# 复制 genesis.json 文件到其他节点
+# Phase 6: Distribute genesis configuration
+echo "Distributing genesis file to all nodes..."
 for node in "${nodes[@]}"; do
-  cd /data/genesis-validator-1/.treasurenetd/config/
-  cp -a genesis.json "/data/${node}/.treasurenetd/config/genesis.json"
+    cd /data/genesis-validator-1/.treasurenetd/config/
+    cp -a genesis.json "/data/${node}/.treasurenetd/config/genesis.json"
+    echo "Distributed to $node"
 done
 
-# 恢复 HOME 环境变量
+# Phase 7: Distribute gentx files (if needed)
+echo "Distributing gentx files..."
+for node in "${nodes[@]}"; do
+    cd /data/genesis-validator-1/.treasurenetd/config/
+    cp -auv "/data/genesis-validator-1/.treasurenetd/config/gentx/"*.json \
+        "/data/${node}/.treasurenetd/config/gentx/"
+done
+
+# Clean up
 export HOME=/home/ubuntu
-
-# 复制 gentx 文件到其他节点
-for node in "${nodes[@]}"; do
- cd /data/genesis-validator-1/.treasurenetd/config/
-  cp -auv "/data/genesis-validator-1/.treasurenetd/config/gentx/"*.json \
-    /data/${node}/.treasurenetd/config/gentx/
-done
+echo "Network initialization completed successfully!"

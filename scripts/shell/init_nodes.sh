@@ -1,79 +1,104 @@
 #!/bin/bash
 
-# Load variables from JSON file
-JSON_FILE="node_config.json"
-TEMPLATE_FILE="init_node_template.sh"
+#############################################################################
+# Node Configuration Generator Script
+#
+# Purpose: Automates node setup by:
+# 1. Reading configuration from JSON file
+# 2. Generating environment variables
+# 3. Creating customized node initialization scripts
+#
+# Features:
+# - Supports multiple node configurations
+# - Template-based script generation
+# - Secure environment variable handling
+# - JSON configuration input
+#############################################################################
 
-# Ensure jq is installed
-command -v jq > /dev/null 2>&1 || { echo >&2 "jq not installed. More info: https://stedolan.github.io/jq/download/"; exit 1; }
+# Configuration files
+JSON_FILE="node_config.json"          # Node configuration file
+TEMPLATE_FILE="init_node_template.sh" # Template script for node initialization
 
-# Read JSON and iterate over each object
-for ((i=0; i<$(jq length $JSON_FILE); i++)); do
-  # Extract variables for this iteration
-  DATA_PATH=$(jq -r ".[$i].DATA_PATH" $JSON_FILE)
-  HOME_PATH=$(jq -r ".[$i].HOME_PATH" $JSON_FILE)
-  PROJECT_NAME=$(jq -r ".[$i].PROJECT_NAME" $JSON_FILE)
-  BINARY_NAME=$(jq -r ".[$i].BINARY_NAME" $JSON_FILE)
-  CHAIN_ID=$(jq -r ".[$i].CHAIN_ID" $JSON_FILE)
-  ALLOCATION=$(jq -r ".[$i].ALLOCATION" $JSON_FILE)
-  VALIDATOR_KEY=$(jq -r ".[$i].VALIDATOR_KEY" $JSON_FILE)
-  ORCHESTRATOR_KEY=$(jq -r ".[$i].ORCHESTRATOR_KEY" $JSON_FILE)
-  MONIKER=$(jq -r ".[$i].MONIKER" $JSON_FILE)
-  KEYRING=$(jq -r ".[$i].KEYRING" $JSON_FILE)
-  KEYALGO=$(jq -r ".[$i].KEYALGO" $JSON_FILE)
-  DENOM=$(jq -r ".[$i].DENOM" $JSON_FILE)
-  NODE_NAME=$(jq -r ".[$i].NODE_NAME" $JSON_FILE)
+# Verify jq is installed for JSON processing
+if ! command -v jq >/dev/null 2>&1; then
+    echo >&2 "Error: jq not installed. Required for JSON processing."
+    echo >&2 "Download from: https://stedolan.github.io/jq/download/"
+    exit 1
+fi
 
-  # Create a temporary environment file for this iteration
-  ENV_FILE=$(mktemp)
-  cat <<EOF > $ENV_FILE
-export DATA_PATH=$DATA_PATH
-export HOME_PATH=$HOME_PATH
-export PROJECT_NAME=$PROJECT_NAME
-export BINARY_NAME=$BINARY_NAME
-export BIN=$BINARY_NAME
-export ARGS="--home $HOME_PATH --keyring-backend test"
-export CHAIN_ID=$CHAIN_ID
-export ALLOCATION=$ALLOCATION
-export VALIDATOR_KEY=$VALIDATOR_KEY
-export ORCHESTRATOR_KEY=$ORCHESTRATOR_KEY
-export MONIKER=$MONIKER
-export KEYRING=$KEYRING
-export KEYALGO=$KEYALGO
-export DENOM=$DENOM
-export NODE_NAME=$NODE_NAME
-export KEYRING_SECRET=$KEYRING_SECRET
+# Validate configuration files exist
+for file in "$JSON_FILE" "$TEMPLATE_FILE"; do
+    if [ ! -f "$file" ]; then
+        echo >&2 "Error: Required file not found: $file"
+        exit 1
+    fi
+done
+
+# Process each node configuration in JSON array
+node_count=$(jq length "$JSON_FILE")
+for ((i = 0; i < node_count; i++)); do
+    echo "Processing node configuration $((i + 1)) of $node_count"
+    
+    # Extract configuration parameters
+    config_vars=(
+        DATA_PATH HOME_PATH PROJECT_NAME BINARY_NAME
+        CHAIN_ID ALLOCATION VALIDATOR_KEY ORCHESTRATOR_KEY
+        MONIKER KEYRING KEYALGO DENOM NODE_NAME
+    )
+    
+    declare -A config
+    for var in "${config_vars[@]}"; do
+        config[$var]=$(jq -r ".[$i].$var" "$JSON_FILE")
+    done
+
+    # Create temporary environment file
+    ENV_FILE=$(mktemp)
+    cat > "$ENV_FILE" <<EOF
+export DATA_PATH=${config[DATA_PATH]}
+export HOME_PATH=${config[HOME_PATH]}
+export PROJECT_NAME=${config[PROJECT_NAME]}
+export BINARY_NAME=${config[BINARY_NAME]}
+export BIN=${config[BINARY_NAME]}
+export ARGS="--home ${config[HOME_PATH]} --keyring-backend test"
+export CHAIN_ID=${config[CHAIN_ID]}
+export ALLOCATION=${config[ALLOCATION]}
+export VALIDATOR_KEY=${config[VALIDATOR_KEY]}
+export ORCHESTRATOR_KEY=${config[ORCHESTRATOR_KEY]}
+export MONIKER=${config[MONIKER]}
+export KEYRING=${config[KEYRING]}
+export KEYALGO=${config[KEYALGO]}
+export DENOM=${config[DENOM]}
+export NODE_NAME=${config[NODE_NAME]}
+export KEYRING_SECRET=${KEYRING_SECRET}
 EOF
 
-  # Source the environment variables into the current shell session
-  source $ENV_FILE
+    # Load environment variables
+    source "$ENV_FILE"
 
-  # Debugging: Print environment variables to ensure they're set correctly
-  echo "Environment Variables:"
-  echo "DATA_PATH=$DATA_PATH"
-  echo "HOME_PATH=$HOME_PATH"
-  echo "PROJECT_NAME=$PROJECT_NAME"
-  echo "BINARY_NAME=$BINARY_NAME"
-  echo "CHAIN_ID=$CHAIN_ID"
-  echo "ALLOCATION=$ALLOCATION"
-  echo "VALIDATOR_KEY=$VALIDATOR_KEY"
-  echo "ORCHESTRATOR_KEY=$ORCHESTRATOR_KEY"
-  echo "MONIKER=$MONIKER"
-  echo "KEYRING=$KEYRING"
-  echo "KEYALGO=$KEYALGO"
-  echo "DENOM=$DENOM"
-  echo "NODE_NAME=$NODE_NAME"
-  echo "KEYRING_SECRET=$KEYRING_SECRET"
+    # Debug output
+    echo "--- Node Configuration ---"
+    for var in "${config_vars[@]}"; do
+        echo "$var=${config[$var]}"
+    done
+    echo "KEYRING_SECRET=[redacted]"
 
-  # Read the template file and replace placeholders with actual values using envsubst
-  envsubst '${DATA_PATH} ${HOME_PATH} ${PROJECT_NAME} ${BINARY_NAME} ${CHAIN_ID} ${ALLOCATION} ${VALIDATOR_KEY} ${ORCHESTRATOR_KEY} ${MONIKER} ${KEYRING} ${KEYALGO} ${DENOM} ${NODE_NAME} ${KEYRING_SECRET}' < $TEMPLATE_FILE > run_$NODE_NAME.sh
+    # Generate node initialization script
+    output_script="run_${config[NODE_NAME]}.sh"
+    envsubst '${DATA_PATH} ${HOME_PATH} ${PROJECT_NAME} ${BINARY_NAME} 
+              ${CHAIN_ID} ${ALLOCATION} ${VALIDATOR_KEY} ${ORCHESTRATOR_KEY}
+              ${MONIKER} ${KEYRING} ${KEYALGO} ${DENOM} ${NODE_NAME} ${KEYRING_SECRET}' \
+              < "$TEMPLATE_FILE" > "$output_script"
 
-  # Make the generated script executable
-  chmod +x run_$NODE_NAME.sh
+    # Make script executable
+    chmod +x "$output_script"
+    echo "Generated initialization script: $output_script"
 
-  # Optionally, you can execute the generated script here:
-  bash ./run_$NODE_NAME.sh
+    # Optional: Execute the script
+    # echo "Executing initialization script..."
+    ./"$output_script"
 
-  # Clean up temporary environment file
-  rm $ENV_FILE
+    # Clean up
+    rm "$ENV_FILE"
 done
+
+echo "Node configuration completed successfully"
