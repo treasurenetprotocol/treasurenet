@@ -13,11 +13,9 @@ sudo rm -rf /home/ubuntu/.treasurenetd
 # Initialize new seed node with specified chain ID
 treasurenetd init seednode0 --chain-id "treasurenet_5005-1"
 
-# Create data directory (with parent directories if needed)
-sudo mkdir -p /data/seednode0/.treasurenetd
-
-# Remove old configuration in data directory if exists
+# Remove old configuration and create data directory
 sudo rm -rf /data/seednode0/.treasurenetd
+sudo mkdir -p /data/seednode0/.treasurenetd
 
 # Move newly initialized node config to data directory
 sudo mv /home/ubuntu/.treasurenetd /data/seednode0/.treasurenetd
