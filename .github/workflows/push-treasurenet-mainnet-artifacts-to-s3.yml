@@ -54,7 +54,7 @@ jobs:
 
   # Job to build Go binaries
   build-go-binary:
-    needs: [ lint-shell ]
+    needs: [ EnvSetup ]
     runs-on: self-hosted
     name: Build Go Binary
     steps:
@@ -97,6 +97,7 @@ jobs:
         env:
           KEYRING_SECRET: ${{ secrets.keyring_secret }}  # Secret for keyring operations
         run: |
+          cd scripts/shell
           chmod +x init_nodes.sh 
           chmod +x init_node_template.sh
           chmod +x node_config.json
@@ -109,36 +110,29 @@ jobs:
           
           bash init_nodes.sh
 
-      - name: Set up nginx certificate files
-        run: |
-          cd ./nginx_backup/certs
-          echo "${{ secrets.CLOUDFLARE_CERTS_KEY }}" >> cloudflare.key
-          echo "${{ secrets.CLOUDFLARE_CERTS_PEM }}" >> cloudflare.pem
-
-      - name: Create nginx configuration files
-        run: |
-          chmod +x create_nginx_file.sh
-          bash create_nginx_file.sh
-
       - name: Generate new genesis file
         env:
           KEYRING_SECRET: ${{ secrets.keyring_secret }}
         run: |   
+          cd scripts/shell
           chmod +x new_genesis.sh
           bash new_genesis.sh  
 
       - name: Initialize seed node
         run: |
+          cd scripts/shell
           chmod +x init_seednode.sh
           bash init_seednode.sh     
 
       - name: Update app.toml configuration
         run: |
+          cd scripts/shell
           chmod +x change_app.toml.sh
           bash change_app.toml.sh
 
       - name: Update config.toml configuration
         run: |
+          cd scripts/shell
           chmod +x change_config.toml.sh 
           bash change_config.toml.sh 
 
