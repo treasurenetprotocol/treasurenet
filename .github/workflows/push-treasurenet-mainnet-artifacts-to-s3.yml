@@ -50,29 +50,23 @@ jobs:
           echo "build-command=${{ env.build-command }}" >> $GITHUB_OUTPUT
           echo "s3-aws-region=${{ env.s3-aws-region }}" >> $GITHUB_OUTPUT
 
-  lint-code:  
+  lint-shell:  
     needs: [ EnvSetup ]
     runs-on: ubuntu-latest
-    name: Lint Code
+    name: Lint Shell Scripts
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Go
-        uses: actions/setup-go@v3
+      - name: Run ShellCheck
+        uses: azure/shellcheck@v1
         with:
-          go-version: '1.18'
+          folder: ./  
+          check_files: "*.sh"  
 
-      - name: Run golangci-lint
-        uses: golangci/golangci-lint-action@v3
-        with:
-          version: v1.55  
-          args: --timeout=5m  
-          working-directory: ./
-          
   # Job to build Go binaries
   build-go-binary:
-    needs: [ lint-code ]
+    needs: [ lint-shell ]
     runs-on: self-hosted
     name: Build Go Binary
     steps:
