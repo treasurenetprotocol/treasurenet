@@ -71,12 +71,12 @@ for node in "${nodes[@]}"; do
     export HOME="/data/$node"
     node_id=$(treasurenetd tendermint show-node-id)
     node_name=$(echo "$node" | tr '-' '_')  # Convert to env-friendly name
-    echo "${node_name}_address=$node_id" >> /data/actions-runner/_work/treasurenet/treasurenet/.github/scripts/ansible/docker/.env
+    echo "${node_name}_address=$node_id" >> /data/actions-runner/_work/treasurenet/treasurenet/scripts/shell/.env
 done
 
 # Verify recorded node IDs
 echo "Node IDs recorded:"
-cat /data/actions-runner/_work/treasurenet/treasurenet/.github/scripts/ansible/docker/.env
+cat /data/actions-runner/_work/treasurenet/treasurenet/scripts/shell/.env
 
 # Phase 6: Distribute genesis configuration
 echo "Distributing genesis file to all nodes..."
