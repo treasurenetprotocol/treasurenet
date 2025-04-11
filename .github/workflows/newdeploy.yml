@@ -1,0 +1,353 @@
+name: Build and Push Docker Image to ECR
+
+
+on:
+  push:
+    branches:
+      - feature/3.1.1 
+env:
+  gha-role-name: "GitHubAction-AssumeRoleWithAction"
+  dockerfile-path: "./Dockerfile"
+  composefile-path: "./docker-compose.yaml"
+  ecr-repo-aws-region: "us-west-1"
+  NETWORK: "tn-testnet"
+  VALIDATOR_ROLE: "validator"
+  EXPLORER_ROLE: "explorer"
+
+permissions:
+  id-token: write
+  contents: write
+  pull-requests: write
+  actions: write
+
+jobs:
+  print_timestamp:
+    uses: treasurenetprotocol/reusable-workflows/.github/workflows/reusable-timestamp.yml@main
+
+  EnvSetup:
+    needs: [ print_timestamp ]
+    name: Setup Environment
+    runs-on: self-hosted
+    outputs:
+      gha-role-name: ${{ steps.set-aws-info.outputs.gha-role-name }}
+      dockerfile-path: ${{ steps.set-aws-info.outputs.dockerfile-path }}
+      composefile-path: ${{ steps.set-aws-info.outputs.composefile-path }}
+      ecr-repo: ${{ steps.extract-repo-name.outputs.repo-name }}
+      aws-secret-name: ${{ steps.extract-repo-name.outputs.secret-name }}
+      ecr-repo-aws-region: ${{ steps.set-aws-info.outputs.ecr-repo-aws-region }}
+    steps:
+      - name: Extract repo name
+        id: extract-repo-name
+        run: |
+          REPO_NAME="${{ github.repository }}"
+          SHORT_NAME=${REPO_NAME##*/}
+          echo "repo-name=$SHORT_NAME" >> $GITHUB_OUTPUT
+          echo "secret-name=testnet/$SHORT_NAME" >>$GITHUB_OUTPUT
+
+      - name: set-aws-info
+        id: set-aws-info
+        run: |
+          echo "ecr-repo-aws-region=${{ env.ecr-repo-aws-region }}" >> $GITHUB_OUTPUT
+          echo "gha-role-name=${{ env.gha-role-name }}" >> $GITHUB_OUTPUT
+          echo "dockerfile-path=${{ env.dockerfile-path }}" >> $GITHUB_OUTPUT
+          echo "composefile-path=${{ env.composefile-path }}">> $GITHUB_OUTPUT
+
+  build-scan-publish:
+    needs: [ EnvSetup ]
+    uses: treasurenetprotocol/reusable-workflows/.github/workflows/reusable-ecr-build-push.yml@feat/add_job_deployment
+    with:
+      gha-role-name: ${{ needs.EnvSetup.outputs.gha-role-name }}
+      dockerfile-path: ${{ needs.EnvSetup.outputs.dockerfile-path }}
+      ecr-repo: ${{ needs.EnvSetup.outputs.ecr-repo }}
+      ecr-repo-aws-region: ${{ needs.EnvSetup.outputs.ecr-repo-aws-region }}
+    secrets:
+      AWS_MANAGEMENT_ACCOUNT: ${{ secrets.AWS_MANAGEMENT_ACCOUNT }}
+      AWS_TARGET_ACCOUNT: ${{ secrets.AWS_TESTNET_ACCOUNT }}
+  
+  build-go-binary:
+    needs: [ EnvSetup , build-scan-publish ]
+    runs-on: self-hosted
+    name: Build Go Binary
+    steps:
+
+      - name: Checkout code
+        uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4.1.4
+
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: '1.18'
+
+      - name: Build Go binary
+        run: |
+          echo "Building Go binary..."
+          go env -w GO111MODULE=on
+          go mod tidy
+          make install
+
+      - name: copy build
+        run: |
+          ls $(go env GOPATH)/bin
+          cp $(go env GOPATH)/bin/treasurenetd .github/scripts/ansible/docker/
+          sudo cp $(go env GOPATH)/bin/treasurenetd /usr/bin
+
+      - name: Check if binary exists
+        run: |
+          if [ -f .github/scripts/ansible/docker/treasurenetd ]; then  
+            echo "Binary file exists."
+          else
+            echo "Binary file does not exist."
+            exit 1
+          fi
+
+      - name: init
+        run: |
+          cd scripts/shell
+          chmod +x init_nodes.sh 
+          chmod +x init_node_template.sh
+          chmod +x node_config.json
+
+          sudo rm -f /data/account.json
+          sudo touch /data/account.json
+
+          sudo chmod 666 /data/account.json
+          sudo echo "{}" > /data/account.json
+          bash init_nodes.sh
+
+      - name: configure aws credentials
+        uses: aws-actions/configure-aws-credentials@e3dd6a429d7300a6a4c196c26e071d42e0343502 # v4.0.2
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_MANAGEMENT_ACCOUNT }}:role/${{ needs.EnvSetup.outputs.gha-role-name }}
+          role-session-name: GitHub_to_AWS_via_FederatedOIDC
+          aws-region: ${{ needs.EnvSetup.outputs.ecr-repo-aws-region }}
+
+      - name: Assume role in target account
+        id: assume-role-target
+        run: |
+          ROLE_ARN="arn:aws:iam::381492270411:role/iac-role"
+          CREDS=$(aws sts assume-role --role-arn $ROLE_ARN --role-session-name GitHubAction --query 'Credentials.[AccessKeyId,SecretAccessKey,SessionToken]' --output text)
+          echo "AWS_ACCESS_KEY_ID=$(echo $CREDS | cut -d ' ' -f 1)" > .env
+          echo "AWS_SECRET_ACCESS_KEY=$(echo $CREDS | cut -d ' ' -f 2)" >> .env
+          echo "AWS_SESSION_TOKEN=$(echo $CREDS | cut -d ' ' -f 3)" >> .env
+
+
+      
+
+      - name: Set up environment variables and .env file
+        run: |
+          
+          echo "IMAGE_NAME=${{ secrets.ECR_REGISTRY }}/${{ needs.EnvSetup.outputs.ecr-repo }}:${{ github.sha }}" >> .env
+          echo "inputs_ecr_repo_aws_region=${{ needs.EnvSetup.outputs.ecr-repo-aws-region }}"  >> .env
+          echo "secrets_ECR_REGISTRY=${{ secrets.ECR_REGISTRY }}" >> .env
+
+      - name: Set nginx file
+        run: |
+          cd ./nginx_backup/certs
+            echo "${{ secrets.CLOUDFLARE_CERTS_KEY }}" >> cloudflare.key
+            echo "${{ secrets.CLOUDFLARE_CERTS_PEM }}" >> cloudflare.pem
+
+      - name: cp and mkdir  nginx file
+        run: |
+          cd scripts/shell
+          chmod +x create_nginx_file.sh
+          bash create_nginx_file.sh
+          
+      - name: copy env to ansible
+        run: |
+            cp .env .github/scripts/ansible/docker
+
+  
+
+
+  deploy:
+    needs: [ print_timestamp, build-go-binary ]
+    runs-on: self-hosted
+
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: arn:aws:iam::381492270411:role/full-ec2
+          aws-region: us-west-1
+          role-session-name: github-actions
+          audience: GitHub_to_AWS_via_FederatedOIDC_test
+
+      - name: aws 
+        run: aws sts get-caller-identity
+
+      - name: Fetch EC2 IP addresses (Public and Private)
+        run: |
+        
+              # Initialize empty arrays for IPs
+              public_ips=()
+              private_ips=()
+              node_ids=()
+
+              # Fetch IP addresses for instances with names "node1", "node2", ..., "node4" and "seednode"
+              for node_name in node0 node1 node2 node3 seednode0 blockscout; do
+                echo "Fetching IP address for instance with Name: $node_name"
+
+                # Fetch the public IP address
+                public_ip=$(aws ec2 describe-instances \
+                    --region us-west-1 \
+                    --filters "Name=tag:Name,Values=$node_name" "Name=instance-state-name,Values=running" \
+                    --query "Reservations[*].Instances[*].PublicIpAddress" \
+                    --output text)
+
+                # Fetch the private IP address
+                private_ip=$(aws ec2 describe-instances \
+                    --region us-west-1 \
+                    --filters "Name=tag:Name,Values=$node_name" "Name=instance-state-name,Values=running" \
+                    --query "Reservations[*].Instances[*].PrivateIpAddress" \
+                    --output text)
+
+                # Fetch the node_id from the instance tag
+                node_id=$(aws ec2 describe-instances \
+                --region us-west-1 \
+                --filters "Name=tag:Name,Values=$node_name" "Name=instance-state-name,Values=running" \
+                --query "Reservations[0].Instances[0].Tags[?Key=='Name'].Value" \
+                --output text)
+
+
+                if [ -n "$public_ip" ]; then
+                    public_ips+=("$public_ip")
+                else
+                    echo "No public IP found for $node_name"
+                fi
+
+                if [ -n "$private_ip" ]; then
+                    private_ips+=("$private_ip")
+                else
+                    echo "No private IP found for $node_name"
+                fi
+
+                node_ids+=("$node_id")  # Store node_id (which is the instance's Name tag)
+              done
+
+              # Save IPs to files
+              printf "%s\n" "${public_ips[@]}" > sorted_ips.txt
+              printf "%s\n" "${private_ips[@]}" > private_ips.txt
+              # Save node_ids to a file
+              printf "%s\n" "${node_ids[@]}" > node_ids.txt
+
+
+      - name: Install ansible on the runner
+        run: |
+          sudo apt update
+          sudo apt install -y ansible
+
+      - name: Add SSH Key
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.AWS_EC2_WWW_TESTNET_SSH_KEY }}
+
+      - name: Prepare the ansible inventory file
+        run: |
+              rm -f inventory.ini && touch inventory.ini
+              echo "[all]" > inventory.ini 
+              
+           
+              mapfile -t node_ids < node_ids.txt
+    
+              mapfile -t public_ips < sorted_ips.txt
+              mapfile -t private_ips < private_ips.txt
+              
+            
+              if [ "${#public_ips[@]}" -ne "${#private_ips[@]}" ] || [ "${#public_ips[@]}" -ne "${#node_ids[@]}" ]; then
+                echo "Mismatch in the number of IPs and node IDs" && exit 1
+              fi
+              
+             
+              for i in "${!public_ips[@]}"; do
+                public_ip=${public_ips[$i]}
+                private_ip=${private_ips[$i]}
+                node_id=${node_ids[$i]}  
+
+             
+                echo "$public_ip ansible_user=ubuntu node_id=$node_id" >> inventory.ini
+              done
+              
+            
+              cat inventory.ini
+
+
+
+      - name: Generate IP Mapping JSON
+        run: |
+          mapfile -t node_ids < node_ids.txt
+          mapfile -t public_ips < sorted_ips.txt
+          mapfile -t private_ips < private_ips.txt
+
+          echo "{" > ip_mapping.json
+          for i in "${!public_ips[@]}"; do
+            public_ip=${public_ips[$i]}
+            private_ip=${private_ips[$i]}
+            node_id="${node_ids[$i]}"
+
+            if [ "$i" -lt "$((${#public_ips[@]} - 1))" ]; then
+              comma=","
+            else
+              comma=""
+            fi
+
+            echo "  \"$node_id\": {" >> ip_mapping.json
+            echo "    \"public_ip\": \"$public_ip\"," >> ip_mapping.json
+            echo "    \"private_ip\": \"$private_ip\"" >> ip_mapping.json
+            echo "  }$comma" >> ip_mapping.json
+          done
+
+          echo "}" >> ip_mapping.json
+          cat ip_mapping.json
+
+      - name: new_genesis.json
+        run: |
+          cp ip_mapping.json .github/scripts/ansible/docker/
+          
+          cd scripts/shell
+
+          chmod +x new_genesis.sh
+            
+          bash new_genesis.sh        
+
+      - name: init seednode
+        run: |
+          cd scripts/shell
+
+          chmod +x init_seednode.sh
+            
+          bash init_seednode.sh     
+
+      - name: bash change_app.toml.sh
+        run: |
+          cd scripts/shell
+          
+          chmod +x change_app.toml.sh
+            
+          bash change_app.toml.sh
+
+
+      - name: bash change_config.toml.sh
+        run: |
+            cd scripts/shell
+
+            chmod +x change_config.toml.sh 
+              
+            bash change_config.toml.sh 
+            
+      - name: Add EC2 instances to known_hosts
+        run: |
+              for ip in $(cat sorted_ips.txt); do
+              echo "Scanning IP: $ip"
+                for ip_inner in $(cat sorted_ips.txt); do
+                  ssh-keyscan -H $ip_inner >> ~/.ssh/known_hosts
+                done
+              done
+
+
+      - name: Run the ansible playbook1
+        run: |
+             ansible-playbook -i inventory.ini  scripts/ansible/deploy_node.yml
+
+      
+
+
