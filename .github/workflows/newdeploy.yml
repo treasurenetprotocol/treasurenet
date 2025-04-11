@@ -102,6 +102,7 @@ jobs:
 
       - name: init
         run: |
+          cd scripts/shell
           chmod +x init_nodes.sh 
           chmod +x init_node_template.sh
           chmod +x node_config.json
@@ -300,29 +301,37 @@ jobs:
       - name: new_genesis.json
         run: |
           cp ip_mapping.json .github/scripts/ansible/docker/
-            
+          
+          cd scripts/shell
+
           chmod +x new_genesis.sh
             
           bash new_genesis.sh        
 
       - name: init seednode
         run: |
+          cd scripts/shell
+
           chmod +x init_seednode.sh
             
           bash init_seednode.sh     
 
-      - name: bash changge_app.toml.sh
+      - name: bash change_app.toml.sh
         run: |
-          chmod +x changge_app.toml.sh
+          cd scripts/shell
+          
+          chmod +x change_app.toml.sh
             
-          bash changge_app.toml.sh
+          bash change_app.toml.sh
 
 
-      - name: bash changge_config.toml.sh
+      - name: bash change_config.toml.sh
         run: |
-            chmod +x changge_config.toml.sh 
+            cd scripts/shell
+
+            chmod +x change_config.toml.sh 
               
-            bash changge_config.toml.sh 
+            bash change_config.toml.sh 
             
       - name: Add EC2 instances to known_hosts
         run: |

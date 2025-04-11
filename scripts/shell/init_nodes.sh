@@ -1,15 +1,25 @@
 #!/bin/bash
 
-# Load variables from JSON file
-JSON_FILE="node_config.json"
+# This script initializes multiple blockchain nodes from a JSON configuration file
+# It reads node parameters from JSON, generates environment variables,
+# creates executable scripts from a template, and optionally runs them
+
+# Path to JSON configuration file containing node parameters
+JSON_FILE="../../node_config.json"
+
+# Path to template script that will be customized for each node
 TEMPLATE_FILE="init_node_template.sh"
 
-# Ensure jq is installed
-command -v jq > /dev/null 2>&1 || { echo >&2 "jq not installed. More info: https://stedolan.github.io/jq/download/"; exit 1; }
+# Check if jq (JSON processor) is installed
+# Exit with error message if jq is not available
+command -v jq > /dev/null 2>&1 || { 
+    echo >&2 "jq not installed. More info: https://stedolan.github.io/jq/download/"; 
+    exit 1; 
+}
 
-# Read JSON and iterate over each object
+# Loop through each node configuration in the JSON array
 for ((i=0; i<$(jq length $JSON_FILE); i++)); do
-  # Extract variables for this iteration
+  # Extract all node parameters from JSON configuration
   DATA_PATH=$(jq -r ".[$i].DATA_PATH" $JSON_FILE)
   HOME_PATH=$(jq -r ".[$i].HOME_PATH" $JSON_FILE)
   PROJECT_NAME=$(jq -r ".[$i].PROJECT_NAME" $JSON_FILE)
@@ -24,8 +34,10 @@ for ((i=0; i<$(jq length $JSON_FILE); i++)); do
   DENOM=$(jq -r ".[$i].DENOM" $JSON_FILE)
   NODE_NAME=$(jq -r ".[$i].NODE_NAME" $JSON_FILE)
 
-  # Create a temporary environment file for this iteration
+  # Create temporary environment file to store extracted variables
   ENV_FILE=$(mktemp)
+  
+  # Write all environment variables to temporary file
   cat <<EOF > $ENV_FILE
 export DATA_PATH=$DATA_PATH
 export HOME_PATH=$HOME_PATH
@@ -44,10 +56,10 @@ export DENOM=$DENOM
 export NODE_NAME=$NODE_NAME
 EOF
 
-  # Source the environment variables into the current shell session
+  # Load environment variables into current shell session
   source $ENV_FILE
 
-  # Debugging: Print environment variables to ensure they're set correctly
+  # Debug output - display all loaded variables
   echo "Environment Variables:"
   echo "DATA_PATH=$DATA_PATH"
   echo "HOME_PATH=$HOME_PATH"
@@ -63,13 +75,14 @@ EOF
   echo "DENOM=$DENOM"
   echo "NODE_NAME=$NODE_NAME"
 
-  # Read the template file and replace placeholders with actual values using envsubst
+  # Generate node initialization script by substituting variables in template
+  # envsubst replaces ${VAR} placeholders with actual values
   envsubst '${DATA_PATH} ${HOME_PATH} ${PROJECT_NAME} ${BINARY_NAME} ${CHAIN_ID} ${ALLOCATION} ${VALIDATOR_KEY} ${ORCHESTRATOR_KEY} ${MONIKER} ${KEYRING} ${KEYALGO} ${DENOM} ${NODE_NAME}' < $TEMPLATE_FILE > run_$NODE_NAME.sh
 
-  # Make the generated script executable
+  # Make generated script executable
   chmod +x run_$NODE_NAME.sh
 
-  # Optionally, you can execute the generated script here:
+  # Optional: Execute the generated script immediately
   bash ./run_$NODE_NAME.sh
 
   # Clean up temporary environment file
