@@ -100,7 +100,7 @@ jobs:
           cd scripts/shell
           chmod +x init_nodes.sh 
           chmod +x init_node_template.sh
-          chmod +x node_config.json
+         
 
           sudo rm -f /data/account.json
           sudo touch /data/account.json
