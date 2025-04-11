@@ -16,7 +16,7 @@
 #############################################################################
 
 # Configuration files
-JSON_FILE="node_config.json"          # Node configuration file
+JSON_FILE="../../node_config.json"          # Node configuration file
 TEMPLATE_FILE="init_node_template.sh" # Template script for node initialization
 
 # Verify jq is installed for JSON processing
