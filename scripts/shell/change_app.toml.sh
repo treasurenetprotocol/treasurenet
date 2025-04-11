@@ -18,7 +18,7 @@
 ##############################################################################
 
 # Navigate to primary node's config directory
-cd /data/node0/.treasurenetd/config/
+cd /data/node0/.treasurenetd/config/ || { echo "Failed to change directory: /data/node0/.treasurenetd/config/ not found"; exit 1; }
 
 # Define configuration filenames
 input_file="app.toml"            # Original configuration file
