@@ -148,6 +148,7 @@ jobs:
 
       - name: cp and mkdir  nginx file
         run: |
+          cd scripts/shell
           chmod +x create_nginx_file.sh
           bash create_nginx_file.sh
           
