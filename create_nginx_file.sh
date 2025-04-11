@@ -1,30 +1,3 @@
-# echo $PWD
-# sudo mkdir -p /data/nginx1/node1
-# sudo mkdir -p /data/nginx1/node2
-# sudo mkdir -p /data/nginx1/node3
-# sudo mkdir -p /data/nginx1/node4
-# sudo mkdir -p /data/nginx1/seednode
-# rm -rf /data/nginx1/node1/*
-# rm -rf /data/nginx1/node2/*
-# rm -rf /data/nginx1/node3/*
-# rm -rf /data/nginx1/node4/*
-# rm -rf /data/nginx1/seednode/*
-# cp -a nginx_backup/* /data/nginx1/node1
-# cp -a nginx_backup/* /data/nginx1/node2
-# cp -a nginx_backup/* /data/nginx1/node3
-# cp -a nginx_backup/* /data/nginx1/node4
-# cp -a nginx_backup/* /data/nginx1/seednode
-# cd /data/nginx1/node1
-# sed -i 's/    server_name node0.testnet.treasurenet.io;/    server_name node1.testnet.treasurenet.io;/' nginx.conf
-# cd /data/nginx1/node2
-# sed -i 's/    server_name node0.testnet.treasurenet.io;/    server_name node2.testnet.treasurenet.io;/' nginx.conf
-# cd /data/nginx1/node3
-# sed -i 's/    server_name node0.testnet.treasurenet.io;/    server_name node3.testnet.treasurenet.io;/' nginx.conf
-# cd /data/nginx1/node4
-# sed -i 's/    server_name node0.testnet.treasurenet.io;/    server_name node4.testnet.treasurenet.io;/' nginx.conf
-# cd /data/nginx1/seednode
-# sed -i 's/    server_name node0.testnet.treasurenet.io;/    server_name seednode.testnet.treasurenet.io;/' nginx.conf
-
 #!/bin/bash
 echo "Print current directory: $PWD" # Print current directory
 

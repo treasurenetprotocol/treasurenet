@@ -4,7 +4,7 @@ set -eux
 # Clear any previous data (make sure to do this carefully)
 sudo rm -rf $DATA_PATH/*
 sudo rm -rf $DATA_PATH/.*
-sudo rm -rf $HOME_PATH/*  # 清理默认目录
+sudo rm -rf $HOME_PATH/*  
 
 # Ensure necessary directories exist
 sudo mkdir -p $DATA_PATH/$PROJECT_NAME
