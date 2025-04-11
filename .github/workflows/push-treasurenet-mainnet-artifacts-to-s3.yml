@@ -68,6 +68,7 @@ jobs:
         with:
           version: v1.55  
           args: --timeout=5m  
+          working-directory: ./
           
   # Job to build Go binaries
   build-go-binary:
