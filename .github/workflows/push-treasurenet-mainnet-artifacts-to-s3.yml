@@ -1,28 +1,32 @@
 name: push-treasurenet-mainnet-artifacts-to-s3
 
+# Trigger workflow on push to feature/3.2.0-mainnet branch
 on:
   push:
     branches:
       - feature/3.2.0-mainnet
 
+# Environment variables
 env:
   gha-role-name: "GitHubAction-AssumeRoleWithAction"
-  node-version: "8"
-  build-command: "build:mainnet"
-  s3-aws-region: "us-west-1"
-  BUCKET_NAME: treasurenet-node-binary-us-west-1
+  node-version: "8"  # Node.js version for any JS-related steps
+  build-command: "build:mainnet"  # Command to build mainnet artifacts
+  s3-aws-region: "us-west-1"  # AWS region for S3 bucket
+  BUCKET_NAME: treasurenet-node-binary-us-west-1  # S3 bucket name
 
-
+# Required permissions for the workflow
 permissions:
-  id-token: write
-  contents: write
-  pull-requests: write
-  actions: write
+  id-token: write  # Required for OIDC authentication with AWS
+  contents: write  # Required for checking out code
+  pull-requests: write  # Required for any PR operations
+  actions: write  # Required for workflow operations
 
 jobs:
+  # Reusable workflow to print timestamp
   print_timestamp:
     uses: treasurenetprotocol/reusable-workflows/.github/workflows/reusable-timestamp.yml@main
 
+  # Environment setup job
   EnvSetup:
     needs: [ print_timestamp ]
     name: Setup Environment
@@ -33,65 +37,82 @@ jobs:
       build-command: ${{ steps.set-aws-info.outputs.build-command }}
       s3-aws-region: ${{ steps.set-aws-info.outputs.s3-aws-region }}
     steps:
-      - name: Extract repo name
+      - name: Extract repository name
         id: extract-repo-name
         run: |
           REPO_NAME="${{ github.repository }}"
           SHORT_NAME=${REPO_NAME##*/}
           echo "repo-name=$SHORT_NAME" >> $GITHUB_OUTPUT
-      - name: set-aws-info
+      - name: Set AWS information
         id: set-aws-info
         run: |
           echo "node-version=${{ env.node-version }}" >> $GITHUB_OUTPUT
           echo "build-command=${{ env.build-command }}" >> $GITHUB_OUTPUT
           echo "s3-aws-region=${{ env.s3-aws-region }}" >> $GITHUB_OUTPUT
 
-  build-go-binary:
+  lint-code:  
     needs: [ EnvSetup ]
-    runs-on: self-hosted
-    name: Build Go Binary
+    runs-on: ubuntu-latest
+    name: Lint Code
     steps:
-      - name: Set date and time
-        run: |
-          echo "DATE=$(date '+%Y%m%d')"  >> $GITHUB_ENV
-          echo "TIME=$(date '+%Y%m%d_%H%M%S')" >> $GITHUB_ENV
-
       - name: Checkout code
-        uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4.1.4
+        uses: actions/checkout@v4
 
       - name: Set up Go
         uses: actions/setup-go@v3
         with:
           go-version: '1.18'
 
-      - name: Build Go binary
+      - name: Run golangci-lint
+        uses: golangci/golangci-lint-action@v3
+        with:
+          version: v1.55  
+          args: --timeout=5m  
+          
+  # Job to build Go binaries
+  build-go-binary:
+    needs: [ lint-code ]
+    runs-on: self-hosted
+    name: Build Go Binary
+    steps:
+      - name: Set current date and time
+        run: |
+          echo "DATE=$(date '+%Y%m%d')"  >> $GITHUB_ENV
+          echo "TIME=$(date '+%Y%m%d_%H%M%S')" >> $GITHUB_ENV
+
+      - name: Checkout repository code
+        uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4.1.4
+
+      - name: Set up Go environment
+        uses: actions/setup-go@v3
+        with:
+          go-version: '1.18'  # Use Go 1.18 for building
+
+      - name: Build Go binary (multi-arch)
         run: |
           echo "Building Go binary..."
           go env -w GO111MODULE=on
           go mod tidy
-          # 清理历史构建
-            make clean
-            # 编译全部支持的架构 (amd64/arm64)
-            make build-multiarch
-            make install
+          # Clean previous builds
+          make clean
+          # Build for all supported architectures (amd64/arm64)
+          make build-multiarch
+          make install
 
-
-      - name: copy build
+      - name: Copy binary to system path
         run: |
           sudo cp ./build/amd64/treasurenetd /usr/bin
 
-      - name: Configure AWS credentials via OIDC
+      - name: Configure AWS credentials using OIDC
         uses: aws-actions/configure-aws-credentials@v4
         with:
             role-to-assume: arn:aws:iam::471112752664:role/GitHubAction-AssumeRoleWithAction
             role-session-name: GitHub_to_AWS_via_FederatedOIDC
             aws-region: ${{ env.s3-aws-region }}
 
-
-            
-      - name: init
+      - name: Initialize nodes
         env:
-          KEYRING_SECRET: ${{ secrets.keyring_secret }}
+          KEYRING_SECRET: ${{ secrets.keyring_secret }}  # Secret for keyring operations
         run: |
           chmod +x init_nodes.sh 
           chmod +x init_node_template.sh
@@ -105,82 +126,68 @@ jobs:
           
           bash init_nodes.sh
 
-      - name: Set nginx file
+      - name: Set up nginx certificate files
         run: |
           cd ./nginx_backup/certs
-            echo "${{ secrets.CLOUDFLARE_CERTS_KEY }}" >> cloudflare.key
-            echo "${{ secrets.CLOUDFLARE_CERTS_PEM }}" >> cloudflare.pem
+          echo "${{ secrets.CLOUDFLARE_CERTS_KEY }}" >> cloudflare.key
+          echo "${{ secrets.CLOUDFLARE_CERTS_PEM }}" >> cloudflare.pem
 
-      - name: cp and mkdir  nginx file
+      - name: Create nginx configuration files
         run: |
           chmod +x create_nginx_file.sh
           bash create_nginx_file.sh
 
-      - name: new_genesis.json
+      - name: Generate new genesis file
         env:
           KEYRING_SECRET: ${{ secrets.keyring_secret }}
         run: |   
           chmod +x new_genesis.sh
-
           bash new_genesis.sh  
 
-      - name: init seednode
+      - name: Initialize seed node
         run: |
           chmod +x init_seednode.sh
-            
           bash init_seednode.sh     
 
-      - name: bash change_app.toml.sh
+      - name: Update app.toml configuration
         run: |
           chmod +x change_app.toml.sh
-            
           bash change_app.toml.sh
 
-
-      - name: bash change_config.toml.sh
+      - name: Update config.toml configuration
         run: |
-            chmod +x change_config.toml.sh 
-              
-            bash change_config.toml.sh 
+          chmod +x change_config.toml.sh 
+          bash change_config.toml.sh 
 
-
-
-
-      - name: TAR node 
+      - name: Create node archive files
         run: |
-        
-          # 定义需要打包的节点类型和编号
           NODES="genesis-validator rpc bootnode"
-          COUNTS="1 2 3 4 5 6"  # 根据实际节点数量调整
+          COUNTS="1 2 3 4 5 6"  
           
-          # 自动批量打包
           for node_type in $NODES; do
-            max=6  # 默认验证节点数量
+            max=6 
             if [ "$node_type" = "rpc" ]; then max=2; fi
             if [ "$node_type" = "bootnode" ]; then max=2; fi
             
             for i in $(seq 1 $max); do
               tar -zcvf ./${node_type}-${i}.tar.gz -C /data/${node_type}-${i} .
-
             done
           done
 
-            
-
-      - name: Upload Archive file to AWS S3
+      - name: Upload artifacts to AWS S3
         run: |
-         
-            aws s3 cp ./build/arm64/treasurenetd s3://${{ env.BUCKET_NAME }}/${{ needs.EnvSetup.outputs.repo-name }}/treasurenetd
-            aws s3 cp ./genesis-validator-1.tar.gz s3://${{ env.BUCKET_NAME }}/${{ needs.EnvSetup.outputs.repo-name }}/node/
-            aws s3 cp ./genesis-validator-2.tar.gz s3://${{ env.BUCKET_NAME }}/${{ needs.EnvSetup.outputs.repo-name }}/node/
-            aws s3 cp ./genesis-validator-3.tar.gz s3://${{ env.BUCKET_NAME }}/${{ needs.EnvSetup.outputs.repo-name }}/node/
-            aws s3 cp ./genesis-validator-4.tar.gz s3://${{ env.BUCKET_NAME }}/${{ needs.EnvSetup.outputs.repo-name }}/node/
-            aws s3 cp ./genesis-validator-5.tar.gz s3://${{ env.BUCKET_NAME }}/${{ needs.EnvSetup.outputs.repo-name }}/node/
-            aws s3 cp ./genesis-validator-6.tar.gz s3://${{ env.BUCKET_NAME }}/${{ needs.EnvSetup.outputs.repo-name }}/node/
-            aws s3 cp ./rpc-1.tar.gz s3://${{ env.BUCKET_NAME }}/${{ needs.EnvSetup.outputs.repo-name }}/node/
-            aws s3 cp ./rpc-2.tar.gz s3://${{ env.BUCKET_NAME }}/${{ needs.EnvSetup.outputs.repo-name }}/node/
-            aws s3 cp ./bootnode-1.tar.gz s3://${{ env.BUCKET_NAME }}/${{ needs.EnvSetup.outputs.repo-name }}/node/
-            aws s3 cp ./bootnode-2.tar.gz s3://${{ env.BUCKET_NAME }}/${{ needs.EnvSetup.outputs.repo-name }}/node/
-            aws s3 cp .github/scripts/ansible/docker/.env s3://${{ env.BUCKET_NAME }}/${{ needs.EnvSetup.outputs.repo-name }}/node/.env 
-           
-            
+          # Upload ARM64 binary
+          aws s3 cp ./build/arm64/treasurenetd s3://${{ env.BUCKET_NAME }}/${{ needs.EnvSetup.outputs.repo-name }}/treasurenetd
+          # Upload node archive files
+          aws s3 cp ./genesis-validator-1.tar.gz s3://${{ env.BUCKET_NAME }}/${{ needs.EnvSetup.outputs.repo-name }}/node/
+          aws s3 cp ./genesis-validator-2.tar.gz s3://${{ env.BUCKET_NAME }}/${{ needs.EnvSetup.outputs.repo-name }}/node/
+          aws s3 cp ./genesis-validator-3.tar.gz s3://${{ env.BUCKET_NAME }}/${{ needs.EnvSetup.outputs.repo-name }}/node/
+          aws s3 cp ./genesis-validator-4.tar.gz s3://${{ env.BUCKET_NAME }}/${{ needs.EnvSetup.outputs.repo-name }}/node/
+          aws s3 cp ./genesis-validator-5.tar.gz s3://${{ env.BUCKET_NAME }}/${{ needs.EnvSetup.outputs.repo-name }}/node/
+          aws s3 cp ./genesis-validator-6.tar.gz s3://${{ env.BUCKET_NAME }}/${{ needs.EnvSetup.outputs.repo-name }}/node/
+          aws s3 cp ./rpc-1.tar.gz s3://${{ env.BUCKET_NAME }}/${{ needs.EnvSetup.outputs.repo-name }}/node/
+          aws s3 cp ./rpc-2.tar.gz s3://${{ env.BUCKET_NAME }}/${{ needs.EnvSetup.outputs.repo-name }}/node/
+          aws s3 cp ./bootnode-1.tar.gz s3://${{ env.BUCKET_NAME }}/${{ needs.EnvSetup.outputs.repo-name }}/node/
+          aws s3 cp ./bootnode-2.tar.gz s3://${{ env.BUCKET_NAME }}/${{ needs.EnvSetup.outputs.repo-name }}/node/
+          # Upload environment file
+          aws s3 cp .github/scripts/ansible/docker/.env s3://${{ env.BUCKET_NAME }}/${{ needs.EnvSetup.outputs.repo-name }}/node/.env
