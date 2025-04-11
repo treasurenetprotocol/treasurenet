@@ -229,17 +229,6 @@
       # Modify docker-compose.yaml for seed node (node_number == 4)
 
 
-
-
-    # - name: Change hosts
-    #   shell: |
-    #     chmod +x update_hosts.sh
-    #     bash ./update_hosts.sh
-    #     cat /etc/hosts
-    #   args:
-    #     chdir: "{{ PATH }}/docker"
-    #   # Change hosts
-
     - name: Docker-compose up
       shell: |
         source .env
