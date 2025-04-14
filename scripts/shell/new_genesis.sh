@@ -50,7 +50,7 @@ for key in $(jq -r 'keys_unsorted[]' "$json_file"); do
             --trace \
             --keyring-backend file \
             "$ACCOUNT" \
-            10000000000000000000000aunit,10000000000stake,10000000000footoken,10000000000footoken2,10000000000ibc/nometadatatoken
+            10000000000000000000000aunit
     fi
 done
 

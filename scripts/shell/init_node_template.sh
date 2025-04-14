@@ -94,18 +94,7 @@ else
 fi
 
 # Configure token metadata
-jq '.app_state.bank.denom_metadata += [
-    {
-        "name": "Foo Token",
-        "symbol": "FOO",
-        "base": "footoken",
-        "display": "mfootoken",
-        "description": "A non-staking test token",
-        "denom_units": [
-            {"denom": "footoken", "exponent": 0},
-            {"denom": "mfootoken", "exponent": 6}
-        ]
-    },
+jq '.app_state.bank.denom_metadata = [
     {
         "name": "Stake Token",
         "symbol": "UNIT",
@@ -117,24 +106,9 @@ jq '.app_state.bank.denom_metadata += [
             {"denom": "unit", "exponent": 18}
         ]
     }
-]' $HOME_PATH/config/genesis.json > /tmp/treasurenet-footoken2-genesis.json
+]' $HOME_PATH/config/genesis.json > $HOME_PATH/config/modified_genesis.json && mv $HOME_PATH/config/modified_genesis.json $HOME_PATH/config/genesis.json
 
-jq '.app_state.bank.denom_metadata += [
-    {
-        "name": "Foo Token2",
-        "symbol": "F20",
-        "base": "footoken2",
-        "display": "mfootoken2",
-        "description": "A second non-staking test token",
-        "denom_units": [
-            {"denom": "footoken2", "exponent": 0},
-            {"denom": "mfootoken2", "exponent": 6}
-        ]
-    }
-]' /tmp/treasurenet-footoken2-genesis.json > /tmp/treasurenet-bech32ibc-genesis.json
-
-jq '.app_state.bech32ibc.nativeHRP = "treasurenet"' /tmp/treasurenet-bech32ibc-genesis.json > $HOME_PATH/config/genesis.json
-
+jq '.app_state.bech32ibc.nativeHRP = "treasurenet"' $HOME_PATH/config/genesis.json > /tmp/treasurenet-bech32ibc-genesis.json && mv /tmp/treasurenet-bech32ibc-genesis.json $HOME_PATH/config/genesis.json
 # Initialize accounts
 VALIDATOR_KEY1=$(printf "$KEYRING_SECRET\n" | $BIN keys show $KEY1 -a $ARGS)
 ORCHESTRATOR_KEY1=$(printf "$KEYRING_SECRET\n" | $BIN keys show $KEY2 -a $ARGS)
