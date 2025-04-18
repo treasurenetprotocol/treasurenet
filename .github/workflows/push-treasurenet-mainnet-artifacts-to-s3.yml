@@ -154,3 +154,6 @@ jobs:
           
           # Upload environment file
           aws s3 cp ${{ env.SCRIPTS_PATH }}/.env s3://${{ env.S3_BUCKET }}/${{ needs.EnvSetup.outputs.repo-name }}/node/.env
+  deploy-dev:
+    needs: [ build-go-binary ]
+    uses: treasurenetprotocol/treasurenet-devops/.github/workflows/mainnet-devops.yml@feature/1.0.0
