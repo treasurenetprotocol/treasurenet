@@ -1,0 +1,53 @@
+name: push-treasurenet-mainnet-artifacts-to-s3
+
+on:
+  workflow_call:
+
+
+
+permissions:
+  id-token: write
+  contents: write
+  pull-requests: write
+  actions: write
+
+jobs:
+  print_timestamp:
+    uses: treasurenetprotocol/reusable-workflows/.github/workflows/reusable-timestamp.yml@main
+
+  EnvSetup:
+    needs: [ print_timestamp ]
+    name: Setup Environment
+    runs-on: self-hosted
+    outputs:
+      repo-name: ${{ steps.extract-repo-name.outputs.repo-name }}
+    steps:
+      - name: Extract repository name
+        id: extract-repo-name
+        run: |
+          REPO_NAME="${{ github.repository }}"
+          SHORT_NAME=${REPO_NAME##*/}
+          echo "repo-name=$SHORT_NAME" >> $GITHUB_OUTPUT
+
+  build-go-binary:
+    needs: [ EnvSetup ]
+    runs-on: self-hosted
+    name: Build Go Binary
+    steps:
+     
+
+      - name: Checkout repository code
+        uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b
+
+
+      - name: Build Go binary (multi-arch)
+        run: |
+          echo "Building Go binary..."
+          go env -w GO111MODULE=on
+          go mod tidy
+          make clean
+          make build-multiarch
+          make install
+
+
+
