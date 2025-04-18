@@ -15,7 +15,7 @@ Treasurenet Protocol offers a remedy for the significant shortfall of enduring a
 For prerequisites and detailed build instructions please read the [Installation](https://wiki.treasurenet.io/docs/For-Validators/quickStart/) instructions. Once the dependencies are installed, run:
 
 ```shell
-make build
+make build 
 ```
 
 Or check out the latest [release](https://github.com/treasurenetprotocol/treasurenet/releases).
