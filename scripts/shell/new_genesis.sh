@@ -93,11 +93,11 @@ done
 echo "Node IDs recorded:"
 cat /data/actions-runner/_work/treasurenet/treasurenet/scripts/shell/.env
 
-cd /data/genesis-validator-1/.treasurenetd/config/
-sed -i \
-  -e 's/\b6311520\b/1262304/g' \
-  -e 's/"per_reward":[[:space:]]*"10000000000000000000"/"per_reward": "50000000000000000000"/g' \
-  genesis.json
+# cd /data/genesis-validator-1/.treasurenetd/config/
+# sed -i \
+#   -e 's/\b6311520\b/1262304/g' \
+#   -e 's/"per_reward":[[:space:]]*"10000000000000000000"/"per_reward": "50000000000000000000"/g' \
+#   genesis.json
 
 # Phase 6: Distribute genesis configuration
 echo "Distributing genesis file to all nodes..."
