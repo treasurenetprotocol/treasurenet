@@ -32,16 +32,14 @@ done
 # Phase 2: Set up genesis accounts
 export HOME=/data/genesis-validator-1
 
-treasurenetd keys add Airdrop_administrator --keyring-backend file
-printf "$KEYRING_SECRET\n"
+printf "$KEYRING_SECRET\n" | treasurenetd keys add Airdrop_administrator --keyring-backend file
 address=$(printf "%s\n" "$KEYRING_SECRET" | treasurenetd keys show Airdrop_administrator -a --keyring-backend file 2>/dev/null)
 printf "$KEYRING_SECRET\n" | treasurenetd add-genesis-account \
             --trace \
             --keyring-backend file \
             "$address" \
             89998350000000000000000000aunit
-treasurenetd keys add contract_deployer --keyring-backend file 
-printf "$KEYRING_SECRET\n"
+printf "$KEYRING_SECRET\n" | treasurenetd keys add contract_deployer --keyring-backend file 
 address=$(printf "%s\n" "$KEYRING_SECRET" | treasurenetd keys show contract_deployer -a --keyring-backend file 2>/dev/null)
 printf "$KEYRING_SECRET\n" | treasurenetd add-genesis-account \
             --trace \
