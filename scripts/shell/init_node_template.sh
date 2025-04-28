@@ -97,7 +97,7 @@ fi
 jq '.app_state.bank.denom_metadata = [
     {
         "name": "Stake Token",
-        "symbol": "UNIT",
+        "symbol": "Unit",
         "base": "aunit",
         "display": "unit",
         "description": "A staking test token",

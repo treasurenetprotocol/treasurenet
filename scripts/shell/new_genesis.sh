@@ -39,7 +39,7 @@ printf "$KEYRING_SECRET\n" | treasurenetd add-genesis-account \
             --trace \
             --keyring-backend file \
             "$address" \
-            000000000000000000aunit
+            89998350000000000000000000aunit
 treasurenetd keys add contract_deployer --keyring-backend file 
 printf "$KEYRING_SECRET\n"
 address=$(printf "%s\n" "$KEYRING_SECRET" | treasurenetd keys show contract_deployer -a --keyring-backend file 2>/dev/null)
@@ -94,6 +94,12 @@ done
 # Verify recorded node IDs
 echo "Node IDs recorded:"
 cat /data/actions-runner/_work/treasurenet/treasurenet/scripts/shell/.env
+
+cd /data/genesis-validator-1/.treasurenetd/config/
+sed -i \
+  -e 's/\b6311520\b/1262304/g' \
+  -e 's/"per_reward":[[:space:]]*"10000000000000000000"/"per_reward": "50000000000000000000"/g' \
+  genesis.json
 
 # Phase 6: Distribute genesis configuration
 echo "Distributing genesis file to all nodes..."

@@ -14,7 +14,7 @@
 # Initialize first bootnode
 echo "Initializing bootnode-1..."
 sudo rm -rf /home/ubuntu/.treasurenetd
-treasurenetd init bootnode-1 --chain-id "treasurenet_5005-1"
+treasurenetd init bootnode-1 --chain-id "treasurenet_5570-1"
 
 # Set up data directory for bootnode-1
 sudo mkdir -p /data/bootnode-1/.treasurenetd
@@ -28,7 +28,7 @@ cp -a genesis.json /data/bootnode-1/.treasurenetd/config/genesis.json
 # Initialize second bootnode
 echo "Initializing bootnode-2..."
 sudo rm -rf /home/ubuntu/.treasurenetd
-treasurenetd init bootnode-2 --chain-id "treasurenet_5005-1"
+treasurenetd init bootnode-2 --chain-id "treasurenet_5570-1"
 
 # Set up data directory for bootnode-2
 sudo mkdir -p /data/bootnode-2/.treasurenetd
