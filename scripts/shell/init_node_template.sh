@@ -129,7 +129,7 @@ ETHEREUM_KEY=$(grep address $DATA_PATH/.$PROJECT_NAME/$KEY1-eth-keys | head -1 |
 printf "$KEYRING_SECRET\n" | $BIN gentx $ARGS \
     --moniker $MONIKER \
     --chain-id=$CHAIN_ID \
-    $KEY1 258000000000000000000aunit \
+    $KEY1 158000000000000000000aunit \
     $ETHEREUM_KEY $ORCHESTRATOR_KEY1
 
 # Finalize genesis
