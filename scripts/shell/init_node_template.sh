@@ -113,8 +113,7 @@ jq '.app_state.bech32ibc.nativeHRP = "treasurenet"' $HOME_PATH/config/genesis.js
 VALIDATOR_KEY1=$(printf "$KEYRING_SECRET\n" | $BIN keys show $KEY1 -a $ARGS)
 ORCHESTRATOR_KEY1=$(printf "$KEYRING_SECRET\n" | $BIN keys show $KEY2 -a $ARGS)
 
-$BIN add-genesis-account $ARGS $VALIDATOR_KEY1 $ALLOCATION
-$BIN add-genesis-account $ARGS $ORCHESTRATOR_KEY1 $ALLOCATION
+
 
 # Update account registry
 FILE="/data/account.json"

@@ -50,24 +50,25 @@ json_file="/data/account.json"
 
 echo "Adding genesis accounts from $json_file..."
 for key in $(jq -r 'keys_unsorted[]' "$json_file"); do
-    # Skip validator1 and orchestrator1 accounts
-    if [[ "$key" != "validator1" && "$key" != "orchestrator1" ]]; then
-        ACCOUNT=$(jq -r ".${key}" "$json_file" 2>/dev/null)
-        
-        # Validate account address
-        if [[ -z "$ACCOUNT" ]]; then
-            echo "Warning: Skipping invalid account for $key"
-            continue
-        fi
-
-        echo "Adding account: $key ($ACCOUNT)"
-        printf "$KEYRING_SECRET\n" | treasurenetd add-genesis-account \
-            --trace \
-            --keyring-backend file \
-            "$ACCOUNT" \
-            200000000000000000000aunit
+   
+    if [[ "$key" != orchestrator* ]]; then
+        continue
     fi
+
+    ACCOUNT=$(jq -r ".${key}" "$json_file")
+    if [[ -z "$ACCOUNT" ]]; then
+        echo "Warning: Skipping invalid account for $key"
+        continue
+    fi
+
+    echo "Adding orchestrator: $key ($ACCOUNT)"
+    printf "$KEYRING_SECRET\n" | treasurenetd add-genesis-account \
+        --trace \
+        --keyring-backend file \
+        "$ACCOUNT" \
+        200000000000000000000aunit
 done
+
 
 # Phase 3: Finalize genesis file
 echo "Creating final genesis file..."
