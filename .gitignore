@@ -57,6 +57,7 @@ vagrant
 # IDE
 .idea/
 *.iml
+.VSCodeCounter/
 
 # Graphviz
 dependency-graph.png
