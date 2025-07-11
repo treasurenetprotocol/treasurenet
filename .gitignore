@@ -31,6 +31,7 @@ docs-tools-stamp
 proto-tools-stamp
 golangci-lint
 keyring_test_cosmos
+CLAUDE.md
 /node_modules/
 **/node_modules/
 **/dist
