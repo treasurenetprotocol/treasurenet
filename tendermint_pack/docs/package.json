@@ -18,5 +18,8 @@
     "postbuild": "./post.sh"
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "overrides": {
+    "form-data": "^4.0.0"
+  }
 }

@@ -2,5 +2,8 @@
   "dependencies": {
     "jq": "^1.7.2",
     "solc": "^0.8.25"
+  },
+  "overrides": {
+    "form-data": "^4.0.0"
   }
 }
