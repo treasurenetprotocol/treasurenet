@@ -815,7 +815,7 @@ func (app *TreasurenetApp) BeginBlocker(ctx sdk.Context, req abci.RequestBeginBl
 		nowTime := time.Now().Add(2 * time.Second)
 		ctx1, cancel := context.WithDeadline(context.Background(), nowTime)
 		go func(ctx context.Context, cancel context.CancelFunc) {
-			defer cancel() // 在 goroutine 结束时调用取消函数
+			defer cancel()
 			getMintat(ctx1)
 		}(ctx1, cancel)
 	}
