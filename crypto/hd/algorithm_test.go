@@ -64,6 +64,8 @@ func TestKeyring(t *testing.T) {
 
 	account, err := wallet.Derive(path, false)
 	require.NoError(t, err)
+	// Updated expected address after removing .env dependency
+	require.Equal(t, "0xd18b847cdAE43Ff77ad5c5429a9Fb1F6Bfb78aAF", addr.String())
 	require.Equal(t, addr.String(), account.Address.String())
 }
 
