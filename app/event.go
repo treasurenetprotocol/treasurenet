@@ -21,7 +21,7 @@ type EventLog struct {
 	Code int    `json:"code"`
 	Msg  string `json:"msg"`
 	Data []interface{}
-	Err  error `json:"err,omitempty"` // 添加错误信息字段
+	Err  error `json:"err,omitempty"`
 }
 
 func getEvents(ctx context.Context, eventSignature []byte, start, end int64) EventLog {
