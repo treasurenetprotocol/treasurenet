@@ -1,0 +1,9 @@
+version: '3.8'
+services:
+  treasureNet:
+    image: nginx
+    network_mode: "host"
+    restart: unless-stopped
+    container_name: nginx
+    volumes:
+      - /data/nginx:/etc/nginx

@@ -23,7 +23,7 @@ RUN apt-get update
 # Copy over binaries from the build-env
 COPY --from=build-env /go/src/github.com/treasurenetprotocol/treasurenet/build/treasurenetd /usr/bin/treasurenetd
 
-EXPOSE 26656 26657 1317 8545 8546
+EXPOSE 26656 26657 26660  1317 8555 8546 8125 9090 
 
 # Run treasurenetd by default
 CMD ["treasurenetd"]
