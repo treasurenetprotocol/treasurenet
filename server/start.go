@@ -86,6 +86,22 @@ which accepts a path for the resulting pprof file.
 				return err
 			}
 
+			// Security check: prevent personal API from being enabled
+			jsonRPCAPIs := serverCtx.Viper.GetStringSlice(srvflags.JSONRPCAPI)
+			for _, api := range jsonRPCAPIs {
+				api = strings.ToLower(strings.TrimSpace(api))
+				if api == "personal" {
+					return fmt.Errorf(
+						"SECURITY ERROR: Personal API is enabled but has been disabled for security reasons.\n"+
+						"Personal API has authentication bypass vulnerabilities (password ignored in transactions).\n"+
+						"To fix: Remove 'personal' from --json-rpc.api parameter.\n"+
+						"Current APIs: %v\n"+
+						"Reference: Authentication bypass in Personal API (C-02)",
+						jsonRPCAPIs,
+					)
+				}
+			}
+
 			_, err = server.GetPruningOptionsFromFlags(serverCtx.Viper)
 			return err
 		},
