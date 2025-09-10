@@ -7,10 +7,10 @@ import (
 	"fmt"
 	"io"
 	"math"
+	"math/big"
 	"net/http"
 	"os"
 	"path/filepath"
-	"reflect"
 	"strconv"
 	"time"
 
@@ -224,6 +224,9 @@ var _ servertypes.Application = (*TreasurenetApp)(nil)
 // Tendermint consensus.
 type TreasurenetApp struct {
 	*baseapp.BaseApp
+
+	bidStartCh <-chan EventLog // ★NEW: Channel to store results from getBidStartLogsNew, used across blocks
+	bidLogsCh  <-chan EventLog // ★NEW: Channel to store results from getLogs, used across blocks
 
 	// encoding
 	cdc               *codec.LegacyAmino
@@ -480,8 +483,8 @@ func NewTreasurenetApp(
 		AddRoute(ibchost.RouterKey, ibcclient.NewClientProposalHandler(app.IBCKeeper.ClientKeeper)).
 		AddRoute(gravitytypes.RouterKey, keeper.NewGravityProposalHandler(app.GravityKeeper)).
 		AddRoute(bech32ibctypes.RouterKey, bech32ibc.NewBech32IBCProposalHandler(app.Bech32IbcKeeper))
-		// AddRoute(erc20types.RouterKey, erc20.NewErc20ProposalHandler(&app.Erc20Keeper)).
-		// AddRoute(incentivestypes.RouterKey, incentives.NewIncentivesProposalHandler(&app.IncentivesKeeper))
+	// AddRoute(erc20types.RouterKey, erc20.NewErc20ProposalHandler(&app.Erc20Keeper)).
+	// AddRoute(incentivestypes.RouterKey, incentives.NewIncentivesProposalHandler(&app.IncentivesKeeper))
 
 	govKeeper := govkeeper.NewKeeper(
 		appCodec, keys[govtypes.StoreKey], app.GetSubspace(govtypes.ModuleName), app.AccountKeeper, app.BankKeeper,
@@ -872,25 +875,29 @@ func (app *TreasurenetApp) BeginBlocker(ctx sdk.Context, req abci.RequestBeginBl
 func (app *TreasurenetApp) EndBlocker(ctx sdk.Context, req abci.RequestEndBlock) abci.ResponseEndBlock {
 	var msgLog sdk.ABCIMessageLog
 	var msgLogs sdk.ABCIMessageLogs
-	var resultsNew <-chan EventLog
-	var results <-chan EventLog
+	/*var resultsNew <-chan EventLog
+	var results <-chan EventLog*/
 	params := app.MintKeeper.GetParams(ctx)
 	events := sdk.Events{sdk.NewEvent("transfer", sdk.NewAttribute("sender", "foo"))}
 	StartBlock := params.StartBlock
 	EndBlock := params.StartBlock + params.HeightBlock
 	HeightBlock := params.HeightBlock
 	newreq := req.Height
+
+	// Core debug print: clearly show current state
+	fmt.Printf("[EndBlock] H=%d StartBlock=%d HeightBlock=%d EndBlock=%d\n", newreq, StartBlock, HeightBlock, EndBlock)
+
 	if EndBlock < newreq {
 		params.StartBlock = newreq
 		app.MintKeeper.SetParams(ctx, params)
 	}
 	if EndBlock == newreq && HeightBlock == int64(2) {
-		nowTime := time.Now().Add(1 * time.Second)
+		nowTime := time.Now().Add(10 * time.Second)
 		ctx1, cancel := context.WithDeadline(context.Background(), nowTime)
 		// go getBidStartLogsNew(ctx1, StartBlock, EndBlock)
 		go func(ctx context.Context, cancel context.CancelFunc) {
 			defer cancel()
-			resultsNew = getBidStartLogsNew(ctx1, StartBlock, EndBlock)
+			app.bidStartCh = getBidStartLogsNew(ctx1, StartBlock, EndBlock)
 		}(ctx1, cancel)
 		params.StartBlock = EndBlock
 		app.MintKeeper.SetParams(ctx, params)
@@ -902,12 +909,12 @@ func (app *TreasurenetApp) EndBlocker(ctx sdk.Context, req abci.RequestEndBlock)
 		msgLogs = sdk.ABCIMessageLogs{msgLog}
 	}
 	if EndBlock == newreq && HeightBlock == int64(60) {
-		nowTime := time.Now().Add(1 * time.Second)
+		nowTime := time.Now().Add(10 * time.Second)
 		ctx1, cancel := context.WithDeadline(context.Background(), nowTime)
 		// go getLogs(ctx1, StartBlock, EndBlock)
 		go func(ctx context.Context, cancel context.CancelFunc) {
 			defer cancel()
-			results = getLogs(ctx1, StartBlock, EndBlock)
+			app.bidLogsCh = getLogs(ctx1, StartBlock, EndBlock)
 		}(ctx1, cancel)
 		params.StartBlock = EndBlock
 		app.MintKeeper.SetParams(ctx, params)
@@ -917,16 +924,22 @@ func (app *TreasurenetApp) EndBlocker(ctx sdk.Context, req abci.RequestEndBlock)
 	}
 	if StartBlock+int64(1) == newreq && HeightBlock != int64(60) {
 		select {
-		case Even, ok := <-resultsNew:
+		case Even, ok := <-app.bidStartCh:
+			app.bidStartCh = nil // ★CHANGED
 			if !ok {
 				fmt.Println("Channel closed")
 			} else {
 				fmt.Printf("EventLog: %+v\n", Even)
 				if Even.Code == 200 && len(Even.Data) > 0 {
 					res1 := Even.Data[0]
+					// 你的旧打印：类型与内容
+					/*fmt.Printf("[BidStart] Data[0] type=%T val=%v\n", res1, res1)
+
 					fmt.Println(reflect.TypeOf(Even.Data[0]))
 					fmt.Println("res1:", res1)
-					res2, _ := json.Marshal(res1)
+					//res2, _ := json.Marshal(res1)
+					m, _ := res1.(map[string]interface{})
+					res2, _ := m["height"]
 					fmt.Println("res2:", string(res2))
 					heigehtnew := string(res2)
 					heigehtnew1, _ := sdk.NewIntFromString(heigehtnew)
@@ -934,7 +947,29 @@ func (app *TreasurenetApp) EndBlocker(ctx sdk.Context, req abci.RequestEndBlock)
 					fmt.Println("NewHeight:", NewHeight)
 					params.HeightBlock = int64(60)
 					params.StartBlock = NewHeight
-					app.MintKeeper.SetParams(ctx, params)
+					app.MintKeeper.SetParams(ctx, params)*/
+					m, ok := res1.(map[string]interface{})
+					if !ok {
+						fmt.Println("[BidStart] unexpected data shape, not a map")
+						params.HeightBlock = int64(2)
+						app.MintKeeper.SetParams(ctx, params)
+					} else {
+						hv := m["height"]
+
+						bi, ok := hv.(*big.Int)
+						if !ok || bi == nil {
+							fmt.Printf("[BidStart] unexpected type for height: %T\n", hv)
+							params.HeightBlock = int64(2)
+							app.MintKeeper.SetParams(ctx, params)
+						} else {
+							newHeight := sdk.NewIntFromBigInt(bi)
+							fmt.Println("NewHeight(sdk.Int):", newHeight.String())
+
+							params.HeightBlock = int64(60)
+							params.StartBlock = newHeight.Int64() // 这里仍然存成 int64
+							app.MintKeeper.SetParams(ctx, params)
+						}
+					}
 				} else {
 					params.HeightBlock = int64(2)
 					app.MintKeeper.SetParams(ctx, params)
@@ -949,12 +984,94 @@ func (app *TreasurenetApp) EndBlocker(ctx sdk.Context, req abci.RequestEndBlock)
 	}
 	if StartBlock+int64(1) == newreq && HeightBlock == int64(60) {
 		fmt.Println("Log acquisition succeeded")
-		if EvenNew, ok := <-results; ok {
-			res, _ := json.Marshal(EvenNew.Data)
-			msgLog = sdk.NewABCIMessageLog(uint32(1), string(res), events)
-			msgLogs = sdk.ABCIMessageLogs{msgLog}
+
+		ch := app.bidLogsCh
+		if ch == nil {
+			fmt.Println("[BidRecord] bidLogsCh is nil; skip this height")
+		} else {
+			select {
+			case EvenNew, ok := <-ch:
+				app.bidLogsCh = nil // 读一次置空
+				if !ok {
+					fmt.Println("[BidRecord] channel closed with no data")
+					break
+				}
+
+				fmt.Println("===== app.go =====")
+				fmt.Println(EvenNew)
+				fmt.Println(EvenNew.Data)
+
+				if EvenNew.Code == 200 && len(EvenNew.Data) > 0 {
+					// 1) 规范化为 [][]interface{} ：每行 [account, amountString]
+					rows := make([][]interface{}, 0, len(EvenNew.Data))
+					for i, it := range EvenNew.Data {
+						m, ok := it.(map[string]interface{})
+						if !ok {
+							fmt.Printf("[BidRecord] item %d unexpected shape: %T\n", i, it)
+							continue
+						}
+
+						// 第一列：账户字符串
+						acc := fmt.Sprint(m["account"])
+
+						// 第二列：amount -> float64（满足下游 row[1].(float64) 的断言）
+						var amtF float64
+						switch v := m["amount"].(type) {
+						case *big.Int:
+							if v != nil {
+								f, _ := new(big.Float).SetInt(v).Float64()
+								amtF = f
+							}
+						case big.Int:
+							f, _ := new(big.Float).SetInt(&v).Float64()
+							amtF = f
+						case float64:
+							amtF = v
+						case json.Number:
+							if f, err := v.Float64(); err == nil {
+								amtF = f
+							} else {
+								fmt.Printf("[BidRecord] bad json.Number: %v\n", err)
+								continue
+							}
+						case string:
+							if f, err := strconv.ParseFloat(v, 64); err == nil {
+								amtF = f
+							} else {
+								fmt.Printf("[BidRecord] bad amount string: %q\n", v)
+								continue
+							}
+						default:
+							s := fmt.Sprint(v)
+							if f, err := strconv.ParseFloat(s, 64); err == nil {
+								amtF = f
+							} else {
+								fmt.Printf("[BidRecord] unknown amount type %T: %v\n", v, v)
+								continue
+							}
+						}
+
+						rows = append(rows, []interface{}{acc, amtF})
+					}
+
+					// 编码为二维数组 JSON，放入 ABCIMessageLog.Log（满足下游 [][]interface{} 期望）
+					if b, err := json.Marshal(rows); err != nil {
+						msgBody := fmt.Sprintf("%v", rows) // 兜底：纯文本
+						msgLog = sdk.NewABCIMessageLog(uint32(1), msgBody, events)
+					} else {
+						msgLog = sdk.NewABCIMessageLog(uint32(1), string(b), events)
+					}
+					msgLogs = sdk.ABCIMessageLogs{msgLog}
+				} else {
+					msgLog = sdk.NewABCIMessageLog(uint32(1), "no bid records", events)
+					msgLogs = sdk.ABCIMessageLogs{msgLog}
+				}
+			default:
+				fmt.Println("[BidRecord] no data yet; will try next height")
+			}
 		}
 	}
+
 	if StartBlock+int64(1) != newreq && HeightBlock == int64(60) {
 		msgLog = sdk.NewABCIMessageLog(uint32(2), " We haven't started a new round of bidding yet ", events)
 		msgLogs = sdk.ABCIMessageLogs{msgLog}
