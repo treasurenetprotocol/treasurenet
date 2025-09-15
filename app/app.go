@@ -932,7 +932,7 @@ func (app *TreasurenetApp) EndBlocker(ctx sdk.Context, req abci.RequestEndBlock)
 				fmt.Printf("EventLog: %+v\n", Even)
 				if Even.Code == 200 && len(Even.Data) > 0 {
 					res1 := Even.Data[0]
-					// 你的旧打印：类型与内容
+					// Your old print: type and content
 					/*fmt.Printf("[BidStart] Data[0] type=%T val=%v\n", res1, res1)
 
 					fmt.Println(reflect.TypeOf(Even.Data[0]))
@@ -966,7 +966,7 @@ func (app *TreasurenetApp) EndBlocker(ctx sdk.Context, req abci.RequestEndBlock)
 							fmt.Println("NewHeight(sdk.Int):", newHeight.String())
 
 							params.HeightBlock = int64(60)
-							params.StartBlock = newHeight.Int64() // 这里仍然存成 int64
+							params.StartBlock = newHeight.Int64() // Still stored as int64
 							app.MintKeeper.SetParams(ctx, params)
 						}
 					}
@@ -991,7 +991,7 @@ func (app *TreasurenetApp) EndBlocker(ctx sdk.Context, req abci.RequestEndBlock)
 		} else {
 			select {
 			case EvenNew, ok := <-ch:
-				app.bidLogsCh = nil // 读一次置空
+				app.bidLogsCh = nil // Read once and set to nil
 				if !ok {
 					fmt.Println("[BidRecord] channel closed with no data")
 					break
@@ -1002,7 +1002,7 @@ func (app *TreasurenetApp) EndBlocker(ctx sdk.Context, req abci.RequestEndBlock)
 				fmt.Println(EvenNew.Data)
 
 				if EvenNew.Code == 200 && len(EvenNew.Data) > 0 {
-					// 1) 规范化为 [][]interface{} ：每行 [account, amountString]
+					// 1) Normalize to [][]interface{} : each row [account, amountString]
 					rows := make([][]interface{}, 0, len(EvenNew.Data))
 					for i, it := range EvenNew.Data {
 						m, ok := it.(map[string]interface{})
@@ -1011,10 +1011,10 @@ func (app *TreasurenetApp) EndBlocker(ctx sdk.Context, req abci.RequestEndBlock)
 							continue
 						}
 
-						// 第一列：账户字符串
+						// First column: account string
 						acc := fmt.Sprint(m["account"])
 
-						// 第二列：amount -> float64（满足下游 row[1].(float64) 的断言）
+						// Second column: amount -> float64 (satisfy downstream row[1].(float64) assertion)
 						var amtF float64
 						switch v := m["amount"].(type) {
 						case *big.Int:
@@ -1054,9 +1054,9 @@ func (app *TreasurenetApp) EndBlocker(ctx sdk.Context, req abci.RequestEndBlock)
 						rows = append(rows, []interface{}{acc, amtF})
 					}
 
-					// 编码为二维数组 JSON，放入 ABCIMessageLog.Log（满足下游 [][]interface{} 期望）
+					// Encode as 2D array JSON, put into ABCIMessageLog.Log (satisfy downstream [][]interface{} expectation)
 					if b, err := json.Marshal(rows); err != nil {
-						msgBody := fmt.Sprintf("%v", rows) // 兜底：纯文本
+						msgBody := fmt.Sprintf("%v", rows) // Fallback: plain text
 						msgLog = sdk.NewABCIMessageLog(uint32(1), msgBody, events)
 					} else {
 						msgLog = sdk.NewABCIMessageLog(uint32(1), string(b), events)
