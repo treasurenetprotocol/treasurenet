@@ -885,7 +885,13 @@ func (app *TreasurenetApp) EndBlocker(ctx sdk.Context, req abci.RequestEndBlock)
 	newreq := req.Height
 
 	// Core debug print: clearly show current state
-	fmt.Printf("[EndBlock] H=%d StartBlock=%d HeightBlock=%d EndBlock=%d\n", newreq, StartBlock, HeightBlock, EndBlock)
+	//fmt.Printf("[EndBlock] H=%d StartBlock=%d HeightBlock=%d EndBlock=%d\n", newreq, StartBlock, HeightBlock, EndBlock)
+	ctx.Logger().Info("EndBlock",
+		"height", newreq,
+		"start_block", StartBlock,
+		"height_block", HeightBlock,
+		"end_block", EndBlock,
+	)
 
 	if EndBlock < newreq {
 		params.StartBlock = newreq
@@ -927,30 +933,18 @@ func (app *TreasurenetApp) EndBlocker(ctx sdk.Context, req abci.RequestEndBlock)
 		case Even, ok := <-app.bidStartCh:
 			app.bidStartCh = nil // ★CHANGED
 			if !ok {
-				fmt.Println("Channel closed")
+				ctx.Logger().Info("Channel closed")
 			} else {
-				fmt.Printf("EventLog: %+v\n", Even)
+				ctx.Logger().Info("EventLog received",
+					"code", Even.Code,
+					"data_len", len(Even.Data),
+					"event", Even,
+				)
 				if Even.Code == 200 && len(Even.Data) > 0 {
 					res1 := Even.Data[0]
-					// Your old print: type and content
-					/*fmt.Printf("[BidStart] Data[0] type=%T val=%v\n", res1, res1)
-
-					fmt.Println(reflect.TypeOf(Even.Data[0]))
-					fmt.Println("res1:", res1)
-					//res2, _ := json.Marshal(res1)
-					m, _ := res1.(map[string]interface{})
-					res2, _ := m["height"]
-					fmt.Println("res2:", string(res2))
-					heigehtnew := string(res2)
-					heigehtnew1, _ := sdk.NewIntFromString(heigehtnew)
-					NewHeight := heigehtnew1.Int64()
-					fmt.Println("NewHeight:", NewHeight)
-					params.HeightBlock = int64(60)
-					params.StartBlock = NewHeight
-					app.MintKeeper.SetParams(ctx, params)*/
 					m, ok := res1.(map[string]interface{})
 					if !ok {
-						fmt.Println("[BidStart] unexpected data shape, not a map")
+						ctx.Logger().Info("BidStart: unexpected data shape (not map)")
 						params.HeightBlock = int64(2)
 						app.MintKeeper.SetParams(ctx, params)
 					} else {
@@ -958,12 +952,16 @@ func (app *TreasurenetApp) EndBlocker(ctx sdk.Context, req abci.RequestEndBlock)
 
 						bi, ok := hv.(*big.Int)
 						if !ok || bi == nil {
-							fmt.Printf("[BidStart] unexpected type for height: %T\n", hv)
+							ctx.Logger().Info("BidStart: unexpected height type",
+								"value_type", fmt.Sprintf("%T", hv),
+							)
 							params.HeightBlock = int64(2)
 							app.MintKeeper.SetParams(ctx, params)
 						} else {
 							newHeight := sdk.NewIntFromBigInt(bi)
-							fmt.Println("NewHeight(sdk.Int):", newHeight.String())
+							ctx.Logger().Info("BidStart: parsed height",
+								"new_height", newHeight.String(),
+							)
 
 							params.HeightBlock = int64(60)
 							params.StartBlock = newHeight.Int64() // Still stored as int64
@@ -983,23 +981,24 @@ func (app *TreasurenetApp) EndBlocker(ctx sdk.Context, req abci.RequestEndBlock)
 		msgLogs = sdk.ABCIMessageLogs{msgLog}
 	}
 	if StartBlock+int64(1) == newreq && HeightBlock == int64(60) {
-		fmt.Println("Log acquisition succeeded")
+		// fmt.Println("Log acquisition succeeded")
 
 		ch := app.bidLogsCh
 		if ch == nil {
-			fmt.Println("[BidRecord] bidLogsCh is nil; skip this height")
+			ctx.Logger().Info("BidRecord: bidLogsCh is nil; skip this height")
+
 		} else {
 			select {
 			case EvenNew, ok := <-ch:
 				app.bidLogsCh = nil // Read once and set to nil
 				if !ok {
-					fmt.Println("[BidRecord] channel closed with no data")
+					ctx.Logger().Info("BidRecord: channel closed with no data")
 					break
 				}
 
-				fmt.Println("===== app.go =====")
-				fmt.Println(EvenNew)
-				fmt.Println(EvenNew.Data)
+				// fmt.Println("===== app.go =====")
+				// fmt.Println(EvenNew)
+				// fmt.Println(EvenNew.Data)
 
 				if EvenNew.Code == 200 && len(EvenNew.Data) > 0 {
 					// 1) Normalize to [][]interface{} : each row [account, amountString]
@@ -1007,7 +1006,10 @@ func (app *TreasurenetApp) EndBlocker(ctx sdk.Context, req abci.RequestEndBlock)
 					for i, it := range EvenNew.Data {
 						m, ok := it.(map[string]interface{})
 						if !ok {
-							fmt.Printf("[BidRecord] item %d unexpected shape: %T\n", i, it)
+							ctx.Logger().Info("BidRecord: item unexpected shape",
+								"index", i,
+								"type", fmt.Sprintf("%T", it),
+							)
 							continue
 						}
 
@@ -1031,14 +1033,14 @@ func (app *TreasurenetApp) EndBlocker(ctx sdk.Context, req abci.RequestEndBlock)
 							if f, err := v.Float64(); err == nil {
 								amtF = f
 							} else {
-								fmt.Printf("[BidRecord] bad json.Number: %v\n", err)
+								ctx.Logger().Info("BidRecord: bad json.Number", "err", err)
 								continue
 							}
 						case string:
 							if f, err := strconv.ParseFloat(v, 64); err == nil {
 								amtF = f
 							} else {
-								fmt.Printf("[BidRecord] bad amount string: %q\n", v)
+								ctx.Logger().Info("BidRecord: bad amount string", "raw", v)
 								continue
 							}
 						default:
@@ -1046,7 +1048,10 @@ func (app *TreasurenetApp) EndBlocker(ctx sdk.Context, req abci.RequestEndBlock)
 							if f, err := strconv.ParseFloat(s, 64); err == nil {
 								amtF = f
 							} else {
-								fmt.Printf("[BidRecord] unknown amount type %T: %v\n", v, v)
+								ctx.Logger().Info("BidRecord: unknown amount type",
+									"type", fmt.Sprintf("%T", v),
+									"val", v,
+								)
 								continue
 							}
 						}
@@ -1067,7 +1072,7 @@ func (app *TreasurenetApp) EndBlocker(ctx sdk.Context, req abci.RequestEndBlock)
 					msgLogs = sdk.ABCIMessageLogs{msgLog}
 				}
 			default:
-				fmt.Println("[BidRecord] no data yet; will try next height")
+				ctx.Logger().Info("BidRecord: no data yet; will try next height")
 			}
 		}
 	}
