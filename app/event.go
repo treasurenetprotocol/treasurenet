@@ -2,7 +2,7 @@ package app
 
 import (
 	"context"
-	"fmt"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"math/big"
 	"strings"
 	"time" // ★1: Added for individual timeout
@@ -23,7 +23,7 @@ type EventLog struct {
 	Err  error `json:"err,omitempty"`
 }
 
-func getEvents(ctx context.Context, eventSignature []byte, start, end int64) EventLog {
+func getEvents(ctx sdk.Context, eventSignature []byte, start, end int64) EventLog {
 	data1 := make([]interface{}, 0)
 
 	client, err := ethclient.Dial("http://127.0.0.1:8555")
@@ -39,8 +39,12 @@ func getEvents(ctx context.Context, eventSignature []byte, start, end int64) Eve
 
 	hash := crypto.Keccak256Hash(eventSignature)
 	topic := hash.Hex()
-	fmt.Println("Listening start：", start)
-	fmt.Println("Listening end：", end)
+	ctx.Logger().Info("eth logs listening window",
+		"from_block", start,
+		"to_block", end,
+		"event_sig", string(eventSignature),
+		"topic0", topic,
+	)
 
 	query := ethereum.FilterQuery{
 		FromBlock: big.NewInt(start),
@@ -177,7 +181,7 @@ func getEvents(ctx context.Context, eventSignature []byte, start, end int64) Eve
 	}
 }
 
-func getLogs(ctx context.Context, start, end int64) <-chan EventLog {
+func getLogs(ctx sdk.Context, start, end int64) <-chan EventLog {
 	results := make(chan EventLog, 1)
 	go func() {
 		defer close(results)
@@ -193,12 +197,17 @@ func getLogs(ctx context.Context, start, end int64) <-chan EventLog {
 		}
 		Even := getEvents(ctx, eventSignature, s, e)
 		results <- Even
-		fmt.Printf("EventLog: %+v\n", Even)
+		ctx.Logger().Info("EventLog received",
+			"code", Even.Code,
+			"msg", Even.Msg,
+			"data_len", len(Even.Data),
+			"err", Even.Err,
+		)
 	}()
 	return results
 }
 
-func getBidStartLogsNew(ctx context.Context, start, end int64) <-chan EventLog {
+func getBidStartLogsNew(ctx sdk.Context, start, end int64) <-chan EventLog {
 	resultsNew := make(chan EventLog, 1)
 	go func() {
 		defer close(resultsNew)
@@ -214,7 +223,12 @@ func getBidStartLogsNew(ctx context.Context, start, end int64) <-chan EventLog {
 		}
 		EvenNew := getEvents(ctx, eventSignature, s, e)
 		resultsNew <- EvenNew
-		fmt.Printf("EventLog: %+v\n", EvenNew)
+		ctx.Logger().Info("EventLog received",
+			"code", EvenNew.Code,
+			"msg", EvenNew.Msg,
+			"data_len", len(EvenNew.Data),
+			"err", EvenNew.Err,
+		)
 	}()
 	return resultsNew
 }

@@ -898,13 +898,16 @@ func (app *TreasurenetApp) EndBlocker(ctx sdk.Context, req abci.RequestEndBlock)
 		app.MintKeeper.SetParams(ctx, params)
 	}
 	if EndBlock == newreq && HeightBlock == int64(2) {
-		nowTime := time.Now().Add(10 * time.Second)
-		ctx1, cancel := context.WithDeadline(context.Background(), nowTime)
+		/*nowTime := time.Now().Add(10 * time.Second)
+		ctx1, cancel := context.WithDeadline(context.Background(), nowTime)*/
 		// go getBidStartLogsNew(ctx1, StartBlock, EndBlock)
-		go func(ctx context.Context, cancel context.CancelFunc) {
+		/*go func(ctx context.Context, cancel context.CancelFunc) {
 			defer cancel()
 			app.bidStartCh = getBidStartLogsNew(ctx1, StartBlock, EndBlock)
-		}(ctx1, cancel)
+		}(ctx1, cancel)*/
+		go func() {
+			app.bidStartCh = getBidStartLogsNew(ctx, StartBlock, EndBlock) // sdk.Context
+		}()
 		params.StartBlock = EndBlock
 		app.MintKeeper.SetParams(ctx, params)
 		msgLog = sdk.NewABCIMessageLog(uint32(3), "  We haven't started bidding yet EndBlock == newreq height=2 ", events)
@@ -915,13 +918,16 @@ func (app *TreasurenetApp) EndBlocker(ctx sdk.Context, req abci.RequestEndBlock)
 		msgLogs = sdk.ABCIMessageLogs{msgLog}
 	}
 	if EndBlock == newreq && HeightBlock == int64(60) {
-		nowTime := time.Now().Add(10 * time.Second)
-		ctx1, cancel := context.WithDeadline(context.Background(), nowTime)
+		/*nowTime := time.Now().Add(10 * time.Second)
+		ctx1, cancel := context.WithDeadline(context.Background(), nowTime)*/
 		// go getLogs(ctx1, StartBlock, EndBlock)
-		go func(ctx context.Context, cancel context.CancelFunc) {
+		/*go func(ctx context.Context, cancel context.CancelFunc) {
 			defer cancel()
 			app.bidLogsCh = getLogs(ctx1, StartBlock, EndBlock)
-		}(ctx1, cancel)
+		}(ctx1, cancel)*/
+		go func() {
+			app.bidLogsCh = getLogs(ctx, StartBlock, EndBlock) // sdk.Context
+		}()
 		params.StartBlock = EndBlock
 		app.MintKeeper.SetParams(ctx, params)
 		msgLog = sdk.NewABCIMessageLog(uint32(2), " We haven't started a new round of bidding yet ", events)
