@@ -875,8 +875,6 @@ func (app *TreasurenetApp) BeginBlocker(ctx sdk.Context, req abci.RequestBeginBl
 func (app *TreasurenetApp) EndBlocker(ctx sdk.Context, req abci.RequestEndBlock) abci.ResponseEndBlock {
 	var msgLog sdk.ABCIMessageLog
 	var msgLogs sdk.ABCIMessageLogs
-	/*var resultsNew <-chan EventLog
-	var results <-chan EventLog*/
 	params := app.MintKeeper.GetParams(ctx)
 	events := sdk.Events{sdk.NewEvent("transfer", sdk.NewAttribute("sender", "foo"))}
 	StartBlock := params.StartBlock
@@ -885,7 +883,6 @@ func (app *TreasurenetApp) EndBlocker(ctx sdk.Context, req abci.RequestEndBlock)
 	newreq := req.Height
 
 	// Core debug print: clearly show current state
-	//fmt.Printf("[EndBlock] H=%d StartBlock=%d HeightBlock=%d EndBlock=%d\n", newreq, StartBlock, HeightBlock, EndBlock)
 	ctx.Logger().Info("EndBlock",
 		"height", newreq,
 		"start_block", StartBlock,
@@ -898,13 +895,6 @@ func (app *TreasurenetApp) EndBlocker(ctx sdk.Context, req abci.RequestEndBlock)
 		app.MintKeeper.SetParams(ctx, params)
 	}
 	if EndBlock == newreq && HeightBlock == int64(2) {
-		/*nowTime := time.Now().Add(10 * time.Second)
-		ctx1, cancel := context.WithDeadline(context.Background(), nowTime)*/
-		// go getBidStartLogsNew(ctx1, StartBlock, EndBlock)
-		/*go func(ctx context.Context, cancel context.CancelFunc) {
-			defer cancel()
-			app.bidStartCh = getBidStartLogsNew(ctx1, StartBlock, EndBlock)
-		}(ctx1, cancel)*/
 		go func() {
 			app.bidStartCh = getBidStartLogsNew(ctx, StartBlock, EndBlock) // sdk.Context
 		}()
@@ -918,13 +908,6 @@ func (app *TreasurenetApp) EndBlocker(ctx sdk.Context, req abci.RequestEndBlock)
 		msgLogs = sdk.ABCIMessageLogs{msgLog}
 	}
 	if EndBlock == newreq && HeightBlock == int64(60) {
-		/*nowTime := time.Now().Add(10 * time.Second)
-		ctx1, cancel := context.WithDeadline(context.Background(), nowTime)*/
-		// go getLogs(ctx1, StartBlock, EndBlock)
-		/*go func(ctx context.Context, cancel context.CancelFunc) {
-			defer cancel()
-			app.bidLogsCh = getLogs(ctx1, StartBlock, EndBlock)
-		}(ctx1, cancel)*/
 		go func() {
 			app.bidLogsCh = getLogs(ctx, StartBlock, EndBlock) // sdk.Context
 		}()
