@@ -25,7 +25,7 @@ const (
 func NewTracer(tracer string, msg core.Message, cfg *params.ChainConfig, height int64) vm.EVMLogger {
 	// TODO: enable additional log configuration
 	logCfg := &logger.Config{
-		Debug: true,
+		Debug: false,
 	}
 
 	switch tracer {
