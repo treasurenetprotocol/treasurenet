@@ -4,7 +4,7 @@ The workflow defined in `.github/workflows/push-treasurenet-mainnet-artifacts-to
 
 ## Self-hosted runner requirements
 - **OS and permissions**: Ubuntu (or compatible) runner with `sudo` access. The workflow writes into `/usr/bin` and `/data`, so both paths must permit the runner user to create and overwrite files.
-- **Pre-installed tooling**: Go 1.18, Node.js 8.x, GNU Make, tar, AWS CLI v2, and access to `aws sts`.
+- **Pre-installed tooling**: Go 1.18, GNU Make, tar, AWS CLI v2, and access to `aws sts`.
 - **Filesystem layout**: `/data` must exist before the workflow runs; the job rewrites node sub-directories underneath it.
 
 ## Repository dependencies

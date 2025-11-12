@@ -19,7 +19,6 @@ env:
   
   # Build Configuration
   GO_VERSION: "1.18"
-  NODE_VERSION: "8"
   BUILD_COMMAND: "build:mainnet"
   
   # Node Configuration
