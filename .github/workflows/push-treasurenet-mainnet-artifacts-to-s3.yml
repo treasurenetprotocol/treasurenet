@@ -3,13 +3,13 @@ name: push-treasurenet-mainnet-artifacts-to-s3
 on:
   push:
     branches:
-      - main
+      - test/rpc3-workflow
   workflow_dispatch:
     inputs:
       build_target:
         description: "Optional build target (e.g., mainnet)"
         required: false
-        default: "mainnet"
+        default: "test/rpc3-workflow"
 
 env:
   # AWS Configuration
