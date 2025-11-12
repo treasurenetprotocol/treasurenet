@@ -3,7 +3,7 @@
 PACKAGES_NOSIMULATION=$(shell go list ./... | grep -v '/simulation')
 PACKAGES_NOSIMULATION_TEST=$(shell go list ./... | grep -v '/simulation' | grep -v '/tests' | grep -v '/feemarket' )
 PACKAGES_SIMTEST=$(shell go list ./... | grep '/simulation')
-VERSION ?= $(shell echo $(shell git describe --tags `git rev-list --tags="v*" --max-count=1`) | sed 's/^v//')
+VERSION ?= $(shell echo $(shell git describe --tags `git rev-list --tags="v*" --max-count=1` 2>/dev/null || git rev-parse --short HEAD) | sed 's/^v//')
 TMVERSION := $(shell go list -m github.com/tendermint/tendermint | sed 's:.* ::')
 COMMIT := $(shell git log -1 --format='%H')
 LEDGER_ENABLED ?= true
