@@ -25,7 +25,7 @@ env:
   # Node Configuration
   NODE_TYPES: "genesis-validator rpc bootnode"
   GENESIS_VALIDATOR_COUNT: 6
-  RPC_NODE_COUNT: 2
+  RPC_NODE_COUNT: 3
   BOOTNODE_COUNT: 2
   
   # Path Configuration

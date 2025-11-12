@@ -18,7 +18,7 @@
 nodes=(
     "genesis-validator-1" "genesis-validator-2" "genesis-validator-3"
     "genesis-validator-4" "genesis-validator-5" "genesis-validator-6"
-    "rpc-1" "rpc-2"
+    "rpc-1" "rpc-2" "rpc-3"
 )
 
 # Phase 1: Collect genesis transactions from all nodes

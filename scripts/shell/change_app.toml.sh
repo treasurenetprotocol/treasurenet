@@ -55,6 +55,7 @@ nodes=(
     "/data/genesis-validator-6/.treasurenetd/config"
     "/data/rpc-1/.treasurenetd/config"
     "/data/rpc-2/.treasurenetd/config"
+    "/data/rpc-3/.treasurenetd/config"
     "/data/bootnode-1/.treasurenetd/config"
     "/data/bootnode-2/.treasurenetd/config"
 )

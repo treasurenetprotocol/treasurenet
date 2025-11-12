@@ -23,7 +23,7 @@ output_file="modified_config.toml"
 
 
 # Process all target nodes
-for node in genesis-validator-{1..6} bootnode-{1..2} rpc-{1..2}; do
+for node in genesis-validator-{1..6} bootnode-{1..2} rpc-{1..3}; do
     # Node configuration directory
     target_dir="/data/$node/.treasurenetd/config/"
     
