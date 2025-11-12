@@ -64,6 +64,7 @@ jobs:
     steps:
       - name: Set current date and time
         run: |
+          set -euo pipefail
           echo "DATE=$(date '+%Y%m%d')" >> $GITHUB_ENV
           echo "TIME=$(date '+%Y%m%d_%H%M%S')" >> $GITHUB_ENV
 
@@ -72,7 +73,9 @@ jobs:
 
       - name: Override build command from manual input
         if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.build_target != '' }}
-        run: echo "BUILD_COMMAND=${{ github.event.inputs.build_target }}" >> $GITHUB_ENV
+        run: |
+          set -euo pipefail
+          echo "BUILD_COMMAND=${{ github.event.inputs.build_target }}" >> $GITHUB_ENV
 
       - name: Set up Go environment
         uses: actions/setup-go@v3
@@ -81,6 +84,7 @@ jobs:
 
       - name: Build Go binary (multi-arch)
         run: |
+          set -euo pipefail
           echo "Building Go binary..."
           go env -w GO111MODULE=on
           go mod tidy
@@ -90,6 +94,7 @@ jobs:
 
       - name: Copy binary to system path
         run: |
+          set -euo pipefail
           sudo cp ./build/amd64/treasurenetd ${{ env.BINARY_PATH }}
 
       - name: Configure AWS credentials
@@ -103,6 +108,7 @@ jobs:
         env:
           KEYRING_SECRET: ${{ secrets.keyring_secret }}
         run: |
+          set -euo pipefail
           cd ${{ env.SCRIPTS_PATH }}
           chmod +x init_nodes.sh init_node_template.sh
           
@@ -117,18 +123,21 @@ jobs:
         env:
           KEYRING_SECRET: ${{ secrets.keyring_secret }}
         run: |   
+          set -euo pipefail
           cd ${{ env.SCRIPTS_PATH }}
           chmod +x new_genesis.sh
           bash new_genesis.sh
 
       - name: Initialize seed node
         run: |
+          set -euo pipefail
           cd ${{ env.SCRIPTS_PATH }}
           chmod +x init_seednode.sh
           bash init_seednode.sh
 
       - name: Update configurations
         run: |
+          set -euo pipefail
           cd ${{ env.SCRIPTS_PATH }}
           chmod +x change_app.toml.sh change_config.toml.sh
           bash change_app.toml.sh
@@ -136,6 +145,7 @@ jobs:
 
       - name: Create node archive files
         run: |
+          set -euo pipefail
           for node_type in ${{ env.NODE_TYPES }}; do
             max=${{ env.GENESIS_VALIDATOR_COUNT }}
             if [ "$node_type" = "rpc" ]; then max=${{ env.RPC_NODE_COUNT }}; fi
@@ -148,6 +158,7 @@ jobs:
 
       - name: Upload artifacts to AWS S3
         run: |
+          set -euo pipefail
           # Upload binaries
           aws s3 cp ./build/arm64/treasurenetd s3://${{ env.S3_BUCKET }}/${{ needs.EnvSetup.outputs.repo-name }}/treasurenetd
           
