@@ -1,0 +1,178 @@
+name: push-treasurenet-mainnet-artifacts-to-s3
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      build_target:
+        description: "Optional build target (e.g., mainnet)"
+        required: false
+        default: "mainnet"
+
+env:
+  # AWS Configuration
+  AWS_ROLE_ARN: "arn:aws:iam::471112752664:role/GitHubAction-AssumeRoleWithAction"
+  AWS_REGION: "us-west-1"
+  S3_BUCKET: "treasurenet-node-binary-us-west-1"
+  
+  # Build Configuration
+  GO_VERSION: "1.18"
+  BUILD_COMMAND: "build:mainnet"
+  
+  # Node Configuration
+  NODE_TYPES: "genesis-validator rpc bootnode"
+  GENESIS_VALIDATOR_COUNT: 6
+  RPC_NODE_COUNT: 3
+  BOOTNODE_COUNT: 2
+  
+  # Path Configuration
+  BINARY_PATH: "/usr/bin"
+  DATA_PATH: "/data"
+  SCRIPTS_PATH: "scripts/shell"
+
+permissions:
+  id-token: write
+  contents: write
+  pull-requests: write
+  actions: write
+
+jobs:
+  print_timestamp:
+    uses: treasurenetprotocol/reusable-workflows/.github/workflows/reusable-timestamp.yml@main
+
+  EnvSetup:
+    needs: [ print_timestamp ]
+    name: Setup Environment
+    runs-on: self-hosted
+    outputs:
+      repo-name: ${{ steps.extract-repo-name.outputs.repo-name }}
+    steps:
+      - name: Extract repository name
+        id: extract-repo-name
+        run: |
+          REPO_NAME="${{ github.repository }}"
+          SHORT_NAME=${REPO_NAME##*/}
+          echo "repo-name=$SHORT_NAME" >> $GITHUB_OUTPUT
+
+  build-go-binary:
+    needs: [ EnvSetup ]
+    runs-on: self-hosted
+    name: Build Go Binary
+    steps:
+      - name: Set current date and time
+        run: |
+          set -euo pipefail
+          echo "DATE=$(date '+%Y%m%d')" >> $GITHUB_ENV
+          echo "TIME=$(date '+%Y%m%d_%H%M%S')" >> $GITHUB_ENV
+
+      - name: Checkout repository code
+        uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b
+        with:
+          fetch-depth: 0
+
+      - name: Override build command from manual input
+        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.build_target != '' }}
+        run: |
+          set -euo pipefail
+          echo "BUILD_COMMAND=${{ github.event.inputs.build_target }}" >> $GITHUB_ENV
+
+      - name: Set up Go environment
+        uses: actions/setup-go@v3
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: Build Go binary (multi-arch)
+        run: |
+          set -euo pipefail
+          echo "Building Go binary..."
+          go env -w GO111MODULE=on
+          go mod tidy
+          make clean
+          make build
+          make install
+
+      - name: Copy binary to system path
+        run: |
+          set -euo pipefail
+          sudo cp ./build/treasurenetd ${{ env.BINARY_PATH }}
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.AWS_ROLE_ARN }}
+          role-session-name: GitHub_to_AWS_via_FederatedOIDC
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Initialize nodes
+        env:
+          KEYRING_SECRET: ${{ secrets.keyring_secret }}
+        run: |
+          set -euo pipefail
+          cd ${{ env.SCRIPTS_PATH }}
+          chmod +x init_nodes.sh init_node_template.sh
+          
+          sudo rm -f ${{ env.DATA_PATH }}/account.json
+          sudo touch ${{ env.DATA_PATH }}/account.json
+          sudo chmod 666 ${{ env.DATA_PATH }}/account.json
+          sudo echo "{}" > ${{ env.DATA_PATH }}/account.json
+          
+          bash init_nodes.sh
+
+      - name: Generate new genesis file
+        env:
+          KEYRING_SECRET: ${{ secrets.keyring_secret }}
+        run: |   
+          set -euo pipefail
+          cd ${{ env.SCRIPTS_PATH }}
+          chmod +x new_genesis.sh
+          bash new_genesis.sh
+
+      - name: Initialize seed node
+        run: |
+          set -euo pipefail
+          cd ${{ env.SCRIPTS_PATH }}
+          chmod +x init_seednode.sh
+          bash init_seednode.sh
+
+      - name: Update configurations
+        run: |
+          set -euo pipefail
+          cd ${{ env.SCRIPTS_PATH }}
+          chmod +x change_app.toml.sh change_config.toml.sh
+          bash change_app.toml.sh
+          bash change_config.toml.sh
+
+      - name: Create node archive files
+        run: |
+          set -euo pipefail
+          for node_type in ${{ env.NODE_TYPES }}; do
+            max=${{ env.GENESIS_VALIDATOR_COUNT }}
+            if [ "$node_type" = "rpc" ]; then max=${{ env.RPC_NODE_COUNT }}; fi
+            if [ "$node_type" = "bootnode" ]; then max=${{ env.BOOTNODE_COUNT }}; fi
+            
+            for i in $(seq 1 $max); do
+              tar -zcvf ./${node_type}-${i}.tar.gz -C ${{ env.DATA_PATH }}/${node_type}-${i} .
+            done
+          done
+
+      - name: Upload artifacts to AWS S3
+        run: |
+          set -euo pipefail
+          # Upload binaries
+          aws s3 cp ./build/treasurenetd s3://${{ env.S3_BUCKET }}/${{ needs.EnvSetup.outputs.repo-name }}/treasurenetd
+          
+          # Upload node archives
+          for node_type in ${{ env.NODE_TYPES }}; do
+            max=${{ env.GENESIS_VALIDATOR_COUNT }}
+            if [ "$node_type" = "rpc" ]; then max=${{ env.RPC_NODE_COUNT }}; fi
+            if [ "$node_type" = "bootnode" ]; then max=${{ env.BOOTNODE_COUNT }}; fi
+            
+            for i in $(seq 1 $max); do
+              aws s3 cp ./${node_type}-${i}.tar.gz s3://${{ env.S3_BUCKET }}/${{ needs.EnvSetup.outputs.repo-name }}/node/
+            done
+          done
+          
+          # Upload environment file
+          aws s3 cp ${{ env.SCRIPTS_PATH }}/.env s3://${{ env.S3_BUCKET }}/${{ needs.EnvSetup.outputs.repo-name }}/node/.env
