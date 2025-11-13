@@ -119,11 +119,12 @@ build-$(1):
 	@mkdir -p $(BUILDDIR)/$(1)
 	@echo "Building for $(1)..."
 	$(if $(filter $(1),arm64),\
-		$(eval ARCH_BUILD_TAGS := $(build_tags) secp256k1_pure_go),\
-		$(eval ARCH_BUILD_TAGS := $(build_tags)))
-	GOOS=linux GOARCH=$(1) LEDGER_ENABLED=$(LEDGER_ENABLED) \
-		go build -tags "$(ARCH_BUILD_TAGS)" -ldflags '$(ldflags)' $(if $(findstring nostrip,$(COSMOS_BUILD_OPTIONS)),,-trimpath) \
-		-o $(BUILDDIR)/$(1)/$(TREASURENET_BINARY) ./cmd/treasurenetd
+		CGO_ENABLED=1 CC=aarch64-linux-gnu-gcc CXX=aarch64-linux-gnu-g++ GOOS=linux GOARCH=$(1) LEDGER_ENABLED=$(LEDGER_ENABLED) \
+			go build -tags "$(build_tags)" -ldflags '$(ldflags)' $(if $(findstring nostrip,$(COSMOS_BUILD_OPTIONS)),,-trimpath) \
+			-o $(BUILDDIR)/$(1)/$(TREASURENET_BINARY) ./cmd/treasurenetd,\
+		GOOS=linux GOARCH=$(1) LEDGER_ENABLED=$(LEDGER_ENABLED) \
+			go build -tags "$(build_tags)" -ldflags '$(ldflags)' $(if $(findstring nostrip,$(COSMOS_BUILD_OPTIONS)),,-trimpath) \
+			-o $(BUILDDIR)/$(1)/$(TREASURENET_BINARY) ./cmd/treasurenetd)
 endef
 
 $(foreach arch,$(SUPPORTED_ARCHS),$(eval $(call ARCH_BUILD_TEMPLATE,$(arch))))
