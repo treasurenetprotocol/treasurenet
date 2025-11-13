@@ -10,6 +10,8 @@ LEDGER_ENABLED ?= true
 BINDIR ?= $(GOPATH)/bin
 TREASURENET_BINARY = treasurenetd
 TREASURENET_DIR = treasurenet
+SUPPORTED_ARCHS ?= amd64 arm64
+BUILD_ARCH ?= $(shell uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/')
 BUILDDIR ?= $(CURDIR)/build
 SIMAPP = ./app
 HTTPS_GIT := https://github.com/treasurenetprotocol/treasurenet.git
@@ -112,12 +114,38 @@ endif
 
 BUILD_TARGETS := build install
 
-build: BUILD_ARGS=-o $(BUILDDIR)/
-build-linux:
-	GOOS=linux GOARCH=amd64 LEDGER_ENABLED=false $(MAKE) build
+define ARCH_BUILD_TEMPLATE
+build-$(1):
+	@mkdir -p $(BUILDDIR)/$(1)
+	@echo "Building for $(1)..."
+	$(if $(filter $(1),arm64),\
+		CGO_ENABLED=1 CC=aarch64-linux-gnu-gcc CXX=aarch64-linux-gnu-g++ GOOS=linux GOARCH=$(1) LEDGER_ENABLED=$(LEDGER_ENABLED) \
+			go build -tags "$(build_tags)" -ldflags '$(ldflags)' $(if $(findstring nostrip,$(COSMOS_BUILD_OPTIONS)),,-trimpath) \
+			-o $(BUILDDIR)/$(1)/$(TREASURENET_BINARY) ./cmd/treasurenetd,\
+		GOOS=linux GOARCH=$(1) LEDGER_ENABLED=$(LEDGER_ENABLED) \
+			go build -tags "$(build_tags)" -ldflags '$(ldflags)' $(if $(findstring nostrip,$(COSMOS_BUILD_OPTIONS)),,-trimpath) \
+			-o $(BUILDDIR)/$(1)/$(TREASURENET_BINARY) ./cmd/treasurenetd)
+endef
 
-$(BUILD_TARGETS): go.sum $(BUILDDIR)/
-	go $@ $(BUILD_FLAGS) $(BUILD_ARGS) ./...
+$(foreach arch,$(SUPPORTED_ARCHS),$(eval $(call ARCH_BUILD_TEMPLATE,$(arch))))
+
+build: build-$(BUILD_ARCH)
+
+build-multiarch: $(addprefix build-,$(SUPPORTED_ARCHS))
+	@echo "Multi-architecture build completed in $(BUILDDIR)/"
+
+install: | $(BUILDDIR)
+	@echo "Installing to GoPATH: $(BINDIR)"
+	@mkdir -p $(BINDIR)
+	@for arch in $(SUPPORTED_ARCHS); do \
+		bin_path="$(BUILDDIR)/$${arch}/$(TREASURENET_BINARY)"; \
+		if [ -f "$${bin_path}" ]; then \
+			install -m 755 "$${bin_path}" "$(BINDIR)/$(TREASURENET_BINARY)-$${arch}"; \
+			echo "✔ Installed $${arch} => $(BINDIR)/$(TREASURENET_BINARY)-$${arch}"; \
+		else \
+			echo "⚠ $${arch} binary missing at $${bin_path}"; \
+		fi \
+	done
 
 $(BUILDDIR)/:
 	mkdir -p $(BUILDDIR)/
