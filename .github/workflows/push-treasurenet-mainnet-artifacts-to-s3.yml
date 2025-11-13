@@ -90,13 +90,19 @@ jobs:
           go env -w GO111MODULE=on
           go mod tidy
           make clean
-          make build
+          make build-multiarch
           make install
 
       - name: Copy binary to system path
         run: |
           set -euo pipefail
-          sudo cp ./build/treasurenetd ${{ env.BINARY_PATH }}
+          ARCH=$(uname -m)
+          case "$ARCH" in
+            x86_64) BIN_SUBDIR="amd64" ;;
+            aarch64) BIN_SUBDIR="arm64" ;;
+            *) echo "Unsupported architecture: $ARCH" >&2; exit 1 ;;
+          esac
+          sudo cp ./build/$BIN_SUBDIR/treasurenetd ${{ env.BINARY_PATH }}
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -160,8 +166,12 @@ jobs:
       - name: Upload artifacts to AWS S3
         run: |
           set -euo pipefail
-          # Upload binaries
-          aws s3 cp ./build/treasurenetd s3://${{ env.S3_BUCKET }}/${{ needs.EnvSetup.outputs.repo-name }}/treasurenetd
+          ARM_BIN=./build/arm64/treasurenetd
+          if [ ! -f "$ARM_BIN" ]; then
+            echo "Arm64 binary not found at $ARM_BIN" >&2
+            exit 1
+          fi
+          aws s3 cp "$ARM_BIN" s3://${{ env.S3_BUCKET }}/${{ needs.EnvSetup.outputs.repo-name }}/treasurenetd
           
           # Upload node archives
           for node_type in ${{ env.NODE_TYPES }}; do

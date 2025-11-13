@@ -10,6 +10,7 @@ LEDGER_ENABLED ?= true
 BINDIR ?= $(GOPATH)/bin
 TREASURENET_BINARY = treasurenetd
 TREASURENET_DIR = treasurenet
+SUPPORTED_ARCHS ?= amd64 arm64
 BUILDDIR ?= $(CURDIR)/build
 SIMAPP = ./app
 HTTPS_GIT := https://github.com/treasurenetprotocol/treasurenet.git
@@ -111,6 +112,15 @@ endif
 ###############################################################################
 
 BUILD_TARGETS := build install
+
+build-multiarch: go.sum
+	@for arch in $(SUPPORTED_ARCHS); do \
+		echo "Building for $$arch..."; \
+		mkdir -p $(BUILDDIR)/$$arch; \
+		GOOS=linux GOARCH=$$arch LEDGER_ENABLED=$(LEDGER_ENABLED) \
+			go build $(BUILD_FLAGS) -o $(BUILDDIR)/$$arch/$(TREASURENET_BINARY) ./cmd/treasurenetd; \
+	done
+	@echo "Multi-architecture binaries stored under $(BUILDDIR)/<arch>"
 
 build: BUILD_ARGS=-o $(BUILDDIR)/
 build-linux:
