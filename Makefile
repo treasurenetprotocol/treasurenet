@@ -118,22 +118,19 @@ define ARCH_BUILD_TEMPLATE
 build-$(1):
 	@mkdir -p $(BUILDDIR)/$(1)
 	@echo "Building for $(1)..."
+	$(if $(filter $(1),arm64),\
+		$(eval ARCH_BUILD_TAGS := $(build_tags) secp256k1_pure_go),\
+		$(eval ARCH_BUILD_TAGS := $(build_tags)))
 	GOOS=linux GOARCH=$(1) LEDGER_ENABLED=$(LEDGER_ENABLED) \
-		go build $(BUILD_FLAGS) -o $(BUILDDIR)/$(1)/$(TREASURENET_BINARY) ./cmd/treasurenetd
+		go build -tags "$(ARCH_BUILD_TAGS)" -ldflags '$(ldflags)' $(if $(findstring nostrip,$(COSMOS_BUILD_OPTIONS)),,-trimpath) \
+		-o $(BUILDDIR)/$(1)/$(TREASURENET_BINARY) ./cmd/treasurenetd
 endef
 
 $(foreach arch,$(SUPPORTED_ARCHS),$(eval $(call ARCH_BUILD_TEMPLATE,$(arch))))
 
 build: build-$(BUILD_ARCH)
 
-build-multiarch:
-	@for arch in $(SUPPORTED_ARCHS); do \
-		if [ "$$arch" = "arm64" ]; then \
-			$(MAKE) BUILD_TAGS="$(BUILD_TAGS) secp256k1_pure_go" build-$$arch; \
-		else \
-			$(MAKE) build-$$arch; \
-		fi; \
-	done
+build-multiarch: $(addprefix build-,$(SUPPORTED_ARCHS))
 	@echo "Multi-architecture build completed in $(BUILDDIR)/"
 
 install: | $(BUILDDIR)
