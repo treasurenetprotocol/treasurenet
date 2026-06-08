@@ -704,8 +704,9 @@ github.com/gorilla/websocket v1.4.0/go.mod h1:E7qHFY5m1UJ88s3WnNqhKjPHQ0heANvMoA
 github.com/gorilla/websocket v1.4.1-0.20190629185528-ae1634f6a989/go.mod h1:E7qHFY5m1UJ88s3WnNqhKjPHQ0heANvMoAMk2YaljkQ=
 github.com/gorilla/websocket v1.4.1/go.mod h1:YR8l580nyteQvAITg2hZ9XVh4b55+EU/adAjf1fMHhE=
 github.com/gorilla/websocket v1.4.2/go.mod h1:YR8l580nyteQvAITg2hZ9XVh4b55+EU/adAjf1fMHhE=
-github.com/gorilla/websocket v1.5.0 h1:PPwGk2jz7EePpoHN/+ClbZu8SPxiqlu12wZP/3sWmnc=
 github.com/gorilla/websocket v1.5.0/go.mod h1:YR8l580nyteQvAITg2hZ9XVh4b55+EU/adAjf1fMHhE=
+github.com/gorilla/websocket v1.5.3 h1:saDtZ6Pbx/0u+bgYQ3q96pZgCzfhKXGPqt7kZ72aNNg=
+github.com/gorilla/websocket v1.5.3/go.mod h1:YR8l580nyteQvAITg2hZ9XVh4b55+EU/adAjf1fMHhE=
 github.com/gostaticanalysis/analysisutil v0.0.0-20190318220348-4088753ea4d3/go.mod h1:eEOZF4jCKGi+aprrirO9e7WKB3beBRtWgqGunKl6pKE=
 github.com/gostaticanalysis/analysisutil v0.0.3/go.mod h1:eEOZF4jCKGi+aprrirO9e7WKB3beBRtWgqGunKl6pKE=
 github.com/gostaticanalysis/analysisutil v0.1.0/go.mod h1:dMhHRU9KTiDcuLGdy87/2gTR8WruwYZrKdRq9m1O6uw=
@@ -1488,9 +1489,8 @@ github.com/tommy-muehle/go-mnd/v2 v2.5.0/go.mod h1:WsUAkMJMYww6l/ufffCD3m+P7LEvr
 github.com/treasurenetprotocol/treasurenet v1.0.2-231023-ibc/go.mod h1:81Ss+Zk1bYK0oy0v4Qch+P2xFVPC5MyYXmDjMxAcpjA=
 github.com/treasurenetprotocol/treasurenet-bech32-pack v1.0.0-231027-tn h1:4LAallfP8h8z/EI4HDklHHq2iOTCq3vR5r5DVxnff+s=
 github.com/treasurenetprotocol/treasurenet-bech32-pack v1.0.0-231027-tn/go.mod h1:X5/FZHMPL+B3ufuVyY2/koxVjd4hIwyTLjYP1DZwppQ=
-github.com/treasurenetprotocol/treasurenet-cosmos-pack v1.1.2-tn-crosschain h1:SFxn8rQhQMehviZQpzKXYgBBMsb6dFIhvxtGPqYAz2I=
-github.com/treasurenetprotocol/treasurenet-cosmos-pack v1.1.2-tn-crosschain/go.mod h1:Ro+XFSYAMGEJIsLCwW8hK095roo6vsZLXFEPoOcQyjE=
-github.com/treasurenetprotocol/treasurenet-cosmos-pack v1.1.3/go.mod h1:Ro+XFSYAMGEJIsLCwW8hK095roo6vsZLXFEPoOcQyjE=
+github.com/treasurenetprotocol/treasurenet-cosmos-pack v1.1.2 h1:6+ukDmxzExE6iB0eaq5eGMFoQb6sbs2J2Cqq3gxZbnM=
+github.com/treasurenetprotocol/treasurenet-cosmos-pack v1.1.2/go.mod h1:Ro+XFSYAMGEJIsLCwW8hK095roo6vsZLXFEPoOcQyjE=
 github.com/treasurenetprotocol/treasurenet-ibc-go-pack/v3 v3.3.0-tn-ibc h1:U7j+8yPQEIbMBZF9jMQB5GwArZll4XuWKIt/SfiBLhA=
 github.com/treasurenetprotocol/treasurenet-ibc-go-pack/v3 v3.3.0-tn-ibc/go.mod h1:DrDYXJjWNwgv72cK1Il+BegtyGIDXcx+cnJwWGzve6o=
 github.com/ttacon/chalk v0.0.0-20160626202418-22c06c80ed31/go.mod h1:onvgF043R+lC5RZ8IT9rBXDaEDnpnw/Cl+HFiw+v/7Q=
