@@ -79,7 +79,7 @@ jobs:
           echo "BUILD_COMMAND=${{ github.event.inputs.build_target }}" >> $GITHUB_ENV
 
       - name: Set up Go environment
-        uses: actions/setup-go@v3
+        uses: actions/setup-go@v6
         with:
           go-version: ${{ env.GO_VERSION }}
 
