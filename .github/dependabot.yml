@@ -13,6 +13,7 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    open-pull-requests-limit: 10
     labels:
       - "dependencies"
       - "docker"
@@ -21,6 +22,7 @@ updates:
     directory: "/networks/local/treasurenetnode"
     schedule:
       interval: "weekly"
+    open-pull-requests-limit: 10
     labels:
       - "dependencies"
       - "docker"
@@ -29,6 +31,7 @@ updates:
     directory: "/tendermint_pack"
     schedule:
       interval: "weekly"
+    open-pull-requests-limit: 10
     labels:
       - "dependencies"
       - "docker"
@@ -37,6 +40,7 @@ updates:
     directory: "/tendermint_pack/DOCKER"
     schedule:
       interval: "weekly"
+    open-pull-requests-limit: 10
     labels:
       - "dependencies"
       - "docker"
@@ -45,6 +49,7 @@ updates:
     directory: "/tendermint_pack/networks/local/localnode"
     schedule:
       interval: "weekly"
+    open-pull-requests-limit: 10
     labels:
       - "dependencies"
       - "docker"
@@ -53,6 +58,7 @@ updates:
     directory: "/tendermint_pack/test/docker"
     schedule:
       interval: "weekly"
+    open-pull-requests-limit: 10
     labels:
       - "dependencies"
       - "docker"
@@ -61,6 +67,7 @@ updates:
     directory: "/tendermint_pack/test/e2e/docker"
     schedule:
       interval: "weekly"
+    open-pull-requests-limit: 10
     labels:
       - "dependencies"
       - "docker"
@@ -69,6 +76,7 @@ updates:
     directory: "/tendermint_pack/tools/proto"
     schedule:
       interval: "weekly"
+    open-pull-requests-limit: 10
     labels:
       - "dependencies"
       - "docker"
@@ -77,6 +85,7 @@ updates:
     directory: "/tendermint_pack/tools/tm-signer-harness"
     schedule:
       interval: "weekly"
+    open-pull-requests-limit: 10
     labels:
       - "dependencies"
       - "docker"
@@ -85,6 +94,7 @@ updates:
     directory: "/tendermint_pack/networks/remote/terraform/cluster"
     schedule:
       interval: "weekly"
+    open-pull-requests-limit: 10
     labels:
       - "dependencies"
       - "terraform"
@@ -93,6 +103,7 @@ updates:
     directory: "/tendermint_pack/networks/remote/terraform"
     schedule:
       interval: "weekly"
+    open-pull-requests-limit: 10
     labels:
       - "dependencies"
       - "terraform"
@@ -101,6 +112,16 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    open-pull-requests-limit: 10
     labels:
       - "dependencies"
       - "ci"
+
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "npm"
