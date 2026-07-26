@@ -68,7 +68,7 @@ jobs:
           echo "TIME=$(date '+%Y%m%d_%H%M%S')" >> $GITHUB_ENV
 
       - name: Checkout repository code
-        uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
         with:
           fetch-depth: 0
 
