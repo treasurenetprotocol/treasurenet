@@ -24,7 +24,6 @@ import sources.nixpkgs {
         config = {
           ethermint-config = ../scripts/ethermint-devnet.yaml;
           geth-genesis = ../scripts/geth-genesis.json;
-          dotenv = builtins.path { name = "dotenv"; path = ../scripts/.env; };
         };
       })
     (_: pkgs: { test-env = import ./testenv.nix { inherit pkgs; }; })

@@ -36,6 +36,10 @@ CLAUDE.md
 **/node_modules/
 **/dist
 secret.yml
+
+# Generated local development credentials. Create with
+# scripts/generate-test-env.sh; never commit this file.
+/scripts/.env
 # vue/
 
 # Local docker volume mappings
