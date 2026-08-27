@@ -30,6 +30,12 @@ Account.enable_unaudited_hdwallet_features()
 print(Account.from_mnemonic('$VALIDATOR1_MNEMONIC').key.hex().replace('0x',''))
 """)
 
+validator_address=$(python -c """
+from eth_account import Account
+Account.enable_unaudited_hdwallet_features()
+print(Account.from_mnemonic('$VALIDATOR1_MNEMONIC').address)
+""")
+
 cat > $tmpfile << EOF
 $validator_key
 EOF
@@ -51,7 +57,7 @@ rm $tmpfile
 
 # start up
 geth --networkid 5005 --datadir $DATA --http --http.addr localhost --http.api 'personal,eth,net,web3,txpool,miner' \
--unlock '0x57f96e6b86cdefdb3d412547816a82e3e0ebf9d2' --password $pwdfile \
+-unlock "$validator_address" --password $pwdfile \
 --mine --allow-insecure-unlock \
 $@
 

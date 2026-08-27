@@ -8,6 +8,7 @@ import (
 )
 
 func BenchmarkEthSecp256k1Algo_Derive(b *testing.B) {
+	mnemonic := newTestMnemonic(b)
 	b.ReportAllocs()
 	for i := 0; i < b.N; i++ {
 		deriveFn := EthSecp256k1.Derive()
@@ -18,6 +19,7 @@ func BenchmarkEthSecp256k1Algo_Derive(b *testing.B) {
 }
 
 func BenchmarkEthSecp256k1Algo_Generate(b *testing.B) {
+	mnemonic := newTestMnemonic(b)
 	bz, err := EthSecp256k1.Derive()(mnemonic, keyring.DefaultBIP39Passphrase, ethermint.BIP44HDPath)
 	if err != nil {
 		b.Fatal(err)

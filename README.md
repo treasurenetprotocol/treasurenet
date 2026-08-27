@@ -232,6 +232,20 @@ console.log(`Balance: ${balance.amount} TNT`);
 
 We welcome contributions from the community! Here's how you can help:
 
+### Local devnet credentials
+
+The local devnet and integration tests require `scripts/.env`, but that file is
+intentionally not tracked. Generate fresh local-only credentials before running
+them:
+
+```bash
+./scripts/generate-test-env.sh
+```
+
+The generated file has owner-only permissions. Never commit, share, or reuse it
+outside local development; use the environment's approved key-management
+process for all production credentials.
+
 ### Getting Started
 
 1. **Fork the repository**
