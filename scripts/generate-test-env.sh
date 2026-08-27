@@ -1,19 +1,17 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-output_file="${PWD}/scripts/.env"
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+output_file="$script_dir/.env"
+force=false
 
-if [[ "${1:-}" == "--output" ]]; then
-  output_file="${2:?missing path after --output}"
-  shift 2
-fi
-
-if [[ "${1:-}" == "--force" ]]; then
-  force=true
-  shift
-else
-  force=false
-fi
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --output) output_file="${2:?missing path after --output}"; shift 2 ;;
+    --force) force=true; shift ;;
+    *) break ;;
+  esac
+done
 
 if [[ $# -ne 0 ]]; then
   echo "Usage: $0 [--output PATH] [--force]" >&2
@@ -27,10 +25,11 @@ fi
 
 mkdir -p "$(dirname "$output_file")"
 umask 077
-program_file="$(mktemp "${TMPDIR:-/tmp}/treasurenet-test-env.XXXXXX.go")"
-output_tmp="$(mktemp "${output_file}.tmp.XXXXXX")"
+tmpdir="$(mktemp -d "${TMPDIR:-/tmp}/treasurenet-test-env.XXXXXX")"
+program_file="$tmpdir/main.go"
+output_tmp="$tmpdir/.env"
 cleanup() {
-  rm -f "$program_file" "$output_tmp"
+  rm -rf "$tmpdir"
 }
 trap cleanup EXIT
 
@@ -82,11 +81,11 @@ func main() {
 }
 EOF
 
-go run "$program_file" >"$output_tmp"
+(cd "$script_dir/.." && go run "$program_file") >"$output_tmp"
 chmod 600 "$output_tmp"
 mv "$output_tmp" "$output_file"
 trap - EXIT
-rm -f "$program_file"
+rm -rf "$tmpdir"
 
 echo "Generated local-only test credentials at $output_file" >&2
 echo "Do not commit or share this file." >&2

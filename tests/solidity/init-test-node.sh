@@ -10,15 +10,15 @@ USER2_KEY="user2"
 USER3_KEY="user3"
 USER4_KEY="user4"
 
-# Generate fresh, local-only keys. Do not replace these with committed
-# mnemonics: the test setup derives all funded genesis accounts from the local
-# test keyring below.
+# remove existing daemon and client
+rm -rf ~/.ethermint*
+
+# Generate fresh, local-only keys after cleaning the test keyring. Do not
+# replace these with committed mnemonics: genesis accounts are derived from
+# this local keyring below.
 for key in "$VAL_KEY" "$USER1_KEY" "$USER2_KEY" "$USER3_KEY" "$USER4_KEY"; do
   ethermintd keys add "$key" --keyring-backend test --algo "eth_secp256k1" >/dev/null
 done
-
-# remove existing daemon and client
-rm -rf ~/.ethermint*
 
 ethermintd init $MONIKER --chain-id $CHAINID
 
